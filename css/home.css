@@ -1,0 +1,679 @@
+/* ===================================
+   HOMEPAGE SECTIONS
+   =================================== */
+
+/* Top Banner */
+.top-banner {
+    background: #8b1d3d;
+    color: #ffffff;
+    height: 30px;
+    margin: 0;
+    padding: 0 16px;
+    overflow: hidden;
+    position: relative;
+    z-index: 1000;
+}
+
+.marquee {
+    display: flex;
+    white-space: nowrap;
+    animation: scroll 30s linear infinite;
+}
+
+.marquee span {
+    display: inline-block;
+    padding: 0 var(--spacing-lg);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 30px;
+}
+
+/* Global Safety Reset */
+header,
+nav,
+.hero-section,
+.hero-swiper {
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Hero Section */
+.hero-section {
+    position: relative;
+    margin-bottom: var(--spacing-xxl);
+    margin-top: 0 !important;
+    padding-top: 0 !important;
+}
+
+.hero-swiper {
+    height: 80vh;
+}
+
+.hero-slide {
+    display: flex;
+    align-items: center;
+    position: relative;
+    min-height: 80vh;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.hero-slide::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        to bottom,
+        rgba(0, 0, 0, 0.25),
+        rgba(0, 0, 0, 0.15)
+    );
+    z-index: 1;
+}
+
+.hero-content {
+    text-align: center;
+    color: #1a1a1a;
+    max-width: 700px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 2;
+}
+
+.hero-groom {
+    background-image: url("../images/hero/hero-1.jpg");
+}
+
+.hero-guest {
+    background-image: url("../images/hero/hero-2.jpg");
+}
+
+.hero-bride {
+    background-image: url("../images/hero/hero-3.jpg");
+}
+
+.hero-festival {
+    background-image: url("../images/hero/hero-4.jpg");
+}
+
+.hero-title {
+    font-size: clamp(2.5rem, 6vw, 4rem);
+    font-family: var(--font-heading);
+    margin-bottom: var(--spacing-lg);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.hero-subtitle {
+    font-size: clamp(1rem, 2vw, 1.5rem);
+    margin-bottom: var(--spacing-xl);
+    opacity: 0.95;
+}
+
+.hero-title,
+.hero-subtitle {
+    text-shadow: 0 3px 10px rgba(0, 0, 0, 0.35);
+}
+
+/* Swiper Customization */
+.swiper-button-prev,
+.swiper-button-next {
+    width: 50px;
+    height: 50px;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 50%;
+    color: var(--primary-color);
+}
+
+.swiper-button-prev:after,
+.swiper-button-next:after {
+    font-size: 20px;
+    font-weight: 900;
+}
+
+.swiper-pagination-bullet {
+    width: 12px;
+    height: 12px;
+    background: var(--white);
+    opacity: 0.5;
+}
+
+.swiper-pagination-bullet-active {
+    opacity: 1;
+    background: var(--accent-color);
+}
+
+/* Category Section */
+.category-section {
+    padding: var(--spacing-xxl) 0;
+    background: var(--bg-light);
+}
+
+.category-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: var(--spacing-lg);
+}
+
+.category-card {
+    background: var(--white);
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all var(--transition-normal);
+    box-shadow: var(--shadow-sm);
+}
+
+.category-card:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-8px);
+}
+
+.category-image {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 3/4;
+}
+
+.category-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-slow);
+}
+
+.category-card:hover .category-image img {
+    transform: scale(1.08);
+}
+
+.category-title {
+    padding: var(--spacing-lg);
+    text-align: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-dark);
+    background: var(--white);
+}
+
+/* Products Section */
+.products-section {
+    padding: var(--spacing-xxl) 0;
+}
+
+.products-swiper .swiper-slide {
+    height: auto;
+}
+
+/* Occasion Section */
+.occasion-section {
+    padding: var(--spacing-xxl) 0;
+    background: var(--bg-light);
+}
+
+.occasion-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: var(--spacing-lg);
+}
+
+.occasion-card {
+    position: relative;
+    border-radius: 8px;
+    overflow: hidden;
+    aspect-ratio: 3/4;
+    transition: all var(--transition-normal);
+}
+
+.occasion-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-lg);
+}
+
+.occasion-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform var(--transition-slow);
+}
+
+.occasion-card:hover img {
+    transform: scale(1.1);
+}
+
+.occasion-card h3 {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+    color: var(--white);
+    padding: var(--spacing-lg);
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* Promotional Banner */
+.promo-banner {
+    padding: var(--spacing-xxl) 0;
+    background: #0B0B0B;
+    color: var(--white);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+.promo-content {
+    position: relative;
+    z-index: 1;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.promo-banner .btn-light {
+    color: #0B0B0B;
+}
+
+.promo-content h2 {
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-family: var(--font-heading);
+    margin-bottom: var(--spacing-md);
+}
+
+.promo-content p {
+    font-size: 1.25rem;
+    margin-bottom: var(--spacing-xl);
+    opacity: 0.95;
+}
+
+/* Newsletter Section */
+.newsletter-section {
+    padding: var(--spacing-xxl) 0;
+    background: var(--bg-light);
+}
+
+.newsletter-content {
+    max-width: 600px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.newsletter-content h2 {
+    margin-bottom: var(--spacing-md);
+}
+
+.newsletter-content p {
+    color: var(--text-gray);
+    margin-bottom: var(--spacing-xl);
+}
+
+.newsletter-form {
+    display: flex;
+    gap: var(--spacing-sm);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.newsletter-form input {
+    flex: 1;
+    padding: 14px 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 50px;
+    font-size: 16px;
+}
+
+.newsletter-form input:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+.newsletter-form button {
+    padding: 14px 32px;
+    border-radius: 50px;
+    white-space: nowrap;
+}
+
+/* Responsive Styles */
+@media (max-width: 1024px) {
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .occasion-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 768px) {
+    .hero-swiper {
+        height: 500px;
+    }
+    
+    .hero-title {
+        font-size: 2rem;
+    }
+    
+    .hero-subtitle {
+        font-size: 1rem;
+    }
+    
+    .category-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--spacing-md);
+    }
+    
+    .occasion-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .newsletter-form {
+        flex-direction: column;
+    }
+    
+    .newsletter-form button {
+        width: 100%;
+    }
+    
+    section {
+        padding: var(--spacing-xl) 0;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-swiper {
+        height: 400px;
+    }
+    
+    .category-grid,
+    .occasion-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .swiper-button-prev,
+    .swiper-button-next {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .swiper-button-prev:after,
+    .swiper-button-next:after {
+        font-size: 16px;
+    }
+}
+
+/* =============================================
+   AMZIRA - CONTINUOUS BACKGROUND
+   Manyavar-Style Canvas Background
+   ============================================= */
+
+/* Main continuous background canvas */
+.homepage-canvas {
+    background: #FBF2DE;
+    /* Warm ivory/parchment - Manyavar style */
+    position: relative;
+    width: 100%;
+}
+
+/* Remove individual section backgrounds */
+.ornament-section,
+.occasion-section,
+.products-section,
+.newsletter-section {
+    background: transparent;
+    /* Inherit from canvas wrapper */
+}
+
+/* =============================================
+   ORNAMENT SECTION (Wedding Procession)
+   ============================================= */
+
+.ornament-section {
+    padding: 64px 0 48px;
+    position: relative;
+}
+
+.ornament-glow {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+    margin: 0 auto;
+    max-width: 600px;
+}
+
+/* Soft embedded glow behind animation */
+.ornament-glow::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 120%;
+    height: 120%;
+    background: radial-gradient(
+        ellipse at center,
+        rgba(212, 175, 55, 0.08) 0%,
+        rgba(212, 175, 55, 0.04) 40%,
+        transparent 70%
+    );
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.ornament-glow img {
+    position: relative;
+    z-index: 1;
+    max-width: 450px;
+    width: 100%;
+    height: auto;
+    opacity: 0.92;
+}
+
+/* =============================================
+   OCCASION SECTION
+   ============================================= */
+
+.occasion-section {
+    padding: 48px 0 64px;
+}
+
+/* Section title styling */
+.section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+    text-align: center;
+    color: #2c2c2c;
+    margin-bottom: 16px;
+    font-weight: 600;
+}
+
+/* =============================================
+   PRODUCT CARDS
+   White cards on beige canvas
+   ============================================= */
+
+.product-card {
+    background: #ffffff;
+    /* Cards stand out on beige background */
+    border-radius: 8px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.product-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+
+/* =============================================
+   RESPONSIVE STYLES
+   ============================================= */
+
+@media (max-width: 1024px) {
+    .occasion-tabs {
+        gap: 32px;
+    }
+}
+
+@media (max-width: 768px) {
+    .ornament-section {
+        padding: 48px 0 32px;
+    }
+    
+    .occasion-section {
+        padding: 32px 0 48px;
+    }
+    
+    .ornament-glow img {
+        max-width: 300px;
+    }
+    
+    .occasion-tabs {
+        gap: 24px;
+    }
+    
+    .tab-btn {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .ornament-glow img {
+        max-width: 260px;
+    }
+    
+    .ornament-glow {
+        padding: 24px;
+    }
+}
+
+
+
+/* ===============================
+   FINAL BACKGROUND CORRECTION
+   =============================== */
+
+/* 1️⃣ Restore New Wedding Collection (Promo Banner) */
+.promo-banner {
+    background: linear-gradient(135deg, #6e0f2a, #8b1538) !important;
+    color: #ffffff !important;
+}
+
+/* Ensure promo text stays white */
+.promo-banner h2,
+.promo-banner p {
+    color: #ffffff !important;
+}
+
+/* Button stays premium */
+.promo-banner .btn,
+.promo-banner button {
+    background: #ffffff !important;
+    color: #6e0f2a !important;
+}
+
+/* 2️⃣ Bestsellers section → Beige */
+.products-section {
+    background: #FBF2DE !important;
+}
+
+/* 3️⃣ Newsletter section → Beige */
+.newsletter-section {
+    background: #FBF2DE !important;
+}
+
+@keyframes scroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* Customer Reviews */
+.reviews-section {
+    padding: 60px 0;
+    background: var(--bg-light);
+}
+
+.reviews-swiper {
+    padding: 20px 0 50px;
+}
+
+.review-card {
+    background: #fff;
+    padding: 32px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
+}
+
+.review-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+}
+
+.review-stars {
+    color: #FFA500;
+    font-size: 18px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 4px;
+}
+
+.review-text {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--text-dark);
+    margin-bottom: 24px;
+    min-height: 100px;
+    font-style: italic;
+}
+
+.review-author {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+}
+
+.author-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #8B1538, #C53030);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.author-info h4 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+}
+
+.author-info p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--text-gray);
+}
+
+@media (max-width: 768px) {
+    .review-card {
+        padding: 24px;
+    }
+
+    .review-text {
+        font-size: 14px;
+        min-height: auto;
+    }
+}
+

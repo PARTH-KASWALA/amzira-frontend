@@ -1,0 +1,17 @@
+<parameter name="content"># Footer Fix TODO
+
+## HTML Changes (index.html)
+- [ ] Uncomment 24×7 Customer Support feature item
+
+## CSS Changes (footer.css)
+- [ ] Change `.features-grid` from 4 to 5 columns (desktop)
+- [ ] Add `.feature-icon` styles (44px size, gold filter)
+- [ ] Remove/keep `.feature-item i` for compatibility
+- [ ] Update responsive breakpoints (5→3→2→1 columns)
+- [ ] Ensure text contrast rgba(255,255,255,0.85)
+
+## Testing
+- [ ] Verify all 5 feature icons display correctly
+- [ ] Check responsive layout on desktop, tablet, mobile
+- [ ] Verify gold-like tone on icons
+</parameter>

@@ -1,0 +1,426 @@
+{
+  "products": [
+    {
+      "id": "AMZ-KJ-001",
+      "name": "Royal Burgundy Kurta Jacket Set",
+      "slug": "royal-burgundy-kurta-jacket",
+      "category": "men",
+      "subcategory": "kurta-jacket",
+      "price": 8999,
+      "salePrice": 6299,
+      "discount": 30,
+       "image": "images/products/product-1-front.jpg",
+
+  "images": [
+        "images/products/product-1-front.jpg",
+        "images/products/product-1-back.jpg"
+      ],
+      "colors": [
+        {"name": "Burgundy", "hex": "#8B1538"},
+        {"name": "Navy", "hex": "#2C5F7C"},
+        {"name": "Gold", "hex": "#D4AF37"}
+      ],
+      "sizes": ["S", "M", "L", "XL", "XXL"],
+      "fabric": "Silk Blend",
+      "occasions": ["Wedding", "Reception", "Engagement"],
+      "badge": "Bestseller",
+      "inStock": true,
+      "stockBySizes": {"S": 5, "M": 10, "L": 8, "XL": 3, "XXL": 2},
+      "rating": 4.5,
+      "reviews": 234,
+      "description": "Elevate your wedding wardrobe with this exquisite royal burgundy kurta jacket set. Crafted from premium silk blend fabric with intricate golden embroidery.",
+      "features": [
+        "Premium silk blend fabric",
+        "Hand-embroidered details",
+        "Comfortable fit",
+        "Includes kurta, jacket, and pajama",
+        "Dry clean only"
+      ]
+    },
+    {
+      "id": "AMZ-SH-002",
+      "name": "Golden Embroidered Sherwani",
+      "slug": "golden-embroidered-sherwani",
+      "category": "men",
+      "subcategory": "sherwani",
+      "price": 15999,
+      "salePrice": 12799,
+      "discount": 20,
+      "image": "images/products/product-2-front.jpg",
+      "images": [
+        "images/products/product-2-front.jpg",
+        "images/products/product-2-back.jpg",
+        "images/products/product-2-side.jpg",
+        "images/products/product-2-detail.jpg"
+      ],
+      "colors": [
+        {"name": "Gold", "hex": "#D4AF37"},
+        {"name": "Ivory", "hex": "#F5F5DC"},
+        {"name": "Maroon", "hex": "#8B1538"}
+      ],
+      "sizes": ["S", "M", "L", "XL", "XXL", "XXXL"],
+      "fabric": "Brocade Silk",
+      "occasions": ["Wedding", "Reception"],
+      "badge": "New",
+      "inStock": true,
+      "stockBySizes": {"S": 3, "M": 7, "L": 10, "XL": 8, "XXL": 4, "XXXL": 2},
+      "rating": 4.8,
+      "reviews": 189,
+      "description": "Make a grand statement at your wedding with this stunning golden embroidered sherwani featuring intricate threadwork and premium brocade silk.",
+      "features": [
+        "Pure brocade silk",
+        "Zari embroidery",
+        "Button closure",
+        "Includes sherwani and churidar",
+        "Dry clean recommended"
+      ]
+    },
+    {
+      "id": "AMZ-KP-003",
+      "name": "Classic Navy Kurta Pajama",
+      "slug": "classic-navy-kurta-pajama",
+      "category": "men",
+      "subcategory": "kurta-pajama",
+      "price": 4999,
+      "salePrice": 3499,
+      "discount": 30,
+      "image": "images/products/product-3-front.jpg",
+      "images": [
+        "images/products/product-3-front.jpg",
+        "images/products/product-3-back.jpg",
+        "images/products/product-3-side.jpg"
+      ],
+      "colors": [
+        {"name": "Navy", "hex": "#2C5F7C"},
+        {"name": "Black", "hex": "#1a1a1a"},
+        {"name": "White", "hex": "#FFFFFF"}
+      ],
+      "sizes": ["S", "M", "L", "XL", "XXL"],
+      "fabric": "Cotton",
+      "occasions": ["Casual", "Festival", "Sangeet"],
+      "badge": "Sale",
+      "inStock": true,
+      "stockBySizes": {"S": 12, "M": 15, "L": 10, "XL": 6, "XXL": 3},
+      "rating": 4.3,
+      "reviews": 156,
+      "description": "A timeless classic navy kurta pajama perfect for any festive occasion. Made from premium cotton for maximum comfort.",
+      "features": [
+        "100% cotton",
+        "Breathable fabric",
+        "Machine washable",
+        "Classic fit",
+        "Includes kurta and pajama"
+      ]
+    },
+    {
+      "id": "AMZ-IW-004",
+      "name": "Maroon Designer Indo Western",
+      "slug": "maroon-indo-western",
+      "category": "men",
+      "subcategory": "indo-western",
+      "price": 10999,
+      "salePrice": 8799,
+      "discount": 20,
+      "image": "images/products/product-4-front.jpg",
+      "images": [
+        "images/products/product-4-front.jpg",
+        "images/products/product-4-back.jpg",
+        "images/products/product-4-side.jpg"
+      ],
+      "colors": [
+        {"name": "Maroon", "hex": "#C53030"},
+        {"name": "Teal", "hex": "#14B8A6"}
+      ],
+      "sizes": ["S", "M", "L", "XL", "XXL"],
+      "fabric": "Silk Blend",
+      "occasions": ["Reception", "Cocktail", "Sangeet"],
+      "badge": "Bestseller",
+      "inStock": true,
+      "stockBySizes": {"S": 4, "M": 8, "L": 6, "XL": 5, "XXL": 2},
+      "rating": 4.6,
+      "reviews": 203,
+      "description": "Contemporary fusion wear that blends traditional aesthetics with modern design. Perfect for the modern groom.",
+      "features": [
+        "Premium silk blend",
+        "Contemporary design",
+        "Slim fit",
+        "Button & zipper closure",
+        "Dry clean only"
+      ]
+    },
+    {
+      "id": "AMZ-KP-005",
+      "name": "White Cotton Kurta Pajama",
+      "slug": "white-cotton-kurta-pajama",
+      "category": "men",
+      "subcategory": "kurta-pajama",
+      "price": 4499,
+      "salePrice": 3149,
+      "discount": 30,
+      "image": "images/products/product-5-front.jpg",
+      "images": [
+        "images/products/product-5-front.jpg",
+        "images/products/product-5-back.jpg",
+        "images/products/product-5-side.jpg"
+      ],
+      "colors": [
+        {"name": "White", "hex": "#FFFFFF"},
+        {"name": "Cream", "hex": "#F5F5DC"}
+      ],
+      "sizes": ["S", "M", "L", "XL", "XXL"],
+      "fabric": "Cotton",
+      "occasions": ["Wedding", "Festival", "Casual"],
+      "inStock": true,
+      "stockBySizes": {"S": 10, "M": 15, "L": 12, "XL": 8, "XXL": 4},
+      "rating": 4.4,
+      "reviews": 142,
+      "description": "Classic white kurta pajama in pure cotton. Perfect for traditional occasions.",
+      "features": [
+        "100% pure cotton",
+        "Machine washable",
+        "Breathable fabric",
+        "Classic fit"
+      ]
+    },
+    {
+      "id": "AMZ-NJ-006",
+      "name": "Premium Nehru Jacket",
+      "slug": "premium-nehru-jacket",
+      "category": "men",
+      "subcategory": "nehru-jacket",
+      "price": 5999,
+      "salePrice": 4199,
+      "discount": 30,
+      "image": "images/products/product-6-front.jpg",
+      "images": [
+        "images/products/product-6-front.jpg",
+        "images/products/product-6-back.jpg"
+      ],
+      "colors": [
+        {"name": "Black", "hex": "#1a1a1a"},
+        {"name": "Burgundy", "hex": "#8B1538"}
+      ],
+      "sizes": ["S", "M", "L", "XL", "XXL"],
+      "fabric": "Velvet",
+      "occasions": ["Reception", "Cocktail"],
+      "inStock": true,
+      "stockBySizes": {"S": 5, "M": 10, "L": 8, "XL": 6, "XXL": 3},
+      "rating": 4.4,
+      "reviews": 98,
+      "description": "Add sophistication with this premium velvet Nehru jacket.",
+      "features": [
+        "Premium velvet fabric",
+        "Structured fit",
+        "Button closure",
+        "Dry clean only"
+      ]
+    },
+    {
+      "id": "AMZ-L-007",
+      "name": "Bridal Red Lehenga",
+      "slug": "bridal-red-lehenga",
+      "category": "women",
+      "subcategory": "lehenga",
+      "price": 24999,
+      "salePrice": 19999,
+      "discount": 20,
+      "image": "images/products/product-7-front.jpg",
+      "images": [
+        "images/products/product-7-front.jpg",
+        "images/products/product-7-back.jpg",
+        "images/products/product-7-detail.jpg"
+      ],
+      "colors": [
+        {"name": "Red", "hex": "#C53030"},
+        {"name": "Pink", "hex": "#EC4899"},
+        {"name": "Green", "hex": "#10B981"}
+      ],
+      "sizes": ["XS", "S", "M", "L", "XL"],
+      "fabric": "Velvet",
+      "occasions": ["Wedding", "Reception"],
+      "badge": "Bestseller",
+      "inStock": true,
+      "stockBySizes": {"XS": 2, "S": 5, "M": 8, "L": 6, "XL": 3},
+      "rating": 4.9,
+      "reviews": 412,
+      "description": "Exquisite bridal lehenga with heavy embroidery and embellishments.",
+      "features": [
+        "Premium velvet & silk",
+        "Zari and sequin work",
+        "Semi-stitched",
+        "Includes blouse piece",
+        "Dry clean only"
+      ]
+    },
+    {
+      "id": "AMZ-S-008",
+      "name": "Designer Silk Saree",
+      "slug": "designer-silk-saree",
+      "category": "women",
+      "subcategory": "saree",
+      "price": 8999,
+      "salePrice": 6299,
+      "discount": 30,
+      "image": "https://via.placeholder.com/800x1000/D4AF37/FFFFFF?text=Silk+Saree",
+      "images": [
+        "https://via.placeholder.com/800x1000/D4AF37/FFFFFF?text=Silk+Saree",
+        "https://via.placeholder.com/800x1000/D4AF37/FFFFFF?text=Drape",
+        "https://via.placeholder.com/800x1000/D4AF37/FFFFFF?text=Pallu"
+      ],
+      "colors": [
+        {"name": "Gold", "hex": "#D4AF37"},
+        {"name": "Purple", "hex": "#9333EA"}
+      ],
+      "sizes": ["Free Size"],
+      "fabric": "Silk",
+      "occasions": ["Wedding", "Festival", "Reception"],
+      "badge": "New",
+      "inStock": true,
+      "stockBySizes": {"Free Size": 20},
+      "rating": 4.7,
+      "reviews": 287,
+      "description": "Elegant pure silk saree with designer border and pallu.",
+      "features": [
+        "Pure silk fabric",
+        "Woven border",
+        "Length: 6.3 meters",
+        "Includes unstitched blouse",
+        "Dry clean recommended"
+      ]
+    },
+    {
+      "id": "AMZ-L-009",
+      "name": "Pink Embroidered Lehenga",
+      "slug": "pink-embroidered-lehenga",
+      "category": "women",
+      "subcategory": "lehenga",
+      "price": 22999,
+      "salePrice": 18399,
+      "discount": 20,
+      "image": "https://via.placeholder.com/800x1000/EC4899/FFFFFF?text=Pink+Lehenga",
+      "images": [
+        "https://via.placeholder.com/800x1000/EC4899/FFFFFF?text=Pink+Lehenga",
+        "https://via.placeholder.com/800x1000/EC4899/FFFFFF?text=Back",
+        "https://via.placeholder.com/800x1000/EC4899/FFFFFF?text=Detail"
+      ],
+      "colors": [
+        {"name": "Pink", "hex": "#EC4899"},
+        {"name": "Peach", "hex": "#FED7AA"}
+      ],
+      "sizes": ["XS", "S", "M", "L", "XL"],
+      "fabric": "Net",
+      "occasions": ["Wedding", "Reception", "Sangeet"],
+      "badge": "New",
+      "inStock": true,
+      "stockBySizes": {"XS": 3, "S": 6, "M": 8, "L": 5, "XL": 2},
+      "rating": 4.8,
+      "reviews": 201,
+      "description": "Beautiful pink lehenga with intricate embroidery.",
+      "features": [
+        "Premium silk & net",
+        "Heavy embroidery",
+        "Semi-stitched",
+        "Includes blouse piece"
+      ]
+    },
+    {
+      "id": "AMZ-IW-010",
+      "name": "Black Sequin Indo Western",
+      "slug": "black-sequin-indo-western",
+      "category": "women",
+      "subcategory": "indo-western",
+      "price": 8999,
+      "salePrice": 6299,
+      "discount": 30,
+      "image": "https://via.placeholder.com/800x1000/1a1a1a/FFFFFF?text=Black+Indo+Western",
+      "images": [
+        "https://via.placeholder.com/800x1000/1a1a1a/FFFFFF?text=Black+Indo+Western",
+        "https://via.placeholder.com/800x1000/1a1a1a/FFFFFF?text=Back"
+      ],
+      "colors": [
+        {"name": "Black", "hex": "#1a1a1a"}
+      ],
+      "sizes": ["XS", "S", "M", "L", "XL"],
+      "fabric": "Georgette",
+      "occasions": ["Cocktail", "Party", "Reception"],
+      "badge": "New",
+      "inStock": true,
+      "stockBySizes": {"XS": 4, "S": 8, "M": 10, "L": 6, "XL": 3},
+      "rating": 4.6,
+      "reviews": 143,
+      "description": "Modern black indo western with sequin detailing.",
+      "features": [
+        "Premium georgette",
+        "Sequin work",
+        "Contemporary design",
+        "Comfortable fit"
+      ]
+    },
+    {
+      "id": "AMZ-KK-011",
+      "name": "Boys Kurta Pajama Set",
+      "slug": "boys-kurta-pajama",
+      "category": "kids",
+      "subcategory": "kurta-pajama",
+      "price": 2999,
+      "salePrice": 2099,
+      "discount": 30,
+      "image": "https://via.placeholder.com/800x1000/2C5F7C/FFFFFF?text=Kids+Kurta",
+      "images": [
+        "https://via.placeholder.com/800x1000/2C5F7C/FFFFFF?text=Kids+Kurta",
+        "https://via.placeholder.com/800x1000/2C5F7C/FFFFFF?text=View+2"
+      ],
+      "colors": [
+        {"name": "Blue", "hex": "#2C5F7C"},
+        {"name": "Cream", "hex": "#F5F5DC"}
+      ],
+      "sizes": ["2-3Y", "4-5Y", "6-7Y", "8-9Y", "10-11Y", "12-13Y"],
+      "fabric": "Cotton Blend",
+      "occasions": ["Wedding", "Festival"],
+      "inStock": true,
+      "stockBySizes": {"2-3Y": 5, "4-5Y": 8, "6-7Y": 10, "8-9Y": 8, "10-11Y": 6, "12-13Y": 4},
+      "rating": 4.5,
+      "reviews": 143,
+      "description": "Comfortable and stylish kurta pajama set for boys.",
+      "features": [
+        "Soft cotton blend",
+        "Easy to wear",
+        "Machine washable",
+        "Available in multiple sizes"
+      ]
+    },
+    {
+      "id": "AMZ-KK-012",
+      "name": "Boys Cream Kurta Pajama",
+      "slug": "boys-cream-kurta-pajama",
+      "category": "kids",
+      "subcategory": "kurta-pajama",
+      "price": 2499,
+      "salePrice": 1749,
+      "discount": 30,
+      "image": "https://via.placeholder.com/800x1000/F5F5DC/333333?text=Kids+Cream+Kurta",
+      "images": [
+        "https://via.placeholder.com/800x1000/F5F5DC/333333?text=Kids+Cream+Kurta",
+        "https://via.placeholder.com/800x1000/F5F5DC/333333?text=Back"
+      ],
+      "colors": [
+        {"name": "Cream", "hex": "#F5F5DC"},
+        {"name": "White", "hex": "#FFFFFF"}
+      ],
+      "sizes": ["2-3Y", "4-5Y", "6-7Y", "8-9Y", "10-11Y", "12-13Y"],
+      "fabric": "Cotton",
+      "occasions": ["Wedding", "Festival"],
+      "inStock": true,
+      "stockBySizes": {"2-3Y": 6, "4-5Y": 10, "6-7Y": 8, "8-9Y": 6, "10-11Y": 4, "12-13Y": 3},
+      "rating": 4.6,
+      "reviews": 87,
+      "description": "Comfortable cream kurta pajama for boys.",
+      "features": [
+        "Soft cotton",
+        "Easy to wear",
+        "Machine washable",
+        "Comfortable fit"
+      ]
+    }
+  ]
+}

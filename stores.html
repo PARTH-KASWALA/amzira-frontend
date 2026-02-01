@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Store Locator | Amzira</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    
+    <style>
+        .coming-soon-section {
+            min-height: 70vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            background: linear-gradient(135deg, #FBF2DE 0%, #F5E6D3 100%);
+        }
+        
+        .coming-soon-content {
+            text-align: center;
+            max-width: 700px;
+        }
+        
+        .coming-soon-icon {
+            font-size: 80px;
+            color: var(--primary-color);
+            margin-bottom: 24px;
+        }
+        
+        .coming-soon-content h1 {
+            font-size: 48px;
+            font-family: var(--font-heading);
+            margin-bottom: 16px;
+            color: var(--text-dark);
+        }
+        
+        .coming-soon-content p {
+            font-size: 18px;
+            color: var(--text-gray);
+            margin-bottom: 32px;
+            line-height: 1.6;
+        }
+        
+        .store-preview {
+            background: white;
+            border-radius: 12px;
+            padding: 32px;
+            margin: 32px 0;
+            text-align: left;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .store-preview h3 {
+            margin-bottom: 20px;
+            color: var(--primary-color);
+            font-size: 24px;
+        }
+        
+        .store-item {
+            padding: 20px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .store-item:last-child {
+            border-bottom: none;
+        }
+        
+        .store-item h4 {
+            margin-bottom: 8px;
+            color: var(--text-dark);
+        }
+        
+        .store-item p {
+            margin: 4px 0;
+            font-size: 14px;
+            color: var(--text-gray);
+        }
+        
+        .store-item i {
+            margin-right: 8px;
+            color: var(--primary-color);
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Banner -->
+    <div class="top-banner">
+        <div class="marquee">
+            <span>Free Shipping For Orders Above $100 • Your Wedding Look Starts Here • Explore the New Wedding Edit!</span>
+            <span>Free Shipping For Orders Above $100 • Your Wedding Look Starts Here • Explore the New Wedding Edit!</span>
+        </div>
+    </div>
+
+    <!-- Header -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/logo/Amzira_logo.png" alt="Amzira Logo" class="logo-icon">
+                        <img src="images/logo/Amzira_name.png" alt="Amzira" class="logo-name">
+                    </a>
+                </div>
+
+                <nav class="nav-desktop">
+                    <ul class="nav-menu">
+                        <li class="nav-item"><a href="men.html">Men</a></li>
+                        <li class="nav-item"><a href="women.html">Women</a></li>
+                        <li class="nav-item"><a href="kids.html">Kids</a></li>
+                        <li class="nav-item"><a href="appointments.html">Appointments</a></li>
+                        <li class="nav-item"><a href="stores.html" class="active">Stores</a></li>
+                    </ul>
+                </nav>
+
+                <div class="header-actions">
+                    <button class="header-icon" id="searchBtn">
+                        <i class="fas fa-search"></i>
+                    </button>
+                    <button class="header-icon">
+                        <i class="far fa-heart"></i>
+                    </button>
+                    <button class="header-icon" id="accountBtn">
+                        <i class="far fa-user"></i>
+                    </button>
+                    <button class="header-icon cart-icon" id="cartBtn">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span class="cart-count">0</span>
+                    </button>
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Mobile Menu -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <h2>AMZIRA</h2>
+            <button class="mobile-menu-close" id="mobileMenuClose">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="mobile-nav">
+            <ul>
+                <li><a href="men.html">Men</a></li>
+                <li><a href="women.html">Women</a></li>
+                <li><a href="kids.html">Kids</a></li>
+                <li><a href="appointments.html">Appointments</a></li>
+                <li><a href="stores.html">Stores</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <!-- Coming Soon Section -->
+    <section class="coming-soon-section">
+        <div class="coming-soon-content">
+            <i class="fas fa-store coming-soon-icon"></i>
+            <h1>Find a Store Near You</h1>
+            <p>Interactive store locator with maps and directions coming soon!</p>
+            
+            <div class="store-preview">
+                <h3>Our Flagship Stores:</h3>
+                
+                <div class="store-item">
+                    <h4>Amzira Mumbai</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> Linking Road, Bandra West, Mumbai - 400050</p>
+                    <p><i class="fas fa-phone"></i> +91 22 2640 5500</p>
+                    <p><i class="fas fa-clock"></i> Mon-Sun: 10:00 AM - 9:00 PM</p>
+                </div>
+                
+                <div class="store-item">
+                    <h4>Amzira Delhi</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> Connaught Place, New Delhi - 110001</p>
+                    <p><i class="fas fa-phone"></i> +91 11 4151 5500</p>
+                    <p><i class="fas fa-clock"></i> Mon-Sun: 10:00 AM - 9:00 PM</p>
+                </div>
+                
+                <div class="store-item">
+                    <h4>Amzira Bangalore</h4>
+                    <p><i class="fas fa-map-marker-alt"></i> MG Road, Bangalore - 560001</p>
+                    <p><i class="fas fa-phone"></i> +91 80 4112 5500</p>
+                    <p><i class="fas fa-clock"></i> Mon-Sun: 10:00 AM - 9:00 PM</p>
+                </div>
+            </div>
+            
+            <p style="margin-bottom: 24px;">For store information and directions:</p>
+            <a href="tel:+919674373838" class="btn btn-primary" style="margin-right: 12px;">
+                <i class="fas fa-phone"></i> Call Us
+            </a>
+            <a href="https://wa.me/919674373838" target="_blank" class="btn btn-secondary">
+                <i class="fab fa-whatsapp"></i> WhatsApp
+            </a>
+            
+            <p style="margin-top: 32px;">
+                <a href="index.html">&larr; Back to Homepage</a>
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="footer-content">
+            <div class="footer-column brand-column">
+                <img src="images/logo/Amzira_logo.png" class="brand-logo" alt="Amzira logo">
+                <img src="images/logo/Amzira_name.png" class="brand-name" alt="Amzira">
+                <p class="brand-tagline">Premium Indian Ethnic Wear</p>
+            </div>
+            <div class="footer-column">
+                <h3 class="footer-heading">SUPPORT</h3>
+                <ul class="footer-links">
+                    <li><a href="#">Contact Us</a></li>
+                    <li><a href="#">Track Order</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <div class="footer-bottom-content">
+                <p class="copyright">© 2025 Amzira Ltd. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="js/loading-states.js"></script>
+    <script src="js/error-handler.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/main.js"></script>
+</body>
+</html>

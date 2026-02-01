@@ -1,0 +1,110 @@
+/* ===================================
+   CART PAGE STYLES
+   Shopping cart, saved items, checkout
+   =================================== */
+
+/* Button Utilities */
+.btn-sm {
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 4px;
+}
+
+.btn-text {
+    background: none;
+    border: none;
+    color: var(--text-gray);
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 0;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: color 0.2s ease;
+}
+
+.btn-text:hover {
+    color: var(--primary-color);
+}
+
+.btn-text i {
+    font-size: 11px;
+}
+
+/* Saved for Later */
+.saved-items-section {
+    margin-top: 40px;
+    padding-top: 40px;
+    border-top: 2px solid var(--border-color);
+}
+
+.saved-items-title {
+    font-size: 24px;
+    margin-bottom: 24px;
+}
+
+.saved-items-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 20px;
+}
+
+.saved-item {
+    background: #fff;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.saved-item-image {
+    aspect-ratio: 3 / 4;
+    background: var(--bg-light);
+}
+
+.saved-item-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.saved-item-info {
+    padding: 16px;
+}
+
+.saved-item-meta {
+    font-size: 13px;
+    color: var(--text-gray);
+    margin-bottom: 8px;
+    display: flex;
+    gap: 12px;
+}
+
+.saved-item-price {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent-color);
+    margin-bottom: 12px;
+}
+
+.saved-item-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+@media (max-width: 768px) {
+    .saved-items-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .saved-item-actions {
+        flex-direction: row;
+    }
+
+    .saved-item-actions .btn {
+        flex: 1;
+        font-size: 12px;
+        padding: 8px;
+    }
+}

@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Account | Amzira</title>
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/header.css">
+    <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    
+    <style>
+        /* Reuse auth page styles from login.html */
+        .auth-page {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #FBF2DE 0%, #F5E6D3 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 40px 20px;
+        }
+
+        .auth-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            max-width: 440px;
+            width: 100%;
+            padding: 48px 40px;
+        }
+
+        .auth-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+
+        .auth-logo {
+            margin-bottom: 24px;
+        }
+
+        .auth-logo img {
+            height: 50px;
+            margin: 0 auto;
+        }
+
+        .auth-header h1 {
+            font-size: 28px;
+            font-family: var(--font-heading);
+            color: var(--text-dark);
+            margin-bottom: 8px;
+        }
+
+        .auth-header p {
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+
+        .auth-form {
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 14px;
+            color: var(--text-dark);
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            font-size: 15px;
+            transition: all 0.2s;
+            font-family: var(--font-primary);
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(139, 21, 56, 0.1);
+        }
+
+        .form-group .input-icon {
+            position: relative;
+        }
+
+        .form-group .input-icon i {
+            position: absolute;
+            right: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-gray);
+            cursor: pointer;
+        }
+
+        .btn-auth {
+            width: 100%;
+            padding: 16px;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-auth:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(139, 21, 56, 0.3);
+        }
+
+        .btn-auth:disabled {
+            background: var(--text-light);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .auth-footer {
+            text-align: center;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .auth-footer p {
+            color: var(--text-gray);
+            font-size: 14px;
+        }
+
+        .auth-footer a {
+            color: var(--primary-color);
+            font-weight: 600;
+            text-decoration: none;
+        }
+
+        .auth-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .back-home {
+            text-align: center;
+            margin-top: 24px;
+        }
+
+        .back-home a {
+            color: var(--text-gray);
+            font-size: 14px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-home a:hover {
+            color: var(--primary-color);
+        }
+
+        .error-message {
+            background: #FEE2E2;
+            border: 1px solid #FCA5A5;
+            color: #991B1B;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .password-strength {
+            margin-top: 8px;
+            font-size: 12px;
+        }
+
+        .strength-bar {
+            height: 4px;
+            background: var(--border-color);
+            border-radius: 2px;
+            margin: 6px 0;
+            overflow: hidden;
+        }
+
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            transition: all 0.3s;
+            border-radius: 2px;
+        }
+
+        .strength-weak .strength-fill {
+            width: 33%;
+            background: #EF4444;
+        }
+
+        .strength-medium .strength-fill {
+            width: 66%;
+            background: #F59E0B;
+        }
+
+        .strength-strong .strength-fill {
+            width: 100%;
+            background: #10B981;
+        }
+
+        .terms-accept {
+            display: flex;
+            align-items: start;
+            gap: 10px;
+            margin-bottom: 24px;
+            font-size: 14px;
+            color: var(--text-gray);
+        }
+
+        .terms-accept input[type="checkbox"] {
+            margin-top: 3px;
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+        }
+
+        .terms-accept a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .terms-accept a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 480px) {
+            .auth-container {
+                padding: 32px 24px;
+            }
+
+            .auth-header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-page">
+        <div class="auth-container">
+            <!-- Header -->
+            <div class="auth-header">
+                <div class="auth-logo">
+                    <a href="index.html">
+                        <img src="images/logo/Amzira_name.png" alt="Amzira">
+                    </a>
+                </div>
+                <h1>Create Account</h1>
+                <p>Join Amzira for exclusive offers & updates</p>
+            </div>
+
+            <!-- Error Message -->
+            <div class="error-message" id="errorMessage"></div>
+
+            <!-- Signup Form -->
+            <form class="auth-form" id="signupForm">
+                <div class="form-group">
+                    <label for="fullName">Full Name *</label>
+                    <input 
+                        type="text" 
+                        id="fullName" 
+                        name="fullName"
+                        placeholder="Enter your full name"
+                        required
+                        autocomplete="name"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="email">Email Address *</label>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        name="email"
+                        placeholder="Enter your email"
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="phone">Mobile Number *</label>
+                    <input 
+                        type="tel" 
+                        id="phone" 
+                        name="phone"
+                        placeholder="10-digit mobile number"
+                        required
+                        pattern="[6-9][0-9]{9}"
+                        autocomplete="tel"
+                        maxlength="10"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password *</label>
+                    <div class="input-icon">
+                        <input 
+                            type="password" 
+                            id="password" 
+                            name="password"
+                            placeholder="Minimum 6 characters"
+                            required
+                            autocomplete="new-password"
+                        >
+                        <i class="fas fa-eye" id="togglePassword"></i>
+                    </div>
+                    <div class="password-strength" id="passwordStrength">
+                        <div class="strength-bar">
+                            <div class="strength-fill"></div>
+                        </div>
+                        <span class="strength-text"></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirm Password *</label>
+                    <div class="input-icon">
+                        <input 
+                            type="password" 
+                            id="confirmPassword" 
+                            name="confirmPassword"
+                            placeholder="Re-enter password"
+                            required
+                            autocomplete="new-password"
+                        >
+                        <i class="fas fa-eye" id="toggleConfirmPassword"></i>
+                    </div>
+                </div>
+
+                <div class="terms-accept">
+                    <input type="checkbox" id="acceptTerms" required>
+                    <label for="acceptTerms">
+                        I agree to Amzira's <a href="#">Terms & Conditions</a> and <a href="#">Privacy Policy</a>
+                    </label>
+                </div>
+
+                <button type="submit" class="btn-auth" id="signupBtn">
+                    Create Account
+                </button>
+            </form>
+
+            <!-- Footer -->
+            <div class="auth-footer">
+                <p>Already have an account? <a href="login.html">Login</a></p>
+            </div>
+
+            <!-- Back to Home -->
+            <div class="back-home">
+                <a href="index.html">
+                    <i class="fas fa-arrow-left"></i>
+                    Back to Homepage
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/loading-states.js"></script>
+    <script src="js/error-handler.js"></script>
+    <script src="js/auth.js"></script>
+
+    <script>
+    // Toggle password visibility
+    document.getElementById('togglePassword').addEventListener('click', function() {
+        const passwordField = document.getElementById('password');
+        const type = passwordField.type === 'password' ? 'text' : 'password';
+        passwordField.type = type;
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
+    });
+
+    document.getElementById('toggleConfirmPassword').addEventListener('click', function() {
+        const passwordField = document.getElementById('confirmPassword');
+        const type = passwordField.type === 'password' ? 'text' : 'password';
+        passwordField.type = type;
+        this.classList.toggle('fa-eye');
+        this.classList.toggle('fa-eye-slash');
+    });
+
+    // Password strength checker
+    document.getElementById('password').addEventListener('input', function() {
+        const password = this.value;
+        const strengthDiv = document.getElementById('passwordStrength');
+        const strengthText = strengthDiv.querySelector('.strength-text');
+        
+        let strength = 0;
+        if (password.length >= 6) strength++;
+        if (password.length >= 10) strength++;
+        if (/[a-z]/.test(password) && /[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^a-zA-Z0-9]/.test(password)) strength++;
+
+        strengthDiv.className = 'password-strength';
+        
+        if (strength <= 2) {
+            strengthDiv.classList.add('strength-weak');
+            strengthText.textContent = 'Weak password';
+            strengthText.style.color = '#EF4444';
+        } else if (strength <= 4) {
+            strengthDiv.classList.add('strength-medium');
+            strengthText.textContent = 'Medium password';
+            strengthText.style.color = '#F59E0B';
+        } else {
+            strengthDiv.classList.add('strength-strong');
+            strengthText.textContent = 'Strong password';
+            strengthText.style.color = '#10B981';
+        }
+    });
+
+    // Phone number validation
+    document.getElementById('phone').addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '').substring(0, 10);
+    });
+
+    // Signup form submission
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const fullName = document.getElementById('fullName').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const password = document.getElementById('password').value;
+        const confirmPassword = document.getElementById('confirmPassword').value;
+        const acceptTerms = document.getElementById('acceptTerms').checked;
+        
+        const errorMessage = document.getElementById('errorMessage');
+        const signupBtn = document.getElementById('signupBtn');
+
+        // Clear previous errors
+        errorMessage.classList.remove('show');
+
+        // Validation
+        if (!fullName || !email || !phone || !password || !confirmPassword) {
+            errorMessage.textContent = 'Please fill all required fields';
+            errorMessage.classList.add('show');
+            return;
+        }
+
+        if (!Auth.validateEmail(email)) {
+            errorMessage.textContent = 'Please enter a valid email address';
+            errorMessage.classList.add('show');
+            return;
+        }
+
+        if (!Auth.validatePhone(phone)) {
+            errorMessage.textContent = 'Please enter a valid 10-digit mobile number starting with 6-9';
+            errorMessage.classList.add('show');
+            return;
+        }
+
+        if (!Auth.validatePassword(password)) {
+            errorMessage.textContent = 'Password must be at least 6 characters long';
+            errorMessage.classList.add('show');
+            return;
+        }
+
+        if (password !== confirmPassword) {
+            errorMessage.textContent = 'Passwords do not match';
+            errorMessage.classList.add('show');
+            return;
+        }
+
+        if (!acceptTerms) {
+            errorMessage.textContent = 'Please accept Terms & Conditions';
+            errorMessage.classList.add('show');
+            return;
+        }
+
+        // Show loading
+        signupBtn.disabled = true;
+        signupBtn.textContent = 'Creating Account...';
+
+        // Simulate API delay
+        setTimeout(async () => {
+            // Attempt signup
+            const result = await Auth.signup({
+                name: fullName,
+                email: email,
+                phone: phone,
+                password: password
+            });
+
+            if (result.success) {
+                // Success - redirect
+                const returnUrl = sessionStorage.getItem('returnUrl') || 'account.html';
+                sessionStorage.removeItem('returnUrl');
+                
+                // Show success message briefly
+                if (window.errorHandler) {
+                    window.errorHandler.showSuccess('Account created successfully!');
+                }
+                
+                setTimeout(() => {
+                    window.location.href = returnUrl;
+                }, 500);
+            } else {
+                // Show error
+                errorMessage.textContent = result.message;
+                errorMessage.classList.add('show');
+                signupBtn.disabled = false;
+                signupBtn.textContent = 'Create Account';
+            }
+        }, 800);
+    });
+
+    // Check if already logged in
+    if (Auth.isLoggedIn()) {
+        const returnUrl = sessionStorage.getItem('returnUrl');
+        if (returnUrl) {
+            sessionStorage.removeItem('returnUrl');
+            window.location.href = returnUrl;
+        } else {
+            window.location.href = 'account.html';
+        }
+    }
+</script>
+</body>
+</html>
