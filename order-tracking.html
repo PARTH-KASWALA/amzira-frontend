@@ -1,0 +1,52 @@
+<!-- order-tracking.html -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Track Order - AMZIRA</title>
+</head>
+<body>
+    <div class="tracking-container">
+        <h1>Track Your Order</h1>
+        <div id="trackingInfo"></div>
+        <div id="statusTimeline"></div>
+    </div>
+    
+    <script>
+        async function loadTracking() {
+            const params = new URLSearchParams(window.location.search);
+            const orderNumber = params.get('order');
+            
+            if (!orderNumber) {
+                alert('Order number required');
+                return;
+            }
+            
+            try {
+                const order = await AMZIRA.orders.getOrderDetail(orderNumber);
+                displayTracking(order);
+            } catch (error) {
+                alert('Failed to load tracking: ' + error.message);
+            }
+        }
+        
+        function displayTracking(order) {
+            // Display order info
+            document.getElementById('trackingInfo').innerHTML = `
+                <div class="order-header">
+                    <h2>Order ${order.order_number}</h2>
+                    <div class="status ${order.status}">${order.status}</div>
+                </div>
+                <div class="order-details">
+                    <p><strong>Tracking:</strong> ${order.tracking_number || 'Not available'}</p>
+                    <p><strong>Placed:</strong> ${new Date(order.created_at).toLocaleDateString()}</p>
+                </div>
+            `;
+            
+            // Display status timeline (would need to call tracking endpoint)
+            // await AMZIRA.orders.getTracking(order.id)
+        }
+        
+        loadTracking();
+    </script>
+</body>
+</html>

@@ -245,36 +245,20 @@ function attachProductEventListeners(container) {
 }
 
 // Add to Cart Function
-function addToCart(productId) {
+async function addToCart(productId) {
     const product = sampleProducts.find(p => p.id === productId);
     if (!product) return;
-    
-    // Get existing cart from localStorage
-    let cart = JSON.parse(localStorage.getItem('amziraCart') || '[]');
-    
-    // Check if product already exists
-    const existingItem = cart.find(item => item.id === productId);
-    
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push({
-            id: product.id,
-            name: product.name,
-            price: product.salePrice,
-            image: product.image,
-            quantity: 1
-        });
+
+    // Delegate to the unified cart manager so logged-in users always hit backend /cart/items.
+    if (window.cart && typeof window.cart.addItem === 'function') {
+        const added = await window.cart.addItem(product.id, 1);
+        if (added) {
+            updateCartCount();
+        }
+        return;
     }
-    
-    // Save to localStorage
-    localStorage.setItem('amziraCart', JSON.stringify(cart));
-    
-    // Update cart count
-    updateCartCount();
-    
-    // Show notification
-    showNotification('Product added to cart!', 'success');
+
+    showNotification('Cart service is unavailable right now. Please refresh and try again.', 'error');
 }
 
 // Toggle Wishlist
@@ -297,9 +281,10 @@ function toggleWishlist(productId, buttonElement) {
 
 // Update Cart Count Badge
 function updateCartCount() {
-    const cart = JSON.parse(localStorage.getItem('amziraCart') || '[]');
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    
+    const totalItems = (window.cart && typeof window.cart.getItemCount === 'function')
+        ? window.cart.getItemCount()
+        : 0;
+
     const cartCountElement = document.querySelector('.cart-count');
     if (cartCountElement) {
         cartCountElement.textContent = totalItems;
