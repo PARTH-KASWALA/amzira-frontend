@@ -1036,21 +1036,53 @@
 
         // Global variables
         let editingAddressId = null;
+        const PINCODE_PATTERN = /^\d{6}$/;
+
+        function notifyUser(message, type = 'error') {
+            if (window.errorHandler) {
+                if (type === 'success' && typeof window.errorHandler.showSuccess === 'function') {
+                    window.errorHandler.showSuccess(message);
+                    return;
+                }
+                if (type === 'warning' && typeof window.errorHandler.showWarning === 'function') {
+                    window.errorHandler.showWarning(message);
+                    return;
+                }
+                if (typeof window.errorHandler.showError === 'function') {
+                    window.errorHandler.showError(message);
+                    return;
+                }
+            }
+            alert(message);
+        }
+
+        function esc(value) {
+            if (window.AMZIRA?.utils?.escapeHtml) return window.AMZIRA.utils.escapeHtml(value);
+            const div = document.createElement('div');
+            div.textContent = value == null ? '' : String(value);
+            return div.innerHTML;
+        }
 
         // Load user data
         const user = Auth.getUser();
         if (user) {
-            document.getElementById('welcomeMessage').textContent = `Welcome back, ${user.name.split(' ')[0]}!`;
-            document.getElementById('profileName').textContent = user.name;
-            document.getElementById('profileEmail').textContent = user.email;
-            document.getElementById('profilePhone').textContent = user.phone;
-            
-            const date = new Date(user.createdAt);
-            document.getElementById('profileDate').textContent = date.toLocaleDateString('en-IN', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
+            const safeName = String(user.name || 'Customer').trim();
+            document.getElementById('welcomeMessage').textContent = `Welcome back, ${safeName.split(' ')[0]}!`;
+            document.getElementById('profileName').textContent = safeName;
+            document.getElementById('profileEmail').textContent = user.email || '-';
+            document.getElementById('profilePhone').textContent = user.phone || '-';
+
+            const createdAt = user.createdAt || user.created_at || null;
+            if (createdAt) {
+                const date = new Date(createdAt);
+                if (!Number.isNaN(date.getTime())) {
+                    document.getElementById('profileDate').textContent = date.toLocaleDateString('en-IN', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    });
+                }
+            }
         }
 
         // Section navigation
@@ -1077,7 +1109,12 @@
         });
 
         // Load orders
-        function loadOrders() {
+        async function loadOrders() {
+            try {
+                await OrderManager.refreshOrders();
+            } catch (_) {
+                // no-op, empty state handles this
+            }
             const orders = OrderManager.getUserOrders();
             const ordersList = document.getElementById('ordersList');
             const ordersEmpty = document.getElementById('ordersEmpty');
@@ -1096,17 +1133,18 @@
                 const deliveryDate = new Date(order.expectedDelivery);
                 const statusDisplay = OrderManager.getStatusDisplay(order.orderStatus);
                 const paymentDisplay = OrderManager.getPaymentMethodDisplay(order.paymentMethod);
+                const safeOrderId = esc(order.orderId);
 
                 // Show first 3 items
                 const itemsToShow = order.items.slice(0, 3);
                 const remainingCount = Math.max(0, order.items.length - 3);
 
                 return `
-                    <div class="order-card" onclick="viewOrderDetails('${order.orderId}')">
+                    <div class="order-card" onclick="viewOrderDetails('${safeOrderId}')">
                         <div class="order-header">
                             <div class="order-header-left">
                                 <div class="order-id-row">
-                                    <span class="order-id">${order.orderId}</span>
+                                    <span class="order-id">${safeOrderId}</span>
                                     <span class="order-status ${order.orderStatus}">
                                         <i class="fas fa-${statusDisplay.icon}"></i>
                                         ${statusDisplay.label}
@@ -1138,7 +1176,7 @@
                                 Expected by ${deliveryDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
                             </div>
                             <div class="order-actions" onclick="event.stopPropagation()">
-                                <button class="btn-order-action" onclick="viewOrderDetails('${order.orderId}')">
+                                <button class="btn-order-action" onclick="viewOrderDetails('${safeOrderId}')">
                                     View Details
                                 </button>
                             </div>
@@ -1149,7 +1187,12 @@
         }
 
         // Load addresses
-        function loadAddresses() {
+        async function loadAddresses() {
+            try {
+                await AddressManager.refresh(true);
+            } catch (_) {
+                notifyUser('Unable to load addresses right now.');
+            }
             const addresses = AddressManager.getAddresses();
             const addressesList = document.getElementById('addressesList');
             const addressesEmpty = document.getElementById('addressesEmpty');
@@ -1169,22 +1212,22 @@
                     <div class="address-header">
                         <span class="address-type">
                             <i class="fas fa-${addr.addressType === 'home' ? 'home' : addr.addressType === 'work' ? 'briefcase' : 'map-pin'}"></i>
-                            ${addr.addressType}
+                            ${esc(addr.addressType)}
                         </span>
-                        <span class="address-name">${addr.name}</span>
+                        <span class="address-name">${esc(addr.name)}</span>
                     </div>
                     <div class="address-details" style="margin: 12px 0;">
-                        ${AddressManager.formatAddress(addr)}
+                        ${esc(AddressManager.formatAddress(addr))}
                     </div>
                     <div class="address-mobile" style="margin-bottom: 16px;">
                         <i class="fas fa-phone"></i>
-                        ${addr.mobile}
+                        ${esc(addr.mobile)}
                     </div>
                     <div class="address-actions">
-                        <button class="btn-address-action" onclick="editAddress('${addr.id}')">
+                        <button class="btn-address-action" onclick="editAddress('${esc(addr.id)}')">
                             <i class="fas fa-edit"></i> Edit
                         </button>
-                        <button class="btn-address-action" onclick="deleteAddress('${addr.id}')">
+                        <button class="btn-address-action" onclick="deleteAddress('${esc(addr.id)}')">
                             <i class="fas fa-trash"></i> Delete
                         </button>
                     </div>
@@ -1237,10 +1280,10 @@
             // Display items
             document.getElementById('modalOrderItems').innerHTML = order.items.map(item => `
                 <div class="order-detail-item">
-                    <img src="${item.image}" alt="${item.name}" class="detail-item-image">
+                    <img src="${esc(item.image)}" alt="${esc(item.name)}" class="detail-item-image">
                     <div class="detail-item-info">
-                        <div class="detail-item-name">${item.name}</div>
-                        <div class="detail-item-meta">Size: ${item.size} | Quantity: ${item.quantity}</div>
+                        <div class="detail-item-name">${esc(item.name)}</div>
+                        <div class="detail-item-meta">Size: ${esc(item.size)} | Quantity: ${Number(item.quantity || 0)}</div>
                         <div class="detail-item-price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
                     </div>
                 </div>
@@ -1251,9 +1294,9 @@
             document.getElementById('modalDeliveryAddress').innerHTML = `
                 <div class="detail-row">
                     <div class="detail-label" style="text-align: left;">
-                        <strong>${addr.name}</strong><br>
-                        ${AddressManager.formatAddress(addr)}<br>
-                        Phone: ${addr.mobile}
+                        <strong>${esc(addr.name)}</strong><br>
+                        ${esc(AddressManager.formatAddress(addr))}<br>
+                        Phone: ${esc(addr.mobile)}
                     </div>
                 </div>
             `;
@@ -1320,11 +1363,13 @@
             document.body.style.overflow = 'hidden';
         }
 
-        function deleteAddress(addressId) {
+        async function deleteAddress(addressId) {
             if (confirm('Are you sure you want to delete this address?')) {
-                const result = AddressManager.deleteAddress(addressId);
+                const result = await AddressManager.deleteAddress(addressId);
                 if (result.success) {
-                    loadAddresses();
+                    await loadAddresses();
+                } else if (result.message) {
+                    notifyUser(result.message);
                 }
             }
         }
@@ -1337,7 +1382,7 @@
         }
 
         // Address form submission
-        document.getElementById('addressForm').addEventListener('submit', function(e) {
+        document.getElementById('addressForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const addressData = {
@@ -1353,27 +1398,49 @@
             };
 
             const saveBtn = document.getElementById('saveAddressBtn');
+            const hasRequiredFields =
+                addressData.name &&
+                addressData.mobile &&
+                addressData.pincode &&
+                addressData.city &&
+                addressData.address &&
+                addressData.state;
+
+            if (!hasRequiredFields) {
+                notifyUser('Please fill all required address fields');
+                return;
+            }
+
+            if (!Auth.validatePhone(addressData.mobile)) {
+                notifyUser('Please enter a valid 10-digit mobile number');
+                return;
+            }
+
+            if (!PINCODE_PATTERN.test(addressData.pincode)) {
+                notifyUser('Please enter a valid 6-digit pincode');
+                return;
+            }
+
             saveBtn.disabled = true;
             saveBtn.textContent = 'Saving...';
 
-            setTimeout(() => {
-                let result;
-                if (editingAddressId) {
-                    result = AddressManager.updateAddress(editingAddressId, addressData);
-                } else {
-                    result = AddressManager.addAddress(addressData);
-                }
+            let result;
+            if (editingAddressId) {
+                result = await AddressManager.updateAddress(editingAddressId, addressData);
+            } else {
+                result = await AddressManager.addAddress(addressData);
+            }
 
-                if (result.success) {
-                    closeAddressModal();
-                    loadAddresses();
-                } else {
-                    alert(result.message);
-                }
+            if (result.success) {
+                closeAddressModal();
+                await loadAddresses();
+                notifyUser('Address saved successfully', 'success');
+            } else {
+                notifyUser(result.message || 'Failed to save address');
+            }
 
-                saveBtn.disabled = false;
-                saveBtn.textContent = 'Save Address';
-            }, 500);
+            saveBtn.disabled = false;
+            saveBtn.textContent = 'Save Address';
         });
 
         // Address type selection

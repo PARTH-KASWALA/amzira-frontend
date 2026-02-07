@@ -27,6 +27,73 @@ async function ensureOrdersApiLayer() {
     });
 }
 
+/**
+ * Build a self-cleaning countdown timer without setInterval.
+ * @param {{expiresAt: string|number|Date, onTick: (msLeft:number)=>void, onExpire: ()=>void}} params
+ * @returns {{start: ()=>void, stop: ()=>void}}
+ */
+function createExpiryTimer({ expiresAt, onTick, onExpire }) {
+    const expiresTs = new Date(expiresAt).getTime();
+    let timeoutId = null;
+    let stopped = false;
+
+    function clear() {
+        if (timeoutId) {
+            window.clearTimeout(timeoutId);
+            timeoutId = null;
+        }
+    }
+
+    function tick() {
+        if (stopped) return;
+
+        const msLeft = Math.max(0, expiresTs - Date.now());
+        onTick(msLeft);
+
+        if (msLeft <= 0) {
+            onExpire();
+            return;
+        }
+
+        timeoutId = window.setTimeout(tick, 1000);
+    }
+
+    return {
+        start() {
+            stopped = false;
+            clear();
+            tick();
+        },
+        stop() {
+            stopped = true;
+            clear();
+        }
+    };
+}
+
+/**
+ * Normalize backend stock check response.
+ * @param {any} stockPayload
+ * @returns {{available:boolean, affectedItems:Array<{productId:string,variantId:string,message:string}>}}
+ */
+function normalizeStockCheck(stockPayload) {
+    const available = Boolean(stockPayload?.available !== false);
+    const rawItems = stockPayload?.affected_items || stockPayload?.items || stockPayload?.conflicts || [];
+    const affectedItems = Array.isArray(rawItems)
+        ? rawItems.map((item) => ({
+            productId: String(item?.product_id || item?.productId || item?.id || ''),
+            variantId: String(item?.variant_id || item?.variantId || ''),
+            message: item?.message || item?.detail || 'Item is no longer available'
+        }))
+        : [];
+
+    return { available, affectedItems };
+}
+
+/**
+ * Show checkout errors through global error surface.
+ * @param {string} message
+ */
 function showCheckoutError(message) {
     if (window.errorHandler && typeof window.errorHandler.showError === 'function') {
         window.errorHandler.showError(message);
@@ -34,6 +101,24 @@ function showCheckoutError(message) {
     }
 
     alert(message);
+}
+
+/**
+ * Build user-facing API error text.
+ * @param {any} error
+ * @param {string} fallback
+ * @returns {string}
+ */
+function getDisplayErrorMessage(error, fallback = 'Checkout failed') {
+    if (window.AMZIRA?.utils?.getApiErrorMessage) {
+        return window.AMZIRA.utils.getApiErrorMessage(error, fallback);
+    }
+
+    if (error?.errors && Array.isArray(error.errors) && error.errors.length) {
+        return `${error.message || fallback} (${error.errors.join(', ')})`;
+    }
+
+    return error?.message || fallback;
 }
 
 function normalizeCartItems(cartData) {
@@ -129,6 +214,12 @@ async function handleRazorpayPayment(orderData, customer) {
     razorpay.open();
 }
 
+/**
+ * Checkout entrypoint that validates cart/address state and creates backend order.
+ * @param {Event|null} event
+ * @param {string|null} explicitPaymentMethod
+ * @returns {Promise<void>}
+ */
 async function initiateCheckout(event, explicitPaymentMethod = null) {
     if (event && typeof event.preventDefault === 'function') {
         event.preventDefault();
@@ -168,7 +259,7 @@ async function initiateCheckout(event, explicitPaymentMethod = null) {
         const currentUser = (window.Auth && typeof window.Auth.getUser === 'function') ? window.Auth.getUser() : null;
         await handleRazorpayPayment(orderData, currentUser);
     } catch (error) {
-        showCheckoutError(error?.message || 'Checkout failed');
+        showCheckoutError(getDisplayErrorMessage(error, 'Checkout failed'));
         throw error;
     }
 }
@@ -181,34 +272,48 @@ function bindCheckoutButtons() {
             initiateCheckout(event);
         });
     }
-
-    const proceedBtn = document.getElementById('proceedToPayment');
-    if (proceedBtn) {
-        proceedBtn.addEventListener('click', (event) => {
-            // Legacy button id retained; behavior now creates the order directly.
-            event.stopImmediatePropagation();
-            initiateCheckout(event);
-        });
-    }
-
-    const payBtn = document.getElementById('payButton');
-    if (payBtn) {
-        payBtn.addEventListener('click', (event) => {
-            event.stopImmediatePropagation();
-            initiateCheckout(event);
-        });
-    }
 }
 
 // Minimal read-only order facade for pages that still reference OrderManager.
 const OrderManager = {
     cache: [],
 
+    normalizeOrder(order) {
+        if (!order || typeof order !== 'object') return null;
+
+        const items = order.items || order.order_items || [];
+        const subtotal = Number(order?.subtotal || 0);
+        const shipping = Number(order?.shipping_amount || 0);
+        const discount = Number(order?.discount || 0);
+        const tax = Number(order?.tax || 0);
+        const total = Number(order?.total || order?.grand_total || 0);
+
+        return {
+            orderId: order.order_number || order.order_id || order.id,
+            orderStatus: String(order.status || order.order_status || 'processing').toLowerCase(),
+            paymentMethod: String(order.payment_method || 'razorpay').toLowerCase(),
+            orderDate: order.created_at || order.order_date || new Date().toISOString(),
+            expectedDelivery: order.estimated_delivery || order.expected_delivery || new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)).toISOString(),
+            deliveryAddress: order.shipping_address || order.deliveryAddress || {},
+            pricing: { subtotal, shipping, discount, tax, total },
+            items: items.map((item) => ({
+                name: item.product_name || item.name || item?.product?.name || 'Product',
+                image: item.image || item?.product?.image || '',
+                size: item.size || item?.variant?.size || '-',
+                quantity: Number(item.quantity || 0),
+                price: Number(item.unit_price || item.price || 0)
+            }))
+        };
+    },
+
     async refreshOrders() {
         try {
             await ensureOrdersApiLayer();
             const payload = await window.AMZIRA.orders.getOrders();
-            this.cache = payload?.orders || payload?.results || (Array.isArray(payload) ? payload : []);
+            const source = payload?.orders || payload?.results || (Array.isArray(payload) ? payload : []);
+            this.cache = source
+                .map((order) => this.normalizeOrder(order))
+                .filter(Boolean);
         } catch (_) {
             this.cache = [];
         }
@@ -228,11 +333,6 @@ const OrderManager = {
         return this.cache.find((order) => String(order.orderId || order.id || order.order_number) === String(orderId));
     },
 
-    // This legacy path is intentionally disabled to prevent local/mock order creation.
-    createOrder() {
-        return { success: false, message: 'Use backend checkout flow via /orders endpoint.' };
-    },
-
     getStatusDisplay(status) {
         const value = String(status || '').toLowerCase();
         if (value === 'delivered') return { label: 'Delivered', color: '#10B981', icon: 'check-circle' };
@@ -250,6 +350,10 @@ const OrderManager = {
 
 window.initiateCheckout = initiateCheckout;
 window.OrderManager = OrderManager;
+window.OrderFlowUtils = {
+    createExpiryTimer,
+    normalizeStockCheck
+};
 
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', bindCheckoutButtons, { once: true });

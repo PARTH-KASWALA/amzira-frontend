@@ -1,160 +1,176 @@
 /* ===================================
    ADDRESS MANAGEMENT SYSTEM
-   Add, Edit, Delete, Select addresses
+   Backend-first address manager with local selection state.
    =================================== */
 
 class AddressManager {
     constructor() {
-        this.storageKey = 'amziraAddresses';
         this.selectedKey = 'selectedAddress';
+        this.cache = [];
+        this.lastLoadedAt = 0;
+        this.cacheTtlMs = 15000;
     }
 
-    // Get all addresses for current user
+    async ensureApiReady() {
+        if (window.AMZIRA && window.AMZIRA.apiRequest) return;
+
+        await new Promise((resolve, reject) => {
+            const existing = document.querySelector('script[data-amzira-api="true"]');
+            if (existing) {
+                existing.addEventListener('load', () => resolve(), { once: true });
+                existing.addEventListener('error', () => reject(new Error('Failed to load API layer')), { once: true });
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = 'js/api.js';
+            script.async = false;
+            script.dataset.amziraApi = 'true';
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error('Failed to load API layer'));
+            document.head.appendChild(script);
+        });
+    }
+
+    normalizeAddress(addr) {
+        if (!addr || typeof addr !== 'object') return null;
+
+        return {
+            id: addr.id,
+            name: addr.full_name || addr.name || '',
+            mobile: addr.phone || addr.mobile || '',
+            pincode: addr.pincode || '',
+            address: addr.address_line1 || addr.address || '',
+            locality: addr.address_line2 || addr.locality || '',
+            city: addr.city || '',
+            state: addr.state || '',
+            addressType: addr.address_type || addr.addressType || 'home',
+            isDefault: Boolean(addr.is_default || addr.isDefault)
+        };
+    }
+
+    toBackendPayload(addressData) {
+        return {
+            full_name: addressData.name,
+            phone: String(addressData.mobile || '').trim(),
+            address_line1: addressData.address,
+            address_line2: addressData.locality || null,
+            city: addressData.city,
+            state: addressData.state,
+            pincode: String(addressData.pincode || '').trim(),
+            country: 'India',
+            address_type: addressData.addressType || 'home',
+            is_default: Boolean(addressData.isDefault)
+        };
+    }
+
+    async refresh(force = false) {
+        if (!window.Auth || !Auth.isLoggedIn()) {
+            this.cache = [];
+            return [];
+        }
+
+        const shouldUseCache = !force && this.cache.length > 0 && (Date.now() - this.lastLoadedAt) < this.cacheTtlMs;
+        if (shouldUseCache) {
+            return this.cache;
+        }
+
+        await this.ensureApiReady();
+        const response = await window.AMZIRA.users.getAddresses();
+        const source = response?.addresses || response?.results || (Array.isArray(response) ? response : []);
+
+        this.cache = source
+            .map((addr) => this.normalizeAddress(addr))
+            .filter(Boolean);
+        this.lastLoadedAt = Date.now();
+
+        return this.cache;
+    }
+
     getAddresses() {
-        const user = Auth.getUser();
-        if (!user) return [];
-
-        const allAddresses = localStorage.getItem(this.storageKey);
-        const addresses = allAddresses ? JSON.parse(allAddresses) : [];
-        
-        // Filter addresses for current user
-        return addresses.filter(addr => addr.userId === user.id);
+        return Array.isArray(this.cache) ? this.cache : [];
     }
 
-    // Get address by ID
     getAddressById(addressId) {
-        const addresses = this.getAllAddresses();
-        return addresses.find(addr => addr.id === addressId);
+        return this.getAddresses().find((addr) => String(addr.id) === String(addressId)) || null;
     }
 
-    // Get all addresses (admin function)
-    getAllAddresses() {
-        const allAddresses = localStorage.getItem(this.storageKey);
-        return allAddresses ? JSON.parse(allAddresses) : [];
-    }
-
-    // Add new address
-    addAddress(addressData) {
-        const user = Auth.getUser();
-        if (!user) {
+    async addAddress(addressData) {
+        if (!window.Auth || !Auth.isLoggedIn()) {
             return { success: false, message: 'Please login first' };
         }
 
-        // Validate required fields
         if (!this.validateAddress(addressData)) {
             return { success: false, message: 'Please fill all required fields' };
         }
 
-        const allAddresses = this.getAllAddresses();
-
-        const newAddress = {
-            id: 'ADDR-' + Date.now(),
-            userId: user.id,
-            name: addressData.name,
-            mobile: addressData.mobile,
-            pincode: addressData.pincode,
-            address: addressData.address,
-            locality: addressData.locality || '',
-            city: addressData.city,
-            state: addressData.state,
-            addressType: addressData.addressType || 'home',
-            isDefault: addressData.isDefault || false,
-            createdAt: new Date().toISOString()
-        };
-
-        // If this is set as default, unset other defaults
-        if (newAddress.isDefault) {
-            allAddresses.forEach(addr => {
-                if (addr.userId === user.id) {
-                    addr.isDefault = false;
-                }
-            });
+        try {
+            await this.ensureApiReady();
+            const created = await window.AMZIRA.users.createAddress(this.toBackendPayload(addressData));
+            await this.refresh(true);
+            return { success: true, address: this.normalizeAddress(created) };
+        } catch (error) {
+            return {
+                success: false,
+                message: window.AMZIRA?.utils?.getApiErrorMessage
+                    ? window.AMZIRA.utils.getApiErrorMessage(error, 'Failed to save address')
+                    : (error?.message || 'Failed to save address')
+            };
         }
-
-        allAddresses.push(newAddress);
-        localStorage.setItem(this.storageKey, JSON.stringify(allAddresses));
-
-        return { success: true, address: newAddress };
     }
 
-    // Update address
-    updateAddress(addressId, addressData) {
-        const allAddresses = this.getAllAddresses();
-        const index = allAddresses.findIndex(addr => addr.id === addressId);
-
-        if (index === -1) {
-            return { success: false, message: 'Address not found' };
-        }
-
-        const user = Auth.getUser();
-        if (allAddresses[index].userId !== user.id) {
-            return { success: false, message: 'Unauthorized' };
-        }
-
-        // Validate
+    async updateAddress(addressId, addressData) {
         if (!this.validateAddress(addressData)) {
             return { success: false, message: 'Please fill all required fields' };
         }
 
-        // If setting as default, unset others
-        if (addressData.isDefault) {
-            allAddresses.forEach(addr => {
-                if (addr.userId === user.id && addr.id !== addressId) {
-                    addr.isDefault = false;
-                }
-            });
+        try {
+            await this.ensureApiReady();
+            const updated = await window.AMZIRA.users.updateAddress(addressId, this.toBackendPayload(addressData));
+            await this.refresh(true);
+            return { success: true, address: this.normalizeAddress(updated) };
+        } catch (error) {
+            return {
+                success: false,
+                message: window.AMZIRA?.utils?.getApiErrorMessage
+                    ? window.AMZIRA.utils.getApiErrorMessage(error, 'Failed to update address')
+                    : (error?.message || 'Failed to update address')
+            };
         }
-
-        // Update address
-        allAddresses[index] = {
-            ...allAddresses[index],
-            ...addressData,
-            updatedAt: new Date().toISOString()
-        };
-
-        localStorage.setItem(this.storageKey, JSON.stringify(allAddresses));
-
-        return { success: true, address: allAddresses[index] };
     }
 
-    // Delete address
-    deleteAddress(addressId) {
-        const allAddresses = this.getAllAddresses();
-        const index = allAddresses.findIndex(addr => addr.id === addressId);
+    async deleteAddress(addressId) {
+        try {
+            await this.ensureApiReady();
+            await window.AMZIRA.users.deleteAddress(addressId);
+            await this.refresh(true);
 
-        if (index === -1) {
-            return { success: false, message: 'Address not found' };
+            const selectedId = this.getSelectedAddressId();
+            if (selectedId && String(selectedId) === String(addressId)) {
+                this.clearSelectedAddress();
+            }
+
+            return { success: true };
+        } catch (error) {
+            return {
+                success: false,
+                message: window.AMZIRA?.utils?.getApiErrorMessage
+                    ? window.AMZIRA.utils.getApiErrorMessage(error, 'Failed to delete address')
+                    : (error?.message || 'Failed to delete address')
+            };
         }
-
-        const user = Auth.getUser();
-        if (allAddresses[index].userId !== user.id) {
-            return { success: false, message: 'Unauthorized' };
-        }
-
-        allAddresses.splice(index, 1);
-        localStorage.setItem(this.storageKey, JSON.stringify(allAddresses));
-
-        // Clear selected address if it was deleted
-        const selectedId = this.getSelectedAddressId();
-        if (selectedId === addressId) {
-            this.clearSelectedAddress();
-        }
-
-        return { success: true };
     }
 
-    // Set selected address for checkout
     selectAddress(addressId) {
         const address = this.getAddressById(addressId);
         if (!address) {
             return { success: false, message: 'Address not found' };
         }
 
-        localStorage.setItem(this.selectedKey, addressId);
-        return { success: true, address: address };
+        localStorage.setItem(this.selectedKey, String(address.id));
+        return { success: true, address };
     }
 
-    // Get selected address
     getSelectedAddress() {
         const addressId = localStorage.getItem(this.selectedKey);
         if (!addressId) return null;
@@ -162,23 +178,19 @@ class AddressManager {
         return this.getAddressById(addressId);
     }
 
-    // Get selected address ID
     getSelectedAddressId() {
         return localStorage.getItem(this.selectedKey);
     }
 
-    // Clear selected address
     clearSelectedAddress() {
         localStorage.removeItem(this.selectedKey);
     }
 
-    // Get default address
     getDefaultAddress() {
         const addresses = this.getAddresses();
-        return addresses.find(addr => addr.isDefault) || addresses[0] || null;
+        return addresses.find((addr) => addr.isDefault) || addresses[0] || null;
     }
 
-    // Validate address data
     validateAddress(data) {
         return (
             data.name && data.name.trim() !== '' &&
@@ -190,33 +202,25 @@ class AddressManager {
         );
     }
 
-    // Validate mobile
     validateMobile(mobile) {
         if (!mobile) return false;
-        // Clean input and validate
         const cleaned = String(mobile).replace(/\D/g, '');
-        const re = /^[6-9]\d{9}$/;
-        return re.test(cleaned);
+        return /^[6-9]\d{9}$/.test(cleaned);
     }
 
-    // Validate pincode
     validatePincode(pincode) {
         if (!pincode) return false;
         const cleaned = String(pincode).replace(/\D/g, '');
-        const re = /^\d{6}$/;
-        return re.test(cleaned);
+        return /^\d{6}$/.test(cleaned);
     }
 
-    // Format address for display
     formatAddress(address) {
-        return `${address.address}, ${address.locality ? address.locality + ', ' : ''}${address.city}, ${address.state} - ${address.pincode}`;
+        return `${address.address}, ${address.locality ? `${address.locality}, ` : ''}${address.city}, ${address.state} - ${address.pincode}`;
     }
 }
 
-// Initialize address manager
 const AddressManager_Instance = new AddressManager();
 
-// Export for global use
 if (typeof window !== 'undefined') {
     window.AddressManager = AddressManager_Instance;
 }

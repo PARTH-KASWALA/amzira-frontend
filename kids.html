@@ -484,14 +484,31 @@
             const grid = document.getElementById('productsGrid');
 
             try {
-                const response = await fetch('data/products.json');
-
-                if (!response.ok) throw new Error('Failed to fetch products');
-
-                const data = await response.json();
+                if (!window.AMZIRA?.products?.getProducts) {
+                    await new Promise((resolve, reject) => {
+                        const existing = document.querySelector('script[data-amzira-api="true"]');
+                        if (existing) {
+                            existing.addEventListener('load', () => resolve(), { once: true });
+                            existing.addEventListener('error', () => reject(new Error('Failed to load API layer')), { once: true });
+                            return;
+                        }
+                        const script = document.createElement('script');
+                        script.src = 'js/api.js';
+                        script.async = false;
+                        script.dataset.amziraApi = 'true';
+                        script.onload = () => resolve();
+                        script.onerror = () => reject(new Error('Failed to load API layer'));
+                        document.head.appendChild(script);
+                    });
+                }
+                if (!window.AMZIRA?.products?.getProducts) {
+                    throw new Error('API client unavailable');
+                }
+                const data = await window.AMZIRA.products.getProducts({ limit: 1000 });
+                const products = data?.products || data?.results || (Array.isArray(data) ? data : []);
 
                 const category = 'kids';
-                const categoryProducts = data.products.filter(p => p.category === category);
+                const categoryProducts = products.filter((p) => p.category === category);
 
                 if (categoryProducts.length === 0) throw new Error('No products found for category');
 
@@ -505,12 +522,7 @@
                         <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px; max-width: 500px; margin: 0 auto;">
                             <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #EF4444; margin-bottom: 20px;"></i>
                             <h3 style="margin-bottom: 12px;">Unable to Load Products</h3>
-                            <p style="color: #666; margin-bottom: 20px; line-height: 1.6;">Please ensure you're running this website on a local server. Opening HTML files directly won't work for loading product data.</p>
-                            <div style="background: #FBF2DE; padding: 16px; border-radius: 8px; text-align: left; margin-bottom: 20px;">
-                                <p style="margin: 0 0 8px 0; font-weight: 600; color: #8B1538;">Quick Setup:</p>
-                                <p style="margin: 4px 0; font-family: monospace; font-size: 13px; color: #666;"><strong>Python:</strong> python -m http.server 8000</p>
-                                <p style="margin: 4px 0; font-family: monospace; font-size: 13px; color: #666;"><strong>Node:</strong> npx serve</p>
-                            </div>
+                            <p style="color: #666; margin-bottom: 20px; line-height: 1.6;">Please refresh and try again.</p>
                             <a href="index.html" class="btn btn-primary">Back to Homepage</a>
                         </div>
                     `;

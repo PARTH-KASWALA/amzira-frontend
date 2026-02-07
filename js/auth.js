@@ -14,6 +14,7 @@ class AuthManager {
 
     init() {
         this.updateHeaderUI();
+        this.checkAuth();
         this.checkRedirect();
     }
 
@@ -51,7 +52,8 @@ class AuthManager {
     }
 
     isLoggedIn() {
-        return localStorage.getItem(this.userStorageKey) !== null;
+        const user = this.getUser();
+        return Boolean(user && user.id);
     }
 
     getUser() {
@@ -72,8 +74,8 @@ class AuthManager {
             const data = await window.AMZIRA.auth.login(email, password);
 
             const user = data?.user || data || null;
-            if (user && typeof user === 'object') {
-                localStorage.setItem(this.userStorageKey, JSON.stringify(user));
+            if (window.AMZIRA?.auth?.storeUserProfile) {
+                window.AMZIRA.auth.storeUserProfile(user);
             }
 
             this.updateHeaderUI();
@@ -137,7 +139,9 @@ class AuthManager {
             const result = await window.AMZIRA.auth.checkAuth();
 
             if (result.authenticated && result.user) {
-                localStorage.setItem(this.userStorageKey, JSON.stringify(result.user));
+                if (window.AMZIRA?.auth?.storeUserProfile) {
+                    window.AMZIRA.auth.storeUserProfile(result.user);
+                }
                 this.updateHeaderUI();
                 return { authenticated: true, user: result.user };
             }

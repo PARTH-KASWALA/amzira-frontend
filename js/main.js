@@ -3,112 +3,38 @@
    Core functionality
    =================================== */
 
-// Product Data
-const sampleProducts = [
-    {
-        id: 'AMZ-KJ-001',
-        name: 'Royal Burgundy Kurta Jacket Set',
-        category: 'Kurta Jacket',
-        price: 8999,
-        salePrice: 6299,
-        discount: 30,
-        image_front: 'images/products/product-1-front.jpg',
-        image_back: 'images/products/product-1-back.jpg',
-        badge: 'Bestseller',
-        rating: 4.5,
-        reviews: 234
-    },
-    {
-        id: 'AMZ-SH-002',
-        name: 'Golden Embroidered Sherwani',
-        category: 'Sherwani',
-        price: 15999,
-        salePrice: 12799,
-        discount: 20,
-        image_front: 'images/products/product-2-front.jpg',
-        image_back: 'images/products/product-2-back.jpg',
-        badge: 'New',
-        rating: 4.8,
-        reviews: 189
-    },
-    {
-        id: 'AMZ-KP-003',
-        name: 'Classic Navy Kurta Pajama',
-        category: 'Kurta Pajama',
-        price: 4999,
-        salePrice: 3499,
-        discount: 30,
-        image_front: 'images/products/product-3-front.jpg',
-        image_back: 'images/products/product-3-back.jpg',
-        badge: 'Sale',
-        rating: 4.3,
-        reviews: 156
-    },
-    {
-        id: 'AMZ-IW-004',
-        name: 'Maroon Indo Western',
-        category: 'Indo Western',
-        price: 10999,
-        salePrice: 8799,
-        discount: 20,
-        image_front: 'images/products/product-4-front.jpg',
-        image_back: 'images/products/product-4-back.jpg',
-        badge: 'Bestseller',
-        rating: 4.6,
-        reviews: 203
-    },
-    {
-        id: 'AMZ-KJ-005',
-        name: 'Emerald Green Kurta Set',
-        category: 'Kurta Jacket',
-        price: 7999,
-        salePrice: 5599,
-        discount: 30,
-        image_front: 'images/products/product-5-front.jpg',
-        image_back: 'images/products/product-5-back.jpg',
-        badge: 'New',
-        rating: 4.4,
-        reviews: 142
-    },
-    {
-        id: 'AMZ-SH-006',
-        name: 'Ivory Wedding Sherwani',
-        category: 'Sherwani',
-        price: 18999,
-        salePrice: 15199,
-        discount: 20,
-        image_front: 'images/products/product-6-front.jpg',
-        image_back: 'images/products/product-6-back.jpg',
-        badge: 'Bestseller',
-        rating: 4.9,
-        reviews: 287
-    },
-    {
-        id: 'AMZ-KP-007',
-        name: 'Beige Silk Kurta Pajama',
-        category: 'Kurta Pajama',
-        price: 5999,
-        salePrice: 4199,
-        discount: 30,
-        image_front: 'images/products/product-7-front.jpg',
-        image_back: 'images/products/product-7-back.jpg',
-        rating: 4.2,
-        reviews: 98
-    },
-    {
-        id: 'AMZ-IW-008',
-        name: 'Black Designer Indo Western',
-        category: 'Indo Western',
-        price: 12999,
-        salePrice: 10399,
-        discount: 20,
-        image_front: 'images/products/product-8-front.jpg',
-        image_back: 'images/products/product-8-back.jpg',
-        badge: 'New',
-        rating: 4.7,
-        reviews: 176
-    }
-];
+/**
+ * Escape unsafe HTML characters for dynamic content rendering.
+ * @param {any} value
+ * @returns {string}
+ */
+function esc(value) {
+    if (window.AMZIRA?.utils?.escapeHtml) return window.AMZIRA.utils.escapeHtml(value);
+    const div = document.createElement('div');
+    div.textContent = value == null ? '' : String(value);
+    return div.innerHTML;
+}
+
+async function ensureApiLayer() {
+    if (window.AMZIRA && window.AMZIRA.apiRequest) return;
+
+    await new Promise((resolve, reject) => {
+        const existing = document.querySelector('script[data-amzira-api="true"]');
+        if (existing) {
+            existing.addEventListener('load', () => resolve(), { once: true });
+            existing.addEventListener('error', () => reject(new Error('Failed to load API layer')), { once: true });
+            return;
+        }
+
+        const script = document.createElement('script');
+        script.src = 'js/api.js';
+        script.async = false;
+        script.dataset.amziraApi = 'true';
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('Failed to load API layer'));
+        document.head.appendChild(script);
+    });
+}
 
 // Create Product Card HTML
 function createProductCard(product) {
@@ -117,21 +43,21 @@ function createProductCard(product) {
     return `
         <div class="product-card">
             <div class="product-image">
-                <img class="front-image" src="${product.image_front}" alt="${product.name}">
-                <img class="back-image" src="${product.image_back}" alt="${product.name}">
-                ${product.badge ? `<span class="product-badge ${product.badge.toLowerCase()}">${product.badge}</span>` : ''}
+                <img class="front-image" src="${esc(product.image_front)}" alt="${esc(product.name)}">
+                <img class="back-image" src="${esc(product.image_back)}" alt="${esc(product.name)}">
+                ${product.badge ? `<span class="product-badge ${esc(product.badge.toLowerCase())}">${esc(product.badge)}</span>` : ''}
                 <div class="product-actions">
-                    <button class="product-action-btn wishlist-btn" data-id="${product.id}">
+                    <button class="product-action-btn wishlist-btn" data-id="${esc(product.id)}">
                         <i class="far fa-heart"></i>
                     </button>
-                    <button class="product-action-btn quick-view-btn" data-id="${product.id}">
+                    <button class="product-action-btn quick-view-btn" data-id="${esc(product.id)}">
                         <i class="far fa-eye"></i>
                     </button>
                 </div>
             </div>
             <div class="product-info">
-                <p class="product-category">${product.category}</p>
-                <h3 class="product-name">${product.name}</h3>
+                <p class="product-category">${esc(product.category)}</p>
+                <h3 class="product-name">${esc(product.name)}</h3>
                 <div class="product-price">
                     <span class="price-current">$${product.salePrice}</span>
                     <span class="price-original">$${product.price}</span>
@@ -145,7 +71,7 @@ function createProductCard(product) {
                     <span class="rating-count">(${product.reviews})</span>
                 </div>
                 ` : ''}
-                <button class="btn btn-primary btn-block add-to-cart-btn" data-id="${product.id}">
+                <button class="btn btn-primary btn-block add-to-cart-btn" data-id="${esc(product.id)}">
                     Add to Cart
                 </button>
             </div>
@@ -192,25 +118,36 @@ function loadProducts(containerId, products) {
 
 // Safe fetch wrapper with better error handling
 async function safeFetchProducts() {
-    try {
-        const response = await fetch('data/products.json');
+    const cacheKey = 'amziraProductsCacheV1';
+    const cacheTtlMs = 5 * 60 * 1000;
 
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+    try {
+        const cachedRaw = sessionStorage.getItem(cacheKey);
+        if (cachedRaw) {
+            const cached = JSON.parse(cachedRaw);
+            if (cached?.timestamp && Array.isArray(cached?.products) && (Date.now() - cached.timestamp) < cacheTtlMs) {
+                return cached.products;
+            }
         }
 
-        const data = await response.json();
-        return data.products || [];
+        await ensureApiLayer();
+
+        if (!window.AMZIRA?.products?.getProducts) {
+            throw new Error('API client is unavailable');
+        }
+
+        const data = await window.AMZIRA.products.getProducts({ limit: 1000 });
+        const products = data?.products || data?.results || (Array.isArray(data) ? data : []);
+
+        sessionStorage.setItem(cacheKey, JSON.stringify({
+            timestamp: Date.now(),
+            products
+        }));
+        return products;
 
     } catch (error) {
         console.error('Failed to fetch products:', error);
-
-        // Show warning to user
-        console.warn('⚠️ Running without local server? Products may not load.');
-        console.warn('💡 Solution: Use "python -m http.server" or "npx serve"');
-
-        // Return sample products as fallback
-        return sampleProducts;
+        return [];
     }
 }
 
@@ -246,7 +183,8 @@ function attachProductEventListeners(container) {
 
 // Add to Cart Function
 async function addToCart(productId) {
-    const product = sampleProducts.find(p => p.id === productId);
+    const products = Array.isArray(window.allProducts) ? window.allProducts : [];
+    const product = products.find((p) => String(p.id) === String(productId));
     if (!product) return;
 
     // Delegate to the unified cart manager so logged-in users always hit backend /cart/items.
@@ -476,9 +414,8 @@ const RecentlyViewed = {
         }
         
         try {
-            const response = await fetch('data/products.json');
-            const data = await response.json();
-            const products = data.products.filter(p => viewedIds.includes(p.id));
+            const productsData = await safeFetchProducts();
+            const products = productsData.filter((p) => viewedIds.includes(p.id));
             
             // Sort by recently viewed order
             products.sort((a, b) => viewedIds.indexOf(a.id) - viewedIds.indexOf(b.id));

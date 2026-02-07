@@ -258,28 +258,8 @@ class ErrorHandler {
 
         window.fetch = async (...args) => {
             try {
-                const response = await originalFetch(...args);
-
-                // Check for HTTP error status codes
-                if (!response.ok) {
-                    const error = new Error(`HTTP ${response.status}: ${response.statusText}`);
-                    error.status = response.status;
-                    error.response = response;
-
-                    // Try to get error details from response
-                    try {
-                        const errorData = await response.clone().json();
-                        error.details = errorData;
-                    } catch (e) {
-                        // Response might not be JSON
-                    }
-
-                    throw error;
-                }
-
-                return response;
+                return await originalFetch(...args);
             } catch (error) {
-                // Re-throw network errors and other fetch failures
                 if (error.name === 'TypeError' && error.message.includes('fetch')) {
                     error.message = 'Network connection failed. Please check your internet connection.';
                 }

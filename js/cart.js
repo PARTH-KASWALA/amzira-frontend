@@ -52,8 +52,23 @@ class ShoppingCart {
         this.guestStorageKey = 'amziraGuestCart';
         this.legacyGuestStorageKey = 'amziraCart';
         this.savedStorageKey = 'amziraSavedForLater';
+        this.restoreNoticeKey = 'cartRestoreNotice';
+        this.forceReloadKey = 'cartForceReload';
         this.items = this.loadGuestCart();
         this.init();
+    }
+
+    normalizeQuantity(quantity) {
+        const parsed = Number(quantity);
+        if (!Number.isFinite(parsed)) return null;
+        return Math.min(10, Math.max(1, Math.floor(parsed)));
+    }
+
+    esc(value) {
+        if (window.AMZIRA?.utils?.escapeHtml) return window.AMZIRA.utils.escapeHtml(value);
+        const div = document.createElement('div');
+        div.textContent = value == null ? '' : String(value);
+        return div.innerHTML;
     }
 
     async init() {
@@ -83,16 +98,34 @@ class ShoppingCart {
         }
 
         if (window.location.pathname.includes('cart.html')) {
+            await this.handleRestoreNotice();
             this.renderCart();
         }
     }
 
-    isAuthenticated() {
-        if (window.Auth && typeof window.Auth.isLoggedIn === 'function') {
-            return window.Auth.isLoggedIn();
+    /**
+     * Display cart restore message and force backend reload when requested by payment flow.
+     * @returns {Promise<void>}
+     */
+    async handleRestoreNotice() {
+        const notice = sessionStorage.getItem(this.restoreNoticeKey);
+        const forceReload = sessionStorage.getItem(this.forceReloadKey) === '1';
+        if (!notice && !forceReload) return;
+
+        sessionStorage.removeItem(this.restoreNoticeKey);
+        sessionStorage.removeItem(this.forceReloadKey);
+
+        if (this.isAuthenticated()) {
+            await this.refreshBackendCart();
         }
 
-        return Boolean(localStorage.getItem('user'));
+        if (notice) {
+            this.showNotification(notice, 'error');
+        }
+    }
+
+    isAuthenticated() {
+        return Boolean(window.Auth && typeof window.Auth.isLoggedIn === 'function' && window.Auth.isLoggedIn());
     }
 
     loadGuestCart() {
@@ -181,6 +214,12 @@ class ShoppingCart {
     }
 
     async addItem(productIdOrObject, quantity = 1, size = null, color = null) {
+        const normalizedQty = this.normalizeQuantity(quantity);
+        if (normalizedQty === null) {
+            this.showNotification('Please enter a valid quantity', 'error');
+            return false;
+        }
+
         let product;
 
         if (typeof productIdOrObject === 'object') {
@@ -212,7 +251,7 @@ class ShoppingCart {
         if (this.isAuthenticated()) {
             try {
                 await ensureApiLayer();
-                await window.AMZIRA.cart.addToCart(product.id, variantId, quantity);
+                await window.AMZIRA.cart.addToCart(product.id, variantId, normalizedQty);
                 await this.refreshBackendCart();
                 this.showNotification('Product added to cart!', 'success');
                 if (window.location.pathname.includes('cart.html')) this.renderCart();
@@ -238,7 +277,10 @@ class ShoppingCart {
         const existing = this.items.find((item) => item.cartItemId === cartItemId);
 
         if (existing) {
-            existing.quantity += quantity;
+            existing.quantity = this.normalizeQuantity(existing.quantity + normalizedQty);
+            if (existing.quantity >= 10) {
+                this.showNotification('Maximum quantity per item is 10', 'info');
+            }
         } else {
             this.items.push({
                 cartItemId,
@@ -249,7 +291,7 @@ class ShoppingCart {
                 price: Number(product.salePrice || product.price || 0),
                 originalPrice: Number(product.price || product.salePrice || 0),
                 image: product.images ? product.images[0] : product.image,
-                quantity,
+                quantity: normalizedQty,
                 size: selectedSize,
                 color: selectedColor
             });
@@ -286,8 +328,9 @@ class ShoppingCart {
     }
 
     async updateQuantity(cartItemId, quantity) {
-        if (quantity <= 0) {
-            await this.removeItem(cartItemId);
+        const normalizedQty = this.normalizeQuantity(quantity);
+        if (normalizedQty === null) {
+            this.showNotification('Please enter a valid quantity', 'error');
             return;
         }
 
@@ -298,7 +341,7 @@ class ShoppingCart {
             try {
                 await ensureApiLayer();
                 const backendId = item.backendItemId || cartItemId;
-                await window.AMZIRA.cart.updateCartItem(backendId, quantity);
+                await window.AMZIRA.cart.updateCartItem(backendId, normalizedQty);
                 await this.refreshBackendCart();
                 this.renderCart();
             } catch (error) {
@@ -307,7 +350,7 @@ class ShoppingCart {
             return;
         }
 
-        item.quantity = quantity;
+        item.quantity = normalizedQty;
         this.saveGuestCart();
         this.renderCart();
     }
@@ -410,18 +453,18 @@ class ShoppingCart {
                     ${savedItems.map((item) => `
                         <div class="saved-item" data-id="${item.cartItemId}">
                             <div class="saved-item-image">
-                                <img src="${item.image}" alt="${item.name}">
+                                <img src="${this.esc(item.image)}" alt="${this.esc(item.name)}" loading="lazy">
                             </div>
                             <div class="saved-item-info">
-                                <h3>${item.name}</h3>
+                                <h3>${this.esc(item.name)}</h3>
                                 <div class="saved-item-meta">
-                                    <span>Size: ${item.size}</span>
-                                    <span>Color: ${item.color}</span>
+                                    <span>Size: ${this.esc(item.size)}</span>
+                                    <span>Color: ${this.esc(item.color)}</span>
                                 </div>
                                 <div class="saved-item-price">$${item.price}</div>
                                 <div class="saved-item-actions">
-                                    <button class="btn btn-sm btn-primary move-to-cart-btn" data-id="${item.cartItemId}">Move to Cart</button>
-                                    <button class="btn btn-sm btn-secondary remove-saved-btn" data-id="${item.cartItemId}">Remove</button>
+                                    <button class="btn btn-sm btn-primary move-to-cart-btn" data-id="${this.esc(item.cartItemId)}">Move to Cart</button>
+                                    <button class="btn btn-sm btn-secondary remove-saved-btn" data-id="${this.esc(item.cartItemId)}">Remove</button>
                                 </div>
                             </div>
                         </div>
@@ -461,15 +504,15 @@ class ShoppingCart {
 
     getCartItemHTML(item) {
         return `
-            <div class="cart-item" data-id="${item.cartItemId}">
+            <div class="cart-item" data-id="${this.esc(item.cartItemId)}">
                 <div class="cart-item-image">
-                    <img src="${item.image}" alt="${item.name}">
+                    <img src="${this.esc(item.image)}" alt="${this.esc(item.name)}" loading="lazy">
                 </div>
                 <div class="cart-item-details">
-                    <h3 class="cart-item-name">${item.name}</h3>
+                    <h3 class="cart-item-name">${this.esc(item.name)}</h3>
                     <div class="cart-item-meta">
-                        <span>Size: ${item.size || '-'}</span>
-                        <span>Color: ${item.color || '-'}</span>
+                        <span>Size: ${this.esc(item.size || '-')}</span>
+                        <span>Color: ${this.esc(item.color || '-')}</span>
                     </div>
                     <div class="cart-item-price">
                         <span class="price-current">$${Number(item.price).toFixed(2)}</span>
@@ -478,14 +521,14 @@ class ShoppingCart {
                 </div>
                 <div class="cart-item-actions">
                     <div class="quantity-control">
-                        <button class="qty-btn qty-minus" data-id="${item.cartItemId}"><i class="fas fa-minus"></i></button>
-                        <input type="number" class="qty-input" value="${item.quantity}" min="1" max="10" data-id="${item.cartItemId}">
-                        <button class="qty-btn qty-plus" data-id="${item.cartItemId}"><i class="fas fa-plus"></i></button>
+                        <button class="qty-btn qty-minus" data-id="${this.esc(item.cartItemId)}"><i class="fas fa-minus"></i></button>
+                        <input type="number" class="qty-input" value="${item.quantity}" min="1" max="10" data-id="${this.esc(item.cartItemId)}">
+                        <button class="qty-btn qty-plus" data-id="${this.esc(item.cartItemId)}"><i class="fas fa-plus"></i></button>
                     </div>
                     <div class="item-total">$${(Number(item.price) * Number(item.quantity)).toFixed(2)}</div>
                     <div class="cart-item-buttons">
-                        <button class="btn-text save-for-later-btn" data-id="${item.cartItemId}"><i class="far fa-bookmark"></i> Save for Later</button>
-                        <button class="btn-text remove-item" data-id="${item.cartItemId}"><i class="far fa-trash-alt"></i> Remove</button>
+                        <button class="btn-text save-for-later-btn" data-id="${this.esc(item.cartItemId)}"><i class="far fa-bookmark"></i> Save for Later</button>
+                        <button class="btn-text remove-item" data-id="${this.esc(item.cartItemId)}"><i class="far fa-trash-alt"></i> Remove</button>
                     </div>
                 </div>
             </div>
@@ -549,10 +592,15 @@ class ShoppingCart {
         document.querySelectorAll('.qty-input').forEach((input) => {
             input.addEventListener('change', async (e) => {
                 const id = e.target.getAttribute('data-id');
-                const qty = Number(e.target.value);
-                if (qty > 0 && qty <= 10) {
-                    await this.updateQuantity(id, qty);
+                const qty = this.normalizeQuantity(e.target.value);
+                if (qty === null) {
+                    e.target.value = 1;
+                    this.showNotification('Quantity must be between 1 and 10', 'error');
+                    return;
                 }
+
+                e.target.value = qty;
+                await this.updateQuantity(id, qty);
             });
         });
 

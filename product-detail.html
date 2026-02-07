@@ -1073,6 +1073,38 @@
         let selectedSize = null;
         let quantity = 1;
 
+        function esc(value) {
+            if (window.AMZIRA?.utils?.escapeHtml) return window.AMZIRA.utils.escapeHtml(value);
+            const div = document.createElement('div');
+            div.textContent = value == null ? '' : String(value);
+            return div.innerHTML;
+        }
+
+        function safeHexColor(value, fallback = '#8B1538') {
+            const raw = String(value || '').trim();
+            return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(raw) ? raw : fallback;
+        }
+
+        async function ensureApiReady() {
+            if (window.AMZIRA && window.AMZIRA.apiRequest) return;
+            await new Promise((resolve, reject) => {
+                const existing = document.querySelector('script[data-amzira-api=\"true\"]');
+                if (existing) {
+                    existing.addEventListener('load', () => resolve(), { once: true });
+                    existing.addEventListener('error', () => reject(new Error('Failed to load API layer')), { once: true });
+                    return;
+                }
+
+                const script = document.createElement('script');
+                script.src = 'js/api.js';
+                script.async = false;
+                script.dataset.amziraApi = 'true';
+                script.onload = () => resolve();
+                script.onerror = () => reject(new Error('Failed to load API layer'));
+                document.head.appendChild(script);
+            });
+        }
+
         // Get product ID from URL
         function getProductId() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -1089,9 +1121,17 @@
             }
 
             try {
-                const response = await fetch('data/products.json');
-                const data = await response.json();
-                currentProduct = data.products.find(p => p.id === productId);
+                await ensureApiReady();
+                let products = [];
+                if (window.AMZIRA?.products?.getProducts) {
+                    const data = await window.AMZIRA.products.getProducts({ limit: 1000 });
+                    products = data?.products || data?.results || (Array.isArray(data) ? data : []);
+                }
+
+                currentProduct = products.find((p) =>
+                    String(p.id) === String(productId) ||
+                    String(p.slug || '').toLowerCase() === String(productId).toLowerCase()
+                );
 
                 if (!currentProduct) {
                     alert('Product not found');
@@ -1102,7 +1142,11 @@
                 displayProduct(currentProduct);
             } catch (error) {
                 console.error('Error loading product:', error);
-                alert('Error loading product. Please try again.');
+                if (window.errorHandler?.showError) {
+                    window.errorHandler.showError('Unable to load product right now.');
+                } else {
+                    alert('Error loading product. Please try again.');
+                }
             }
         }
 
@@ -1163,7 +1207,7 @@
 
             // Features
             if (product.features && product.features.length > 0) {
-                const featuresHTML = product.features.map(f => `<li>${f}</li>`).join('');
+                const featuresHTML = product.features.map(f => `<li>${esc(f)}</li>`).join('');
                 document.getElementById('productFeatures').innerHTML = featuresHTML;
             }
 
@@ -1177,8 +1221,8 @@
             const mainImage = document.getElementById('mainImage');
 
             thumbsContainer.innerHTML = images.map((img, index) => `
-                <div class="thumb-item ${index === 0 ? 'active' : ''}" data-image="${img}">
-                    <img src="${img}" alt="Product Image ${index + 1}">
+                <div class="thumb-item ${index === 0 ? 'active' : ''}" data-image="${esc(img)}">
+                    <img src="${esc(img)}" alt="Product Image ${index + 1}" loading="lazy">
                 </div>
             `).join('');
 
@@ -1199,9 +1243,9 @@
             const container = document.getElementById('colorSelector');
             container.innerHTML = colors.map((color, index) => `
                 <div class="color-swatch ${index === 0 ? 'selected' : ''}" 
-                     style="background: ${color.hex}"
-                     data-color="${color.name}"
-                     title="${color.name}">
+                     style="background: ${safeHexColor(color.hex)}"
+                     data-color="${esc(color.name)}"
+                     title="${esc(color.name)}">
                 </div>
             `).join('');
 
@@ -1223,8 +1267,8 @@
         function displaySizes(sizes) {
             const container = document.getElementById('sizeSelector');
             container.innerHTML = sizes.map(size => `
-                <div class="size-option" data-size="${size}">
-                    ${size}
+                <div class="size-option" data-size="${esc(size)}">
+                    ${esc(size)}
                 </div>
             `).join('');
 
@@ -1677,7 +1721,7 @@ function fallbackCopyText(text) {
 
 function showShareNotification(message, type = 'success') {
     const note = document.createElement('div');
-    note.innerHTML = message;
+    note.textContent = message;
     note.style.cssText = `
         position: fixed;
         bottom: 80px;

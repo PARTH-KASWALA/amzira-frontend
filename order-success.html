@@ -273,6 +273,7 @@
                 <!-- Title -->
                 <h1 class="success-title">Order Confirmed!</h1>
                 <p class="success-subtitle">Thank you for shopping with Amzira</p>
+                <p class="success-subtitle" id="emailStatusMessage" style="margin-top: -16px; margin-bottom: 28px;">Order placed - confirmation email sent.</p>
 
                 <!-- Order Info -->
                 <div class="order-info">
@@ -508,6 +509,7 @@
  
 
     <!-- Scripts -->
+    <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/address.js"></script>
     <script src="js/order.js"></script>
@@ -518,66 +520,152 @@
             // Will redirect to login
         }
 
-        // Load order details
-        document.addEventListener('DOMContentLoaded', function() {
-            const orderId = sessionStorage.getItem('lastOrderId');
-            
-            if (!orderId) {
-                // No order found, redirect to home
-                window.location.href = 'index.html';
+        function esc(value) {
+            if (window.AMZIRA?.utils?.escapeHtml) return window.AMZIRA.utils.escapeHtml(value);
+            const div = document.createElement('div');
+            div.textContent = value == null ? '' : String(value);
+            return div.innerHTML;
+        }
+
+        function getApiMessage(error, fallback) {
+            if (window.AMZIRA?.utils?.getApiErrorMessage) {
+                return window.AMZIRA.utils.getApiErrorMessage(error, fallback);
+            }
+            return error?.message || fallback;
+        }
+
+        function renderEmailStatus(order) {
+            const messageEl = document.getElementById('emailStatusMessage');
+            const emailStatus = String(order?.email_status || '').toLowerCase();
+            const emailSent = order?.email_sent === true || ['sent', 'queued', 'delivered'].includes(emailStatus);
+            const emailFailed = order?.email_sent === false || ['failed', 'bounced'].includes(emailStatus);
+
+            if (emailSent) {
+                messageEl.textContent = 'Order placed - confirmation email sent.';
+                messageEl.style.color = '#0f766e';
                 return;
             }
 
-            const order = OrderManager.getOrderById(orderId);
-            
-            if (!order) {
-                window.location.href = 'index.html';
+            if (emailFailed) {
+                messageEl.textContent = 'Order placed - we could not confirm email delivery. Please check your orders in account.';
+                messageEl.style.color = '#9a3412';
                 return;
             }
 
-            // Display order details
-            document.getElementById('orderId').textContent = order.orderId;
-            
-            const orderDate = new Date(order.orderDate);
-            document.getElementById('orderDate').textContent = orderDate.toLocaleDateString('en-IN', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
+            messageEl.textContent = 'Order placed - confirmation email is being processed.';
+            messageEl.style.color = '#475569';
+        }
 
-            document.getElementById('orderTotal').textContent = `₹${order.pricing.total.toLocaleString('en-IN')}`;
+        function renderDeliveryAddress(address) {
+            const node = document.getElementById('deliveryAddress');
+            const name = esc(address?.name || address?.full_name || '');
+            const address1 = esc(address?.address || address?.address_line1 || '');
+            const address2 = esc(address?.locality || address?.address_line2 || '');
+            const city = esc(address?.city || '');
+            const state = esc(address?.state || '');
+            const pincode = esc(address?.pincode || '');
+            const phone = esc(address?.mobile || address?.phone || '');
 
-            const paymentMethodDisplay = OrderManager.getPaymentMethodDisplay(order.paymentMethod);
-            document.getElementById('paymentMethod').textContent = paymentMethodDisplay.label;
-
-            const deliveryDate = new Date(order.expectedDelivery);
-            document.getElementById('deliveryDate').textContent = deliveryDate.toLocaleDateString('en-IN', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-
-            // Display delivery address
-            const addr = order.deliveryAddress;
-            document.getElementById('deliveryAddress').innerHTML = `
-                <strong>${addr.name}</strong><br>
-                ${AddressManager.formatAddress(addr)}<br>
-                <strong>Phone:</strong> ${addr.mobile}
+            node.innerHTML = `
+                <strong>${name}</strong><br>
+                ${address1}${address2 ? `, ${address2}` : ''}, ${city}, ${state} - ${pincode}<br>
+                <strong>Phone:</strong> ${phone}
             `;
+        }
 
-            // Display items
-            document.getElementById('itemsList').innerHTML = order.items.map(item => `
+        function renderItems(items) {
+            const list = document.getElementById('itemsList');
+            list.innerHTML = (items || []).map((item) => `
                 <div class="item-row">
                     <div class="item-details">
-                        <div class="item-name">${item.name}</div>
-                        <div class="item-meta">Size: ${item.size} | Qty: ${item.quantity}</div>
+                        <div class="item-name">${esc(item?.name || item?.product_name || 'Item')}</div>
+                        <div class="item-meta">Size: ${esc(item?.size || item?.variant?.size || '-')} | Qty: ${Number(item?.quantity || 0)}</div>
                     </div>
-                    <div class="item-price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
+                    <div class="item-price">₹${(Number(item?.price || item?.unit_price || 0) * Number(item?.quantity || 0)).toLocaleString('en-IN')}</div>
                 </div>
             `).join('');
+        }
 
-            // Clear session data
-            sessionStorage.removeItem('lastOrderId');
+        function handleTerminalOrderStatus(order) {
+            const orderStatus = String(order?.status || order?.order_status || '').toLowerCase();
+            if (orderStatus === 'cancelled' || orderStatus === 'canceled') {
+                if (window.errorHandler?.showWarning) {
+                    window.errorHandler.showWarning('This order was cancelled. Please review your cart.');
+                }
+                window.location.href = 'cart.html';
+                return true;
+            }
+            if (orderStatus === 'expired') {
+                if (window.errorHandler?.showWarning) {
+                    window.errorHandler.showWarning('This order expired before completion. Please place your order again.');
+                }
+                window.location.href = 'cart.html';
+                return true;
+            }
+            return false;
+        }
+
+        async function loadOrderDetail() {
+            const params = new URLSearchParams(window.location.search);
+            const orderRef = params.get('order');
+            if (!orderRef) {
+                window.location.href = 'index.html';
+                return;
+            }
+
+            const order = await window.AMZIRA.orders.getOrderDetail(orderRef);
+            if (!order || typeof order !== 'object') {
+                throw new Error('Invalid order response from server.');
+            }
+
+            if (handleTerminalOrderStatus(order)) return;
+
+            const orderId = order?.order_number || order?.order_id || order?.id || orderRef;
+            document.getElementById('orderId').textContent = orderId;
+
+            const createdAt = order?.created_at || order?.order_date || new Date().toISOString();
+            document.getElementById('orderDate').textContent = new Date(createdAt).toLocaleDateString('en-IN', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+
+            const total = Number(order?.total || order?.grand_total || 0);
+            document.getElementById('orderTotal').textContent = `₹${total.toLocaleString('en-IN')}`;
+
+            const paymentMethod = String(order?.payment_method || '').toLowerCase();
+            document.getElementById('paymentMethod').textContent = paymentMethod === 'cod' || paymentMethod === 'cash_on_delivery'
+                ? 'Cash on Delivery'
+                : 'Online Payment';
+
+            const deliveryDateRaw = order?.estimated_delivery || order?.expected_delivery;
+            if (deliveryDateRaw) {
+                document.getElementById('deliveryDate').textContent = new Date(deliveryDateRaw).toLocaleDateString('en-IN', {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            } else {
+                document.getElementById('deliveryDate').textContent = 'Will be updated soon';
+            }
+
+            renderDeliveryAddress(order?.shipping_address || order?.deliveryAddress || {});
+            renderItems(order?.items || order?.order_items || []);
+            renderEmailStatus(order);
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            try {
+                await loadOrderDetail();
+            } catch (error) {
+                const message = getApiMessage(error, 'Unable to load order details.');
+                if (window.errorHandler?.showError) {
+                    window.errorHandler.showError(message);
+                } else {
+                    alert(message);
+                }
+                window.location.href = 'account.html';
+            }
         });
     </script>
 </body>

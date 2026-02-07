@@ -33,6 +33,13 @@ class ProductFilter {
         this._listeners.push({ element, event, handler, options });
     }
 
+    _esc(value) {
+        if (window.AMZIRA?.utils?.escapeHtml) return window.AMZIRA.utils.escapeHtml(value);
+        const div = document.createElement('div');
+        div.textContent = value == null ? '' : String(value);
+        return div.innerHTML;
+    }
+
     // Parse common URL parameters and seed activeFilters accordingly
     parseURLFilters() {
         try {
@@ -346,30 +353,30 @@ class ProductFilter {
         const stockStatus = this.getStockStatus(product);
         
         return `
-            <div class="product-card" data-id="${product.id}">
+            <div class="product-card" data-id="${this._esc(product.id)}">
                 <div class="product-image">
-                    <img src="${product.images ? product.images[0] : product.image}" 
-                         alt="${product.name}"
+                    <img src="${this._esc(product.images ? product.images[0] : product.image)}" 
+                         alt="${this._esc(product.name)}"
                          loading="lazy">
                     ${product.badge ? 
-                        `<span class="product-badge ${product.badge.toLowerCase()}">${product.badge}</span>` 
+                        `<span class="product-badge ${this._esc(product.badge.toLowerCase())}">${this._esc(product.badge)}</span>` 
                         : ''}
                     ${stockStatus.html}
                     <div class="product-actions">
-                        <button class="product-action-btn wishlist-btn" data-id="${product.id}">
+                        <button class="product-action-btn wishlist-btn" data-id="${this._esc(product.id)}">
                             <i class="far fa-heart"></i>
                         </button>
-                        <button class="product-action-btn quick-view-btn" data-id="${product.id}">
+                        <button class="product-action-btn quick-view-btn" data-id="${this._esc(product.id)}">
                             <i class="far fa-eye"></i>
                         </button>
-                        <button class="product-action-btn quick-add-btn" data-id="${product.id}">
+                        <button class="product-action-btn quick-add-btn" data-id="${this._esc(product.id)}">
                             <i class="fas fa-cart-plus"></i>
                         </button>
                     </div>
                 </div>
                 <div class="product-info">
-                    <p class="product-category">${product.subcategory}</p>
-                    <h3 class="product-name">${product.name}</h3>
+                    <p class="product-category">${this._esc(product.subcategory)}</p>
+                    <h3 class="product-name">${this._esc(product.name)}</h3>
                     ${this.getSizeAvailabilityHTML(product)}
                     <div class="product-price">
                         <span class="price-current">$${product.salePrice || product.price}</span>
@@ -430,7 +437,7 @@ class ProductFilter {
             <div class="size-availability">
                 <span class="size-label">Available in:</span>
                 ${availableSizes.map(size =>
-                    `<span class="size-chip ${product.stockBySizes[size] <= 2 ? 'low-stock' : ''}">${size}</span>`
+                    `<span class="size-chip ${product.stockBySizes[size] <= 2 ? 'low-stock' : ''}">${this._esc(size)}</span>`
                 ).join('')}
             </div>
         `;
@@ -607,31 +614,68 @@ class ProductFilter {
 
 // Initialize filter when page loads and dependencies ready
 document.addEventListener('DOMContentLoaded', function() {
+    async function ensureApiLayer() {
+        if (window.AMZIRA && window.AMZIRA.apiRequest) return;
+        await new Promise((resolve, reject) => {
+            const existing = document.querySelector('script[data-amzira-api="true"]');
+            if (existing) {
+                existing.addEventListener('load', () => resolve(), { once: true });
+                existing.addEventListener('error', () => reject(new Error('Failed to load API layer')), { once: true });
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = 'js/api.js';
+            script.async = false;
+            script.dataset.amziraApi = 'true';
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error('Failed to load API layer'));
+            document.head.appendChild(script);
+        });
+    }
+
     // Function to initialize filter
-    function initFilter() {
-        fetch('data/products.json')
-            .then(response => response.json())
-            .then(data => {
-                window.productFilter = new ProductFilter(data.products);
-            })
-            .catch(error => {
-                console.error('Error loading products:', error);
-                // Show user-friendly message instead of breaking
-                const grid = document.getElementById('productsGrid');
-                if (grid) {
-                    grid.innerHTML = `
-                        <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
-                            <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #EF4444; margin-bottom: 16px;"></i>
-                            <h3>Unable to Load Products</h3>
-                            <p style="color: #666; margin-bottom: 20px;">Please ensure you're running this site on a local server.</p>
-                            <p style="font-size: 14px; color: #999;">See README.md for setup instructions.</p>
-                        </div>
-                    `;
-                } else {
-                    // Fallback to sample products
-                    window.productFilter = new ProductFilter(sampleProducts);
+    async function initFilter() {
+        const cacheKey = 'amziraProductsCacheV1';
+        const cacheTtlMs = 5 * 60 * 1000;
+
+        try {
+            await ensureApiLayer();
+            let products = [];
+            const cachedRaw = sessionStorage.getItem(cacheKey);
+            if (cachedRaw) {
+                const cached = JSON.parse(cachedRaw);
+                if (cached?.timestamp && Array.isArray(cached?.products) && (Date.now() - cached.timestamp) < cacheTtlMs) {
+                    products = cached.products;
                 }
-            });
+            }
+
+            if (!products.length) {
+                if (!window.AMZIRA?.products?.getProducts) {
+                    throw new Error('API client unavailable');
+                }
+                const data = await window.AMZIRA.products.getProducts({ limit: 1000 });
+                products = data?.products || data?.results || (Array.isArray(data) ? data : []);
+                sessionStorage.setItem(cacheKey, JSON.stringify({
+                    timestamp: Date.now(),
+                    products
+                }));
+            }
+
+            window.productFilter = new ProductFilter(products);
+        } catch (error) {
+            console.error('Error loading products:', error);
+            const grid = document.getElementById('productsGrid');
+            if (grid) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #EF4444; margin-bottom: 16px;"></i>
+                        <h3>Unable to Load Products</h3>
+                        <p style="color: #666; margin-bottom: 20px;">Please refresh and try again.</p>
+                    </div>
+                `;
+            }
+        }
     }
 
     // Wait for cart if it hasn't loaded yet

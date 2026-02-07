@@ -926,100 +926,496 @@
 <script src="js/orders.js"></script>
 
 <script>
-    // Require login
     if (!Auth.requireLogin('payment.html')) {
-        // Will redirect to login
+        // Redirect handled by Auth manager.
     }
 
-    // Global variables
+    const PENDING_ORDER_KEY = 'pendingPaymentOrder';
+    const CART_RESTORE_NOTICE_KEY = 'cartRestoreNotice';
+    const CART_FORCE_RELOAD_KEY = 'cartForceReload';
+    const RATE_LIMIT_LOCK_MS = 10000;
     let selectedPaymentMethod = 'card';
-    let orderData = {};
+    let checkoutContext = { deliveryAddress: null, cart: null, pendingOrder: null };
+    let rateLimitedUntil = 0;
+    let pendingStatusPollId = null;
+    let paymentExpiryTimer = null;
 
-    // Initialize on page load
-    document.addEventListener('DOMContentLoaded', function() {
-        loadOrderSummary();
-        initPaymentTabs();
-        initCardFormatting();
-        initPaymentButton();
-    });
-
-    // Load order summary
-    function loadOrderSummary() {
-        // Get delivery address
-        const address = JSON.parse(sessionStorage.getItem('deliveryAddress'));
-        if (!address) {
-            alert('No delivery address found. Redirecting to checkout.');
-            window.location.href = 'checkout.html';
-            return;
-        }
-
-        // Display address
-        document.getElementById('deliveryAddress').innerHTML = `
-            <strong>${address.name}</strong><br>
-            ${AddressManager.formatAddress(address)}<br>
-            <strong>Phone:</strong> ${address.mobile}
-        `;
-
-        // Get cart
-        const cart = JSON.parse(localStorage.getItem('cart')) || [];
-        if (cart.length === 0) {
-            window.location.href = 'cart.html';
-            return;
-        }
-
-        // Calculate prices
-        const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-        const discount = 0;
-        const shipping = subtotal > 1000 ? 0 : 100;
-        const tax = Math.round((subtotal - discount + shipping) * 0.18);
-        const total = subtotal - discount + shipping + tax;
-
-        // Update UI
-        document.getElementById('subtotal').textContent = `₹${subtotal.toLocaleString('en-IN')}`;
-        document.getElementById('discount').textContent = discount > 0 ? `- ₹${discount.toLocaleString('en-IN')}` : '₹0';
-        document.getElementById('shipping').textContent = shipping === 0 ? 'FREE' : `₹${shipping}`;
-        document.getElementById('tax').textContent = `₹${tax.toLocaleString('en-IN')}`;
-        document.getElementById('total').textContent = `₹${total.toLocaleString('en-IN')}`;
-
-        // Store order data
-        orderData = {
-            items: cart,
-            deliveryAddress: address,
-            subtotal: subtotal,
-            discount: discount,
-            shipping: shipping,
-            tax: tax,
-            total: total
-        };
+    function esc(value) {
+        if (window.AMZIRA?.utils?.escapeHtml) return window.AMZIRA.utils.escapeHtml(value);
+        const div = document.createElement('div');
+        div.textContent = value == null ? '' : String(value);
+        return div.innerHTML;
     }
 
-    // Initialize payment tabs
+    function showError(message) {
+        if (window.errorHandler?.showError) {
+            window.errorHandler.showError(message);
+            return;
+        }
+        alert(message);
+    }
+
+    function showSuccess(message) {
+        if (window.errorHandler?.showSuccess) {
+            window.errorHandler.showSuccess(message);
+            return;
+        }
+        alert(message);
+    }
+
+    function showWarning(message) {
+        if (window.errorHandler?.showWarning) {
+            window.errorHandler.showWarning(message);
+            return;
+        }
+        alert(message);
+    }
+
+    function apiMessage(error, fallback) {
+        if (window.AMZIRA?.utils?.getApiErrorMessage) {
+            return window.AMZIRA.utils.getApiErrorMessage(error, fallback);
+        }
+        return error?.message || fallback;
+    }
+
+    function normalizeCartItems(cartData) {
+        return cartData?.items || cartData?.cart_items || [];
+    }
+
+    /**
+     * Redirect back to cart with a restore/failure notice.
+     * @param {string} message
+     */
+    function redirectToCartWithRestore(message) {
+        sessionStorage.setItem(CART_RESTORE_NOTICE_KEY, message);
+        sessionStorage.setItem(CART_FORCE_RELOAD_KEY, '1');
+        window.location.href = 'cart.html';
+    }
+
+    function getPaymentExpiryBanner() {
+        let banner = document.getElementById('paymentExpiryBanner');
+        if (banner) return banner;
+
+        banner = document.createElement('div');
+        banner.id = 'paymentExpiryBanner';
+        banner.style.cssText = 'display:none;margin-bottom:16px;padding:12px 14px;border:1px solid #f59e0b;background:#fffbeb;color:#92400e;border-radius:8px;font-weight:600;';
+        const paymentMain = document.querySelector('.payment-main');
+        if (paymentMain) {
+            paymentMain.insertBefore(banner, paymentMain.firstChild.nextSibling);
+        }
+        return banner;
+    }
+
+    /**
+     * Format remaining milliseconds into MM:SS.
+     * @param {number} msLeft
+     * @returns {string}
+     */
+    function formatCountdown(msLeft) {
+        const totalSeconds = Math.max(0, Math.ceil(msLeft / 1000));
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        return `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    }
+
+    function lockPayButton(ms = RATE_LIMIT_LOCK_MS, message = 'Too many requests. Please slow down.') {
+        const payButton = document.getElementById('payButton');
+        if (!payButton) return;
+        rateLimitedUntil = Date.now() + ms;
+        payButton.disabled = true;
+        payButton.innerHTML = '<i class="fas fa-hourglass-half"></i> Please wait...';
+        showWarning(message);
+
+        window.setTimeout(() => {
+            if (Date.now() < rateLimitedUntil) return;
+            payButton.disabled = false;
+            payButton.innerHTML = '<i class="fas fa-lock"></i> Pay Securely';
+        }, ms);
+    }
+
+    function setPendingOrder(orderLike) {
+        if (!orderLike) {
+            sessionStorage.removeItem(PENDING_ORDER_KEY);
+            checkoutContext.pendingOrder = null;
+            return;
+        }
+
+        const pending = {
+            id: orderLike.id || orderLike.order_id || orderLike.orderId || null,
+            ref: orderLike.order_number || orderLike.order_no || orderLike.number || orderLike.id || null,
+            expiresAt: orderLike.expires_at || orderLike.expiresAt || null
+        };
+
+        checkoutContext.pendingOrder = pending;
+        sessionStorage.setItem(PENDING_ORDER_KEY, JSON.stringify(pending));
+    }
+
+    function getPendingOrder() {
+        if (checkoutContext.pendingOrder?.id || checkoutContext.pendingOrder?.ref) {
+            return checkoutContext.pendingOrder;
+        }
+
+        const raw = sessionStorage.getItem(PENDING_ORDER_KEY);
+        if (!raw) return null;
+        try {
+            const parsed = JSON.parse(raw);
+            checkoutContext.pendingOrder = parsed;
+            return parsed;
+        } catch (_) {
+            sessionStorage.removeItem(PENDING_ORDER_KEY);
+            return null;
+        }
+    }
+
+    function classifyOrderState(orderDetail) {
+        const orderStatus = String(orderDetail?.status || orderDetail?.order_status || '').toLowerCase();
+        const paymentStatus = String(orderDetail?.payment_status || '').toLowerCase();
+
+        if (['cancelled', 'canceled'].includes(orderStatus)) return 'cancelled';
+        if (['expired'].includes(orderStatus)) return 'expired';
+        if (['paid', 'captured', 'success'].includes(paymentStatus)) return 'paid';
+        if (['failed'].includes(paymentStatus)) return 'payment_failed';
+        return 'pending_payment';
+    }
+
+    async function getOrderDetailForPending() {
+        const pending = getPendingOrder();
+        if (!pending) return null;
+        const orderRef = pending.ref || pending.id;
+        if (!orderRef) return null;
+        return window.AMZIRA.orders.getOrderDetail(orderRef);
+    }
+
+    async function refreshPendingOrderStatus(showUserMessage = false) {
+        const pending = getPendingOrder();
+        if (!pending) return;
+
+        try {
+            const detail = await getOrderDetailForPending();
+            if (!detail) return;
+            setPendingOrder({
+                ...pending,
+                ...detail,
+                id: detail?.id || detail?.order_id || pending.id,
+                order_number: detail?.order_number || pending.ref,
+                expires_at: detail?.expires_at || pending.expiresAt
+            });
+            startExpiryCountdown(detail?.expires_at || detail?.expiresAt || pending.expiresAt || null);
+
+            const state = classifyOrderState(detail);
+            const ref = detail?.order_number || detail?.order_id || pending.ref || pending.id;
+
+            if (state === 'paid') {
+                setPendingOrder(null);
+                sessionStorage.removeItem('deliveryAddress');
+                window.location.href = `order-success.html?order=${encodeURIComponent(ref)}`;
+                return;
+            }
+
+            if (state === 'cancelled') {
+                setPendingOrder(null);
+                showWarning('Your order was cancelled. Items were not reserved. Please review your cart.');
+                redirectToCartWithRestore('Order cancelled. Your cart has been restored.');
+                return;
+            }
+
+            if (state === 'expired') {
+                setPendingOrder(null);
+                showWarning('Your order has expired. Please place your order again.');
+                redirectToCartWithRestore('Order expired. Your cart has been restored.');
+                return;
+            }
+
+            if (showUserMessage) {
+                showWarning('Payment is pending. You can retry payment.');
+            }
+        } catch (error) {
+            if (showUserMessage) {
+                showError(apiMessage(error, 'Unable to refresh order status.'));
+            }
+        }
+    }
+
+    function startPendingStatusPolling() {
+        if (pendingStatusPollId) window.clearInterval(pendingStatusPollId);
+        if (!getPendingOrder()) return;
+
+        pendingStatusPollId = window.setInterval(() => {
+            refreshPendingOrderStatus(false);
+        }, 12000);
+    }
+
+    function startExpiryCountdown(expiresAt) {
+        const banner = getPaymentExpiryBanner();
+        if (!expiresAt || !window.OrderFlowUtils?.createExpiryTimer) {
+            banner.style.display = 'none';
+            return;
+        }
+
+        if (paymentExpiryTimer) paymentExpiryTimer.stop();
+        paymentExpiryTimer = window.OrderFlowUtils.createExpiryTimer({
+            expiresAt,
+            onTick(msLeft) {
+                banner.style.display = 'block';
+                banner.textContent = `Order expires in ${formatCountdown(msLeft)}. Complete payment now.`;
+            },
+            onExpire() {
+                banner.style.display = 'none';
+                setPendingOrder(null);
+                showWarning('Order expired, please checkout again');
+                redirectToCartWithRestore('Order expired. Your cart has been restored.');
+            }
+        });
+        paymentExpiryTimer.start();
+    }
+
+    /**
+     * Run backend stock check before payment progression.
+     * @returns {Promise<boolean>}
+     */
+    async function ensureStockAvailableForPayment() {
+        const stockPayload = await window.AMZIRA.stock.check();
+        const normalized = window.OrderFlowUtils?.normalizeStockCheck
+            ? window.OrderFlowUtils.normalizeStockCheck(stockPayload)
+            : { available: Boolean(stockPayload?.available !== false), affectedItems: [] };
+
+        if (normalized.available) return true;
+        showError(normalized.affectedItems[0]?.message || 'Some items are out of stock. Your cart has been restored.');
+        redirectToCartWithRestore('Stock changed. Your cart has been restored.');
+        return false;
+    }
+
+    function renderAddress(address) {
+        const name = esc(address.name || address.full_name || '');
+        const phone = esc(address.mobile || address.phone || '');
+        const address1 = esc(address.address || address.address_line1 || '');
+        const locality = esc(address.locality || address.address_line2 || '');
+        const city = esc(address.city || '');
+        const state = esc(address.state || '');
+        const pincode = esc(address.pincode || '');
+
+        document.getElementById('deliveryAddress').innerHTML = `
+            <strong>${name}</strong><br>
+            ${address1}${locality ? `, ${locality}` : ''}, ${city}, ${state} - ${pincode}<br>
+            <strong>Phone:</strong> ${phone}
+        `;
+    }
+
+    function renderCartSummary(cartData) {
+        const subtotal = Number(cartData?.subtotal || 0);
+        const shipping = Number(cartData?.shipping_amount || (subtotal > 2000 ? 0 : 100));
+        const discount = Number(cartData?.discount || 0);
+        const tax = Number(cartData?.tax || subtotal * 0.18);
+        const total = Number(cartData?.total || (subtotal - discount + shipping + tax));
+
+        document.getElementById('subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+        document.getElementById('discount').textContent = discount > 0 ? `- ₹${discount.toFixed(2)}` : '₹0.00';
+        document.getElementById('shipping').textContent = shipping === 0 ? 'FREE' : `₹${shipping.toFixed(2)}`;
+        document.getElementById('tax').textContent = `₹${tax.toFixed(2)}`;
+        document.getElementById('total').textContent = `₹${total.toFixed(2)}`;
+    }
+
+    function mapPaymentMethod(method) {
+        return method === 'cod' ? 'cod' : 'razorpay';
+    }
+
+    function validatePaymentForm() {
+        if (selectedPaymentMethod === 'card') {
+            const cardNumber = document.getElementById('cardNumber')?.value;
+            const cardName = document.getElementById('cardName')?.value;
+            const cardExpiry = document.getElementById('cardExpiry')?.value;
+            const cardCVV = document.getElementById('cardCVV')?.value;
+            if (!cardNumber || !cardName || !cardExpiry || !cardCVV) {
+                throw new Error('Please fill all card details');
+            }
+        } else if (selectedPaymentMethod === 'upi') {
+            const upiId = document.getElementById('upiId')?.value;
+            const selected = document.querySelector('.upi-option.selected');
+            if (!upiId && !selected) {
+                throw new Error('Please select UPI app or enter UPI ID');
+            }
+        } else if (selectedPaymentMethod === 'netbanking') {
+            const bank = document.getElementById('bankSelect')?.value;
+            if (!bank) {
+                throw new Error('Please select your bank');
+            }
+        }
+    }
+
+    async function resolveBackendAddressId(address) {
+        const numericId = Number(address?.id);
+        if (Number.isInteger(numericId) && numericId > 0) return numericId;
+
+        const phone = String(address.mobile || address.phone || '').trim();
+        const pincode = String(address.pincode || '').trim();
+        if (!Auth.validatePhone(phone)) {
+            throw new Error('Please provide a valid 10-digit phone number in your delivery address.');
+        }
+        if (!/^\d{6}$/.test(pincode)) {
+            throw new Error('Please provide a valid 6-digit pincode in your delivery address.');
+        }
+
+        const created = await window.AMZIRA.users.createAddress({
+            full_name: address.name || address.full_name || 'Customer',
+            phone,
+            address_line1: address.address || address.address_line1 || '',
+            address_line2: address.locality || address.address_line2 || null,
+            city: address.city || '',
+            state: address.state || '',
+            pincode,
+            country: 'India',
+            address_type: address.addressType || address.address_type || 'home',
+            is_default: Boolean(address.isDefault || address.is_default)
+        });
+
+        return created?.id;
+    }
+
+    function resetPayButton() {
+        const payButton = document.getElementById('payButton');
+        if (!payButton) return;
+        if (Date.now() < rateLimitedUntil) return;
+        payButton.disabled = false;
+        payButton.innerHTML = '<i class="fas fa-lock"></i> Pay Securely';
+    }
+
+    async function openRazorpayForOrder(orderData) {
+        const payButton = document.getElementById('payButton');
+        const user = window.Auth?.getUser ? window.Auth.getUser() : null;
+        const orderId = orderData?.order_id || orderData?.id;
+        const orderRef = orderData?.order_number || orderId;
+        if (!orderId) throw new Error('Order creation failed: missing order id');
+
+        const paymentOrder = await window.AMZIRA.payments.createPaymentOrder(orderId);
+        if (typeof window.Razorpay !== 'function') {
+            throw new Error('Razorpay SDK is not loaded');
+        }
+
+        const options = {
+            key: paymentOrder?.razorpay_key_id || paymentOrder?.key || paymentOrder?.key_id,
+            amount: paymentOrder?.amount,
+            currency: paymentOrder?.currency || 'INR',
+            order_id: paymentOrder?.razorpay_order_id || paymentOrder?.order_id,
+            name: 'Amzira',
+            description: `Order ${orderRef || ''}`,
+            prefill: {
+                name: user?.name || '',
+                email: user?.email || '',
+                contact: user?.phone || ''
+            },
+            handler: async function(response) {
+                try {
+                    await window.AMZIRA.payments.verifyPayment(
+                        response.razorpay_order_id,
+                        response.razorpay_payment_id,
+                        response.razorpay_signature
+                    );
+                    await refreshPendingOrderStatus(false);
+                } catch (error) {
+                    showError(apiMessage(error, 'Payment verification failed. Please retry.'));
+                    resetPayButton();
+                }
+            },
+            modal: {
+                ondismiss: function() {
+                    showWarning('Payment window closed. Your order is still pending payment.');
+                    resetPayButton();
+                }
+            },
+            theme: { color: '#8B1538' }
+        };
+
+        const razorpay = new window.Razorpay(options);
+        razorpay.on('payment.failed', function() {
+            showError('Payment failed. Your cart has been restored.');
+            redirectToCartWithRestore('Payment failed. Your cart has been restored.');
+        });
+        razorpay.open();
+    }
+
+    async function processPayment() {
+        if (Date.now() < rateLimitedUntil) return;
+
+        const payButton = document.getElementById('payButton');
+        payButton.disabled = true;
+        payButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+
+        try {
+            validatePaymentForm();
+            await refreshPendingOrderStatus(false);
+
+            const existingPending = getPendingOrder();
+            if (existingPending?.id && selectedPaymentMethod !== 'cod') {
+                if (!(await ensureStockAvailableForPayment())) return;
+                await openRazorpayForOrder({ id: existingPending.id, order_number: existingPending.ref });
+                return;
+            }
+
+            const address = checkoutContext.deliveryAddress;
+            if (!address) throw new Error('No delivery address found. Please return to checkout.');
+
+            const addressId = await resolveBackendAddressId(address);
+            if (!addressId) throw new Error('Unable to resolve delivery address');
+
+            const paymentMethod = mapPaymentMethod(selectedPaymentMethod);
+            const createdOrder = await window.AMZIRA.orders.createOrder({
+                shipping_address_id: addressId,
+                billing_address_id: addressId,
+                payment_method: paymentMethod
+            });
+
+            setPendingOrder(createdOrder);
+            startExpiryCountdown(createdOrder?.expires_at || createdOrder?.expiresAt);
+
+            if (paymentMethod === 'cod') {
+                const ref = createdOrder?.order_number || createdOrder?.order_id || createdOrder?.id;
+                setPendingOrder(null);
+                sessionStorage.removeItem('deliveryAddress');
+                window.location.href = `order-success.html?order=${encodeURIComponent(ref)}`;
+                return;
+            }
+
+            if (!(await ensureStockAvailableForPayment())) return;
+            showSuccess('Order created. Complete payment to confirm stock.');
+            await openRazorpayForOrder(createdOrder);
+        } catch (error) {
+            if (error?.status === 429) {
+                lockPayButton(RATE_LIMIT_LOCK_MS, 'Too many requests. Please slow down.');
+                return;
+            }
+
+            if (error?.status === 409) {
+                showWarning(apiMessage(error, 'Some items are no longer available in requested quantity.'));
+                redirectToCartWithRestore('Stock changed. Your cart has been restored.');
+                return;
+            }
+
+            showError(apiMessage(error, 'Payment failed'));
+            resetPayButton();
+        }
+    }
+
     function initPaymentTabs() {
         const tabs = document.querySelectorAll('.payment-tab');
         const contents = document.querySelectorAll('.payment-content');
-
-        tabs.forEach(tab => {
+        tabs.forEach((tab) => {
             tab.addEventListener('click', function() {
                 const method = this.getAttribute('data-method');
                 selectedPaymentMethod = method;
-
-                // Update active states
-                tabs.forEach(t => t.classList.remove('active'));
-                contents.forEach(c => c.classList.remove('active'));
-
+                tabs.forEach((t) => t.classList.remove('active'));
+                contents.forEach((c) => c.classList.remove('active'));
                 this.classList.add('active');
-                document.getElementById(method + 'Payment').classList.add('active');
+                const panel = document.getElementById(method + 'Payment');
+                if (panel) panel.classList.add('active');
             });
         });
     }
 
-    // Initialize card formatting
     function initCardFormatting() {
         const cardNumber = document.getElementById('cardNumber');
         const cardExpiry = document.getElementById('cardExpiry');
         const cardCVV = document.getElementById('cardCVV');
 
-        // Format card number
         if (cardNumber) {
             cardNumber.addEventListener('input', function() {
                 let value = this.value.replace(/\D/g, '');
@@ -1028,18 +1424,14 @@
             });
         }
 
-        // Format expiry
         if (cardExpiry) {
             cardExpiry.addEventListener('input', function() {
                 let value = this.value.replace(/\D/g, '');
-                if (value.length >= 2) {
-                    value = value.substring(0, 2) + '/' + value.substring(2, 4);
-                }
+                if (value.length >= 2) value = `${value.substring(0, 2)}/${value.substring(2, 4)}`;
                 this.value = value;
             });
         }
 
-        // Format CVV
         if (cardCVV) {
             cardCVV.addEventListener('input', function() {
                 this.value = this.value.replace(/\D/g, '').substring(0, 3);
@@ -1047,128 +1439,63 @@
         }
     }
 
-    // Initialize payment button
-    function initPaymentButton() {
-        const payButton = document.getElementById('payButton');
-        
-        payButton.addEventListener('click', function() {
-            processPayment();
-        });
-    }
-
-    // Process payment
-    function processPayment() {
-        const payButton = document.getElementById('payButton');
-        
-        // Validate based on payment method
-        if (selectedPaymentMethod === 'card') {
-            const cardNumber = document.getElementById('cardNumber').value;
-            const cardName = document.getElementById('cardName').value;
-            const cardExpiry = document.getElementById('cardExpiry').value;
-            const cardCVV = document.getElementById('cardCVV').value;
-
-            if (!cardNumber || !cardName || !cardExpiry || !cardCVV) {
-                alert('Please fill all card details');
-                return;
-            }
-        } else if (selectedPaymentMethod === 'upi') {
-            const upiId = document.getElementById('upiId').value;
-            if (!upiId && !document.querySelector('.upi-option.selected')) {
-                alert('Please select UPI app or enter UPI ID');
-                return;
-            }
-        } else if (selectedPaymentMethod === 'netbanking') {
-            const bank = document.getElementById('bankSelect').value;
-            if (!bank) {
-                alert('Please select your bank');
-                return;
-            }
+    async function loadOrderSummary() {
+        checkoutContext.deliveryAddress = JSON.parse(sessionStorage.getItem('deliveryAddress') || 'null');
+        if (!checkoutContext.deliveryAddress) {
+            showError('No delivery address found. Redirecting to checkout.');
+            window.location.href = 'checkout.html';
+            return;
         }
 
-        // Show loading
-        payButton.disabled = true;
-        payButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        renderAddress(checkoutContext.deliveryAddress);
 
-        // Simulate payment processing
-        setTimeout(() => {
-            if (selectedPaymentMethod === 'cod') {
-                // COD - Direct order creation
-                createOrder('cod', 'pending', null);
+        checkoutContext.cart = await window.AMZIRA.cart.getCart();
+        const items = normalizeCartItems(checkoutContext.cart);
+        if (!items.length) {
+            window.location.href = 'cart.html';
+            return;
+        }
+
+        renderCartSummary(checkoutContext.cart);
+    }
+
+    document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            await loadOrderSummary();
+            initPaymentTabs();
+            initCardFormatting();
+            document.getElementById('payButton').addEventListener('click', processPayment);
+            document.querySelectorAll('.upi-option').forEach((option) => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.upi-option').forEach((opt) => opt.classList.remove('selected'));
+                    this.classList.add('selected');
+                });
+            });
+
+            await refreshPendingOrderStatus(true);
+            const pending = getPendingOrder();
+            if (pending?.expiresAt) {
+                startExpiryCountdown(pending.expiresAt);
             } else {
-                // Online payment - Use Razorpay
-                initiateRazorpay();
+                const detail = await getOrderDetailForPending();
+                startExpiryCountdown(detail?.expires_at || detail?.expiresAt || null);
             }
-        }, 1000);
-    }
-
-    // Initiate Razorpay payment
-    function initiateRazorpay() {
-        const options = {
-            key: 'rzp_test_1DP5mmOlF5G5ag', // TEST MODE KEY
-            amount: orderData.total * 100, // Amount in paise
-            currency: 'INR',
-            name: 'Amzira',
-            description: 'Order Payment',
-            image: 'images/logo/Amzira_name.png',
-            handler: function(response) {
-                // Payment successful
-                createOrder(selectedPaymentMethod, 'paid', response.razorpay_payment_id);
-            },
-            prefill: {
-                name: Auth.getUser().name,
-                email: Auth.getUser().email,
-                contact: Auth.getUser().phone
-            },
-            theme: {
-                color: '#8B1538'
-            },
-            modal: {
-                ondismiss: function() {
-                    // Payment cancelled
-                    const payButton = document.getElementById('payButton');
-                    payButton.disabled = false;
-                    payButton.innerHTML = '<i class="fas fa-lock"></i> Pay Securely';
-                }
-            }
-        };
-
-        const razorpay = new Razorpay(options);
-        razorpay.open();
-    }
-
-    // Create order
-    function createOrder(paymentMethod, paymentStatus, paymentId) {
-        const result = OrderManager.createOrder({
-            ...orderData,
-            paymentMethod: paymentMethod,
-            paymentStatus: paymentStatus,
-            paymentId: paymentId
-        });
-
-        if (result.success) {
-            // Store order ID for confirmation page
-            sessionStorage.setItem('lastOrderId', result.order.orderId);
-            
-            // Clear session data
-            sessionStorage.removeItem('deliveryAddress');
-            sessionStorage.removeItem('orderTotal');
-
-            // Redirect to confirmation
-            window.location.href = 'order-success.html';
-        } else {
-            alert('Order creation failed. Please try again.');
-            const payButton = document.getElementById('payButton');
-            payButton.disabled = false;
-            payButton.innerHTML = '<i class="fas fa-lock"></i> Pay Securely';
+            startPendingStatusPolling();
+        } catch (error) {
+            showError(apiMessage(error, 'Unable to initialize payment'));
+            window.location.href = 'checkout.html';
         }
-    }
+    });
 
-    // UPI option selection
-    document.querySelectorAll('.upi-option').forEach(option => {
-        option.addEventListener('click', function() {
-            document.querySelectorAll('.upi-option').forEach(opt => opt.classList.remove('selected'));
-            this.classList.add('selected');
-        });
+    window.addEventListener('beforeunload', function() {
+        if (pendingStatusPollId) {
+            window.clearInterval(pendingStatusPollId);
+            pendingStatusPollId = null;
+        }
+        if (paymentExpiryTimer) {
+            paymentExpiryTimer.stop();
+            paymentExpiryTimer = null;
+        }
     });
 </script>
 

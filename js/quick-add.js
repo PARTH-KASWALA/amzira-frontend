@@ -16,6 +16,33 @@ class QuickAdd {
         this.attachQuickAddListeners();
     }
 
+    esc(value) {
+        if (window.AMZIRA?.utils?.escapeHtml) return window.AMZIRA.utils.escapeHtml(value);
+        const div = document.createElement('div');
+        div.textContent = value == null ? '' : String(value);
+        return div.innerHTML;
+    }
+
+    async ensureApiReady() {
+        if (window.AMZIRA && window.AMZIRA.apiRequest) return;
+        await new Promise((resolve, reject) => {
+            const existing = document.querySelector('script[data-amzira-api="true"]');
+            if (existing) {
+                existing.addEventListener('load', () => resolve(), { once: true });
+                existing.addEventListener('error', () => reject(new Error('Failed to load API layer')), { once: true });
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = 'js/api.js';
+            script.async = false;
+            script.dataset.amziraApi = 'true';
+            script.onload = () => resolve();
+            script.onerror = () => reject(new Error('Failed to load API layer'));
+            document.head.appendChild(script);
+        });
+    }
+
     createModal() {
         const modalHTML = `
             <div class="quick-add-modal" id="quickAddModal">
@@ -67,9 +94,13 @@ class QuickAdd {
 
             // If not found, try to fetch from products.json
             if (!product) {
-                const response = await fetch('data/products.json');
-                const data = await response.json();
-                product = data.products.find(p => p.id === productId);
+                await this.ensureApiReady();
+                if (!window.AMZIRA?.products?.getProducts) {
+                    throw new Error('API client unavailable');
+                }
+                const data = await window.AMZIRA.products.getProducts({ limit: 1000 });
+                const products = data?.products || data?.results || (Array.isArray(data) ? data : []);
+                product = products.find((p) => String(p.id) === String(productId));
             }
 
             if (product) {
@@ -86,12 +117,12 @@ class QuickAdd {
 
         const content = `
             <div class="quick-add-image">
-                <img src="${product.images ? product.images[0] : product.image}"
-                     alt="${product.name}"
+                <img src="${this.esc(product.images ? product.images[0] : product.image)}"
+                     alt="${this.esc(product.name)}"
                      loading="lazy">
             </div>
             <div class="quick-add-details">
-                <h3 class="quick-add-title">${product.name}</h3>
+                <h3 class="quick-add-title">${this.esc(product.name)}</h3>
                 <div class="quick-add-price">
                     <span class="price-current">$${product.salePrice || product.price}</span>
                     ${product.salePrice ? `<span class="price-original">$${product.price}</span>` : ''}
@@ -140,10 +171,10 @@ class QuickAdd {
 
             return `
                 <button class="size-option-quick ${isOutOfStock ? 'out-of-stock' : ''}"
-                        data-size="${size}"
-                        onclick="window.quickAdd.selectSize('${size}')"
+                        data-size="${this.esc(size)}"
+                        onclick="window.quickAdd.selectSize('${this.esc(size)}')"
                         ${isOutOfStock ? 'disabled' : ''}>
-                    ${size}
+                    ${this.esc(size)}
                     ${isLowStock && !isOutOfStock ? '<span class="low-stock-indicator">Low</span>' : ''}
                 </button>
             `;

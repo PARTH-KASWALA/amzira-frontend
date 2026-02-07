@@ -382,6 +382,7 @@
     <!-- Scripts -->
     <script src="js/loading-states.js"></script>
     <script src="js/error-handler.js"></script>
+    <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
 
     <script>
@@ -494,10 +495,7 @@
         // Show loading
         signupBtn.disabled = true;
         signupBtn.textContent = 'Creating Account...';
-
-        // Simulate API delay
-        setTimeout(async () => {
-            // Attempt signup
+        (async () => {
             const result = await Auth.signup({
                 name: fullName,
                 email: email,
@@ -506,26 +504,23 @@
             });
 
             if (result.success) {
-                // Success - redirect
                 const returnUrl = sessionStorage.getItem('returnUrl') || 'account.html';
                 sessionStorage.removeItem('returnUrl');
-                
-                // Show success message briefly
+
                 if (window.errorHandler) {
                     window.errorHandler.showSuccess('Account created successfully!');
                 }
-                
+
                 setTimeout(() => {
                     window.location.href = returnUrl;
-                }, 500);
+                }, 200);
             } else {
-                // Show error
                 errorMessage.textContent = result.message;
                 errorMessage.classList.add('show');
                 signupBtn.disabled = false;
                 signupBtn.textContent = 'Create Account';
             }
-        }, 800);
+        })();
     });
 
     // Check if already logged in

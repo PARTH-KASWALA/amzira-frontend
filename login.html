@@ -373,7 +373,7 @@
         });
 
         // Login form submission
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
             const emailPhone = document.getElementById('emailPhone').value.trim();
@@ -395,8 +395,7 @@
             loginBtn.disabled = true;
             loginBtn.textContent = 'Logging in...';
 
-            // Simulate API delay
-            setTimeout(async () => {
+            try {
                 // Attempt login
                 const result = await Auth.login(emailPhone, password);
 
@@ -409,10 +408,14 @@
                     // Show error
                     errorMessage.textContent = result.message;
                     errorMessage.classList.add('show');
-                    loginBtn.disabled = false;
-                    loginBtn.textContent = 'Login';
                 }
-            }, 800);
+            } catch (_) {
+                errorMessage.textContent = 'Login failed. Please try again.';
+                errorMessage.classList.add('show');
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'Login';
+            }
         });
 
         // Check if already logged in
