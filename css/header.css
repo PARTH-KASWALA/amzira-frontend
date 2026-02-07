@@ -3,7 +3,7 @@
    =================================== */
 
 .header {
-    background: var(--white);
+    background: var(--bg-light);
     border-bottom: 1px solid var(--border-color);
     position: sticky;
     top: 0;
@@ -12,14 +12,14 @@
 }
 
 .header.scrolled {
-    box-shadow: var(--shadow-md);
+    box-shadow: var(--shadow-sm);
 }
 
 .header-content {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--spacing-sm) 0 0 0;
+    padding: var(--spacing-md) 0;
 }
 
 /* Logo */
@@ -61,10 +61,10 @@
 }
 
 .nav-item > a {
-    font-weight: 600;
-    font-size: 15px;
+    font-weight: 400;
+    font-size: 12px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 2px;
     color: var(--text-dark);
     padding: var(--spacing-sm) 0;
     position: relative;
@@ -76,13 +76,17 @@
     bottom: 0;
     left: 0;
     width: 0;
-    height: 2px;
-    background: var(--primary-color);
+    height: 1px;
+    background: var(--accent-color);
     transition: width var(--transition-normal);
 }
 
 .nav-item:hover > a::after {
     width: 100%;
+}
+
+.nav-item:hover > a {
+    color: var(--accent-color);
 }
 
 /* Mega Menu */
@@ -91,15 +95,16 @@
     top: 100%;
     left: 50%;
     transform: translateX(-50%);
-    background: var(--white);
-    box-shadow: var(--shadow-xl);
+    background: var(--bg-light);
+    box-shadow: var(--shadow-lg);
     padding: var(--spacing-xl);
     min-width: 900px;
     opacity: 0;
     visibility: hidden;
     transition: all var(--transition-normal);
     margin-top: var(--spacing-md);
-    border-radius: 8px;
+    border-radius: 0;
+    border-top: 1px solid var(--accent-color);
 }
 
 .nav-item:hover .mega-menu {
@@ -115,14 +120,14 @@
 }
 
 .mega-menu-col h4 {
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 11px;
+    font-weight: 500;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--primary-color);
+    letter-spacing: 2px;
+    color: var(--accent-color);
     margin-bottom: var(--spacing-md);
     padding-bottom: var(--spacing-sm);
-    border-bottom: 2px solid var(--border-color);
+    border-bottom: 1px solid var(--border-color);
 }
 
 .mega-menu-col ul li {
@@ -130,15 +135,15 @@
 }
 
 .mega-menu-col ul li a {
-    color: var(--text-dark);
-    font-size: 14px;
+    color: var(--text-gray);
+    font-size: 13px;
     transition: all var(--transition-fast);
     display: block;
     padding: 6px 0;
 }
 
 .mega-menu-col ul li a:hover {
-    color: var(--primary-color);
+    color: var(--accent-color);
     padding-left: var(--spacing-sm);
 }
 
@@ -180,8 +185,7 @@
 }
 
 .header-icon:hover {
-    background: var(--bg-light);
-    color: var(--primary-color);
+    color: var(--accent-color);
 }
 
 .cart-icon {
@@ -192,16 +196,16 @@
     position: absolute;
     top: -4px;
     right: -4px;
-    background: var(--primary-color);
-    color: var(--white);
-    width: 20px;
-    height: 20px;
+    background: var(--accent-color);
+    color: var(--primary-color);
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
-    font-weight: 700;
+    font-size: 10px;
+    font-weight: 600;
 }
 
 /* Mobile Menu Toggle */
@@ -239,8 +243,9 @@
 
 .mobile-menu-header h2 {
     font-family: var(--font-heading);
-    color: var(--primary-color);
+    color: var(--text-dark);
     margin: 0;
+    letter-spacing: 3px;
 }
 
 .mobile-menu-close {
@@ -266,7 +271,7 @@
 }
 
 .mobile-nav ul li a:hover {
-    color: var(--primary-color);
+    color: var(--accent-color);
     padding-left: var(--spacing-sm);
 }
 
@@ -361,7 +366,7 @@
     top: 50%;
     transform: translateY(-50%);
     background: var(--primary-color);
-    color: var(--white);
+    color: #F8F6F2;
     width: 50px;
     height: 50px;
     border-radius: 50%;
@@ -397,7 +402,7 @@
 }
 
 .suggestion-tag:hover {
-    background: var(--primary-color);
+    background: rgba(198, 166, 100, 0.3);
 }
 
 /* Disable hover mega menu on touch devices */
@@ -483,7 +488,7 @@
 }
 
 .mega-submenu a:hover {
-    background: #FBF2DE;
-    color: #8B1538 !important;
+    background: var(--bg-warm, #E7E1D6);
+    color: var(--accent-color) !important;
     padding-left: 16px !important;
 }

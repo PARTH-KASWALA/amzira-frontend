@@ -3,9 +3,9 @@
    ===================================================== */
 
 .features-strip {
-  background: #FBF2DE;
-  padding: 50px 20px;
-  border-top: 1px solid #E8D5B7;
+  background: var(--bg-warm, #E7E1D6);
+  padding: 60px 20px;
+  border-top: 1px solid var(--border-color, #EDEDED);
 }
 
 /* Ensure SVG <img> icons in footer features are sized and centered */
@@ -47,9 +47,9 @@
 i.feature-icon {
   /* Font Awesome <i> fallback styling - applies only to <i> elements */
   display: inline-block;
-  font-size: 28px; /* fallback size for icon fonts */
+  font-size: 28px;
   line-height: 1;
-  color: #8B1538; /* brand maroon */
+  color: var(--accent-color, #C6A664);
   width: auto;
   height: auto;
   margin-bottom: var(--spacing-md);
@@ -64,11 +64,11 @@ i.feature-icon {
 }
 
 .feature-item h4 {
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 1.2px;
+    font-size: 10px;
+    font-weight: 400;
+    letter-spacing: 2px;
     text-transform: uppercase;
-    color: #c9a24d; /* gold text */
+    color: var(--text-dark, #0F0F0F);
     margin: 0;
 }
 
@@ -77,9 +77,9 @@ i.feature-icon {
    ===================================================== */
 
 .main-footer {
-  background: linear-gradient(135deg, #6e0f2a, #8b1538);
-  color: #FFFFFF;
-  padding: 60px 20px 0;
+  background: #0F0F0F;
+  color: #E7E1D6;
+  padding: 80px 20px 0;
 }
 
 .footer-content {
@@ -127,10 +127,12 @@ i.feature-icon {
 
 /* Brand tagline */
 .footer-brand .brand-tagline {
-  font-size: 15px;
+  font-size: 13px;
   line-height: 1.6;
-  color: #000;
+  color: rgba(231, 225, 214, 0.6);
   margin-top: 4px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
 }
 
 /* Footer Columns */
@@ -140,14 +142,14 @@ i.feature-icon {
 }
 
 .footer-heading {
-  font-size: 13px;
-  font-weight: 700;
-  letter-spacing: 1.5px;
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: 2.5px;
   text-transform: uppercase;
-  color: #D4AF37;
-  margin: 0 0 24px 0;
-  padding-bottom: 12px;
-  border-bottom: 2px solid rgba(212, 175, 55, 0.3);
+  color: #C6A664;
+  margin: 0 0 28px 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(198, 166, 100, 0.2);
 }
 
 .footer-links {
@@ -164,16 +166,16 @@ i.feature-icon {
 }
 
 .footer-links a {
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(231, 225, 214, 0.7);
   text-decoration: none;
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.7;
   transition: all 0.3s ease;
   display: inline-block;
 }
 
 .footer-links a:hover {
-  color: #D4AF37;
+  color: #C6A664;
   padding-left: 5px;
 }
 
@@ -194,11 +196,11 @@ i.feature-icon {
 }
 
 .social-heading {
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 1.2px;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 2.5px;
   text-transform: uppercase;
-  color: #D4AF37;
+  color: #C6A664;
   margin: 0 0 16px 0;
 }
 
@@ -214,16 +216,16 @@ i.feature-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(198, 166, 100, 0.1);
   border-radius: 50%;
-  color: #FFFFFF;
+  color: #E7E1D6;
   transition: all 0.3s ease;
   text-decoration: none;
 }
 
 .social-links a:hover {
-  background: #D4AF37;
-  transform: translateY(-3px);
+  background: #C6A664;
+  color: #0F0F0F;
 }
 
 .social-links svg {
@@ -236,7 +238,7 @@ i.feature-icon {
    ===================================================== */
 
 .footer-bottom {
-  background: linear-gradient(135deg, #6e0f2a, #8b1538);
+  background: #0F0F0F;
   max-width: 1400px;
   margin: 0 auto;
   padding: 30px 0;
@@ -480,9 +482,10 @@ i.feature-icon {
 
 /* Trust Footer */
 .trust-footer {
-  background: #8b1538;
-  color: #fff;
-  font-size: 14px;
+  background: #0F0F0F;
+  color: #E7E1D6;
+  font-size: 13px;
+  border-top: 1px solid rgba(198, 166, 100, 0.15);
 }
 
 .trust-footer-inner {
