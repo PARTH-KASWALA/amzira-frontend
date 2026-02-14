@@ -473,7 +473,9 @@
 }
 
 .product-title {
-    font-size: 32px;
+    font-family: var(--font-heading);
+    font-size: 36px;
+    font-weight: 500;
     margin-bottom: var(--spacing-sm);
 }
 
@@ -1134,3 +1136,22 @@
         justify-content: center;
     }
 }
+
+/* === Merged from luxury.css === */
+.gallery-main-image,
+
+.pdp-info {
+    padding-top: 18px;
+}
+
+.breadcrumb,
+
+.breadcrumb a,
+
+.breadcrumb {
+    font-size: 12px !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.pdp-section-title,

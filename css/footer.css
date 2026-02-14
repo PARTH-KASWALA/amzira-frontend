@@ -3,9 +3,10 @@
    ===================================================== */
 
 .features-strip {
-  background: #FBF2DE;
-  padding: 50px 20px;
-  border-top: 1px solid #E8D5B7;
+  background: #f6ebd8;
+  padding: 34px 24px;
+  border-top: 1px solid #e8dec7;
+  border-bottom: 1px solid #e8dec7;
 }
 
 /* Ensure SVG <img> icons in footer features are sized and centered */
@@ -32,16 +33,21 @@
 }
 
 .features-container {
-  max-width: 1400px;
+  max-width: 1520px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 40px;
-  align-items: start;
+  gap: 24px;
+  align-items: center;
 }
 
 .feature-item {
-    text-align: center;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
 }
 
 i.feature-icon {
@@ -57,19 +63,26 @@ i.feature-icon {
 
 /* If an <img> is still used, ensure it is visible and sized consistently */
 .features-strip img.feature-icon {
-  display: inline-block;
+  display: block;
+  width: 60px;
+  height: 60px;
   object-fit: contain;
-  margin-bottom: var(--spacing-md);
+  margin: 0 auto 14px;
   filter: none !important;
 }
 
+.features-strip .feature-icon-svg {
+  filter: invert(17%) sepia(26%) saturate(1087%) hue-rotate(356deg) brightness(94%) contrast(91%) !important;
+}
+
 .feature-item h4 {
-    font-size: 12px;
-    font-weight: 500;
-    letter-spacing: 1.2px;
-    text-transform: uppercase;
-    color: #c9a24d; /* gold text */
-    margin: 0;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #6c3a1f;
+  margin: 0;
+  line-height: 1.2;
 }
 
 /* =====================================================
@@ -77,9 +90,9 @@ i.feature-icon {
    ===================================================== */
 
 .main-footer {
-  background: linear-gradient(135deg, #6e0f2a, #8b1538);
+  background: linear-gradient(135deg, #6e0f2a, #8b1538 55%, #7a1231);
   color: #FFFFFF;
-  padding: 60px 20px 0;
+  padding: 50px 20px 0;
 }
 
 .footer-content {
@@ -129,7 +142,7 @@ i.feature-icon {
 .footer-brand .brand-tagline {
   font-size: 15px;
   line-height: 1.6;
-  color: #000;
+  color: rgba(255, 255, 255, 0.82);
   margin-top: 4px;
 }
 
@@ -167,14 +180,15 @@ i.feature-icon {
   color: rgba(255, 255, 255, 0.85);
   text-decoration: none;
   font-size: 13px;
-  line-height: 1.6;
+  line-height: 1.7;
   transition: all 0.3s ease;
   display: inline-block;
 }
 
+/* // Pre-launch UI polish — Manyavar standard */
 .footer-links a:hover {
   color: #D4AF37;
-  padding-left: 5px;
+  padding-left: 4px;
 }
 
 /* Contact Links */
@@ -236,10 +250,10 @@ i.feature-icon {
    ===================================================== */
 
 .footer-bottom {
-  background: linear-gradient(135deg, #6e0f2a, #8b1538);
+  background: linear-gradient(135deg, #6e0f2a, #8b1538 55%, #7a1231);
   max-width: 1400px;
   margin: 0 auto;
-  padding: 30px 0;
+  padding: 24px 0;
 }
 
 .footer-bottom-content {
@@ -372,17 +386,18 @@ i.feature-icon {
 /* Mobile (below 768px) */
 @media (max-width: 768px) {
   .features-strip {
-    padding: 40px 15px;
+    padding: 30px 16px;
   }
   
   .features-container {
     grid-template-columns: repeat(2, 1fr);
-    gap: 30px;
+    gap: 18px;
   }
-  
-  i.feature-icon {
-    width: 48px;
-    height: 48px;
+
+  .features-strip img.feature-icon {
+    width: 52px;
+    height: 52px;
+    margin-bottom: 10px;
   }
   
   /* .feature-text removed — feature headings now use <h4> and are styled via .feature-item h4 */
@@ -441,7 +456,7 @@ i.feature-icon {
 @media (max-width: 480px) {
   .features-container {
     grid-template-columns: 1fr;
-    gap: 25px;
+    gap: 14px;
   }
   
   .brand-logo {
@@ -457,9 +472,9 @@ i.feature-icon {
     justify-content: center;
   }
 
-  i.feature-icon {
-    width: 42px;
-    height: 42px;
+  .features-strip img.feature-icon {
+    width: 48px;
+    height: 48px;
   }
 }
 
@@ -480,7 +495,7 @@ i.feature-icon {
 
 /* Trust Footer */
 .trust-footer {
-  background: #8b1538;
+  background: #7a1231;
   color: #fff;
   font-size: 14px;
 }
@@ -545,4 +560,123 @@ i.feature-icon {
     justify-content: center;
     flex-wrap: wrap;
   }
+}
+
+/* === Merged from luxury.css === */
+.footer-heading {
+    font-family: var(--font-heading);
+    font-weight: 600;
+    line-height: 1.15;
+    letter-spacing: 0.04em;
+    color: #0F0F0F;
+}
+
+.main-footer,
+
+.footer-bottom,
+
+.footer-bar {
+    background: #0F0F0F !important;
+    color: #F8F6F2 !important;
+    border-top: 1px solid #C6A664;
+}
+
+.features-strip {
+    background: #E7E1D6 !important;
+    border-top: 1px solid #EDEDED;
+}
+
+.footer-heading,
+
+.social-heading,
+
+.footer-links a:hover,
+
+.social-links a:hover {
+    color: #C6A664 !important;
+}
+
+.footer-links a,
+
+.brand-tagline,
+
+.copyright,
+
+.contact-links .timing {
+    color: rgba(248, 246, 242, 0.8) !important;
+}
+
+.footer-heading {
+    border-color: rgba(198, 166, 100, 0.35) !important;
+}
+
+.footer-links a:hover {
+    padding-left: 0 !important;
+}
+
+.footer-bar {
+    display: none !important;
+}
+
+.feature-item {
+    padding: 8px 4px;
+}
+
+.feature-icon,
+
+.footer-features .feature-item img,
+
+.features-strip img.feature-icon {
+    width: 46px !important;
+    height: 46px !important;
+    margin-bottom: 10px !important;
+}
+
+.social-links {
+    gap: 10px !important;
+}
+
+.social-links svg {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+.features-strip {
+    background: #FBF3E3 !important;
+    border-top: 1px solid #e8dec7 !important;
+    border-bottom: 1px solid #e0d3b5 !important;
+    padding: 42px 24px !important;
+}
+
+.features-strip .features-container {
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 20px !important;
+    align-items: center !important;
+}
+
+.features-strip .feature-item {
+    min-height: 132px !important;
+    justify-content: center !important;
+    text-align: center !important;
+    padding: 12px 8px !important;
+}
+
+.features-strip .feature-icon,
+
+.features-strip .feature-icon-svg,
+
+.features-strip .footer-features .feature-item img,
+
+.features-strip img.feature-icon {
+    width: 108px !important;
+    height: 84px !important;
+    margin: 0 auto 16px !important;
+    padding: 0 !important;
+    background: transparent !important;
+    border: none !important;
+    outline: none !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+    object-fit: contain !important;
+    filter: none !important;
 }

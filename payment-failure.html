@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Not Completed | Amzira</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <style>
+        .payment-failure-page {
+            max-width: 820px;
+            margin: 0 auto;
+            padding: 56px 20px;
+            text-align: center;
+        }
+
+        .failure-icon {
+            width: 72px;
+            height: 72px;
+            margin: 0 auto 18px;
+            border-radius: 50%;
+            background: #fee2e2;
+            color: #b91c1c;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+        }
+
+        .failure-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 24px;
+        }
+
+        .failure-context {
+            margin-top: 20px;
+            padding: 14px;
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            text-align: left;
+        }
+
+        .support-inline {
+            margin-top: 16px;
+            font-size: 14px;
+            color: var(--text-gray);
+        }
+    </style>
+</head>
+<body>
+    <main class="payment-failure-page">
+        <div class="failure-icon" aria-hidden="true">!</div>
+        <h1 id="failureTitle">Payment Not Completed</h1>
+        <p id="failureMessage">Your order is not confirmed yet. You can retry safely.</p>
+
+        <div class="failure-context" id="failureContext" style="display:none;"></div>
+
+        <div class="failure-actions">
+            <a class="btn btn-primary" href="payment.html">Try Again</a>
+            <a class="btn btn-secondary" href="cart.html">Back to Cart</a>
+            <a class="btn btn-secondary" href="contact-support.html">Contact Support</a>
+        </div>
+
+        <p class="support-inline">
+            Need help now? Email <a href="mailto:care@amzira.com">care@amzira.com</a> or call
+            <a href="tel:+911800120000500">1800-120-000-500</a>
+        </p>
+        <p><a href="order-tracking.html">Track Order</a></p>
+    </main>
+
+    <script>
+        (function renderFailureContext() {
+            const params = new URLSearchParams(window.location.search);
+            const reason = params.get('reason') || '';
+            const title = document.getElementById('failureTitle');
+            const message = document.getElementById('failureMessage');
+            const context = document.getElementById('failureContext');
+            const pendingRaw = sessionStorage.getItem('pending_order_context');
+            let pending = null;
+
+            try {
+                pending = pendingRaw ? JSON.parse(pendingRaw) : null;
+            } catch (_) {
+                pending = null;
+            }
+
+            if (reason === 'payment_cancelled') {
+                title.textContent = 'Payment Cancelled';
+                message.textContent = 'No payment was captured. You can retry payment when ready.';
+                return;
+            }
+
+            if (reason === 'payment_failed') {
+                title.textContent = 'Payment Failed';
+                message.textContent = 'Your payment did not go through. Please retry or return to cart.';
+                return;
+            }
+
+            if (reason === 'order_not_completed') {
+                title.textContent = 'Order Not Completed';
+                message.textContent = 'This order could not be completed. Please retry checkout.';
+                return;
+            }
+
+            if (reason === 'order_expired') {
+                title.textContent = 'Order Expired';
+                message.textContent = 'The order session expired. Please review your cart and retry.';
+                return;
+            }
+
+            if (reason === 'order_cancelled') {
+                title.textContent = 'Order Cancelled';
+                message.textContent = 'This order was cancelled. You can return to cart and place a new order.';
+            }
+
+            const orderRef = params.get('order') || pending?.order_number || pending?.ref || pending?.id || '';
+            if (orderRef && context) {
+                context.style.display = 'block';
+                context.innerHTML = `
+                    <strong>Order Reference:</strong> ${orderRef}<br>
+                    <span>Your cart and pending order details are preserved. You can retry payment safely.</span>
+                `;
+            }
+        })();
+    </script>
+</body>
+</html>

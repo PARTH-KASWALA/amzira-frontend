@@ -1,0 +1,44 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - link "Amzira" [ref=e6] [cursor=pointer]:
+      - /url: index.html
+      - img "Amzira" [ref=e7]
+    - heading "Welcome Back" [level=1] [ref=e8]
+    - paragraph [ref=e9]: Login to your account to continue
+  - generic [ref=e10]: Incorrect email or password
+  - generic [ref=e11]:
+    - generic [ref=e12]:
+      - generic [ref=e13]: Email or Phone Number
+      - textbox "Email or Phone Number" [ref=e14]:
+        - /placeholder: Enter your email or phone
+        - text: user@example.com
+    - generic [ref=e15]:
+      - generic [ref=e16]: Password
+      - generic [ref=e17]:
+        - textbox "Password" [ref=e18]:
+          - /placeholder: Enter your password
+          - text: StrongPass1
+        - generic [ref=e19] [cursor=pointer]: 
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - checkbox "Remember me" [ref=e22] [cursor=pointer]
+        - generic [ref=e23]: Remember me
+      - link "Forgot Password?" [ref=e24] [cursor=pointer]:
+        - /url: forgot-password.html
+    - button "Login" [ref=e25] [cursor=pointer]
+  - generic [ref=e26]: OR
+  - button " Login with OTP" [ref=e27] [cursor=pointer]:
+    - generic [ref=e28]: 
+    - text: Login with OTP
+  - paragraph [ref=e30]:
+    - text: New to Amzira?
+    - link "Create Account" [ref=e31] [cursor=pointer]:
+      - /url: signup.html
+  - link " Back to Homepage" [ref=e33] [cursor=pointer]:
+    - /url: index.html
+    - generic [ref=e34]: 
+    - text: Back to Homepage
+```

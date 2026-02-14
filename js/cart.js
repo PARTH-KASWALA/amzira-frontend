@@ -7,6 +7,34 @@
 
 let productsCache = null;
 
+const LOCALE_CONFIG = {
+    currency: '₹',
+    currencyCode: 'INR',
+    locale: 'en-IN',
+    taxRate: 0.18,
+    taxLabel: 'GST',
+    shippingThreshold: 2000,
+    shippingFee: 99
+};
+
+function formatMoney(value, decimals = 0) {
+    const amount = Number(value) || 0;
+    return amount.toLocaleString(LOCALE_CONFIG.locale, {
+        style: 'currency',
+        currency: LOCALE_CONFIG.currencyCode,
+        minimumFractionDigits: decimals,
+        maximumFractionDigits: decimals
+    });
+}
+
+function normalizeForDisplay(product) {
+    if (window.ProductNormalizer && typeof window.ProductNormalizer.normalize === 'function') {
+        const normalized = window.ProductNormalizer.normalize(product);
+        if (normalized) return { ...product, ...normalized };
+    }
+    return product;
+}
+
 async function ensureApiLayer() {
     if (window.AMZIRA && window.AMZIRA.apiRequest) return;
 
@@ -33,8 +61,8 @@ async function loadProductsData() {
 
     try {
         await ensureApiLayer();
-        const response = await window.AMZIRA.products.getProducts({ limit: 1000 });
-        productsCache = response?.products || [];
+        const response = await window.AMZIRA.products.getProducts({ limit: 100 });
+        productsCache = response?.products || response?.results || (Array.isArray(response) ? response : []);
         return productsCache;
     } catch (error) {
         console.error('Failed to load products:', error);
@@ -54,6 +82,9 @@ class ShoppingCart {
         this.savedStorageKey = 'amziraSavedForLater';
         this.restoreNoticeKey = 'cartRestoreNotice';
         this.forceReloadKey = 'cartForceReload';
+        this.productFallbackImage = 'images/products/product-1-front.jpg';
+        this.backendSummary = null;
+        this.pendingQuantityUpdates = new Set();
         this.items = this.loadGuestCart();
         this.init();
     }
@@ -71,7 +102,142 @@ class ShoppingCart {
         return div.innerHTML;
     }
 
+    getPriceValue(product) {
+        const normalized = normalizeForDisplay(product);
+        // Audit Ref: [BLOCKER] Price Can Be Zero (Free Products) + backend contract alignment.
+        const sale = Number(normalized?.sale_price ?? normalized?.salePrice ?? NaN);
+        const current = Number(normalized?.price ?? NaN);
+        const base = Number(normalized?.base_price ?? normalized?.basePrice ?? NaN);
+        const price = Number.isFinite(sale) && sale > 0
+            ? sale
+            : (Number.isFinite(current) && current > 0
+                ? current
+                : (Number.isFinite(base) ? base : 0));
+        if (!Number.isFinite(price) || price <= 0) {
+            console.error('Invalid price for product:', product?.id, 'Price:', price);
+            if (window.errorHandler?.showError) {
+                window.errorHandler.showError('Cannot add product: Invalid price. Please contact support.');
+            }
+            return null;
+        }
+        return price;
+    }
+
+    getOriginalPriceValue(product) {
+        const normalized = normalizeForDisplay(product);
+        return Number(
+            normalized?.basePrice ??
+            normalized?.base_price ??
+            normalized?.price ??
+            normalized?.sale_price ??
+            normalized?.salePrice ??
+            0
+        );
+    }
+
+    hardenPlaceholderLinks() {
+        // Audit Ref: [BLOCKER] Dead nav/footer links using href="#".
+        const selectors = [
+            'header a[href="#"]',
+            'footer a[href="#"]',
+            '.mobile-menu a[href="#"]'
+        ];
+        document.querySelectorAll(selectors.join(', ')).forEach((anchor) => {
+            anchor.setAttribute('href', 'javascript:void(0)');
+            anchor.setAttribute('aria-disabled', 'true');
+            anchor.classList.add('is-disabled-link');
+            anchor.addEventListener('click', (event) => {
+                event.preventDefault();
+            });
+        });
+    }
+
+    setupGlobalImageFallbacks() {
+        // Audit Ref: Data integrity/safety - Harden image fallbacks everywhere.
+        document.addEventListener('error', (event) => {
+            const target = event.target;
+            if (!(target instanceof HTMLImageElement)) return;
+            if (target.dataset.fallbackApplied === 'true') return;
+            target.dataset.fallbackApplied = 'true';
+            target.src = this.productFallbackImage;
+        }, true);
+    }
+
+    setButtonLoading(button, isLoading, loadingText = null) {
+        if (!button) return;
+
+        if (window.loadingManager && typeof window.loadingManager.setButtonLoading === 'function') {
+            window.loadingManager.setButtonLoading(button, isLoading);
+            if (isLoading && loadingText) button.textContent = loadingText;
+            return;
+        }
+
+        if (isLoading) {
+            if (!button.dataset.originalText) button.dataset.originalText = button.textContent;
+            button.disabled = true;
+            if (loadingText) button.textContent = loadingText;
+            return;
+        }
+
+        button.disabled = false;
+        if (button.dataset.originalText) {
+            button.textContent = button.dataset.originalText;
+            delete button.dataset.originalText;
+        }
+    }
+
+    resolveVariantId(product, size = null, color = null) {
+        if (!product || typeof product !== 'object') return null;
+
+        const variants = Array.isArray(product.variants) ? product.variants : [];
+        const selectedSize = size ?? product.selectedSize ?? null;
+        const selectedColor = color ?? product.selectedColor ?? null;
+
+        const explicitVariant = Number(product.selectedVariantId || product.variant_id || product.default_variant_id || product.defaultVariantId);
+        if (Number.isInteger(explicitVariant) && explicitVariant > 0) {
+            return explicitVariant;
+        }
+
+        if (selectedSize !== null && selectedSize !== undefined) {
+            const numericSize = Number(selectedSize);
+            if (Number.isInteger(numericSize) && numericSize > 0) {
+                return numericSize;
+            }
+        }
+
+        if (window.selectedVariantId) {
+            const selected = Number(window.selectedVariantId);
+            if (Number.isInteger(selected) && selected > 0) return selected;
+        }
+
+        if (variants.length === 1 && Number.isInteger(Number(variants[0]?.id))) {
+            return Number(variants[0].id);
+        }
+
+        if (variants.length > 1 && selectedSize != null) {
+            const requestedSize = String(selectedSize).trim().toLowerCase();
+            const requestedColor = selectedColor == null ? '' : String(selectedColor).trim().toLowerCase();
+            const matched = variants.find((variant) => {
+                const variantSize = String(variant?.size || '').trim().toLowerCase();
+                const variantColor = String(variant?.color || '').trim().toLowerCase();
+                if (!variantSize) return false;
+                if (variantSize !== requestedSize) return false;
+                if (!requestedColor) return true;
+                return variantColor === requestedColor;
+            });
+
+            const matchedId = Number(matched?.id);
+            if (Number.isInteger(matchedId) && matchedId > 0) {
+                return matchedId;
+            }
+        }
+
+        return null;
+    }
+
     async init() {
+        this.hardenPlaceholderLinks();
+        this.setupGlobalImageFallbacks();
         this.updateCartCount();
 
         window.addEventListener('auth:login', async () => {
@@ -82,6 +248,7 @@ class ShoppingCart {
 
         window.addEventListener('auth:logout', () => {
             this.items = this.loadGuestCart();
+            this.backendSummary = null;
             this.updateCartCount();
             this.renderCart();
         });
@@ -183,6 +350,7 @@ class ShoppingCart {
             await ensureApiLayer();
             const data = await window.AMZIRA.cart.getCart();
             this.items = this.normalizeBackendItems(data);
+            this.backendSummary = data || null;
             this.updateCartCount();
             return this.items;
         } catch (error) {
@@ -202,8 +370,10 @@ class ShoppingCart {
 
             for (const item of guestItems) {
                 if (!item.id) continue;
+                if (!Number.isInteger(Number(item.variant_id)) || Number(item.variant_id) <= 0) continue;
+                const safeVariantId = Number(item.variant_id);
 
-                await window.AMZIRA.cart.addToCart(item.id, item.variant_id || null, item.quantity || 1);
+                await window.AMZIRA.cart.addToCart(item.id, safeVariantId, item.quantity || 1);
             }
 
             this.clearGuestCart();
@@ -232,21 +402,58 @@ class ShoppingCart {
             }
         }
 
-        let variantId = null;
-        if (size !== null && size !== undefined) {
-            const maybeId = Number(size);
-            if (!Number.isNaN(maybeId) && maybeId > 0) {
-                variantId = maybeId;
+        const variantId = this.resolveVariantId(product, size, color);
+        if (!Number.isInteger(Number(variantId)) || Number(variantId) <= 0) {
+            this.showNotification('Please select size/color', 'error');
+            return false;
+        }
+
+        const price = this.getPriceValue(product);
+        if (price === null) {
+            return false;
+        }
+
+        const addToGuestCart = () => {
+            let selectedSize = size || product.selectedSize || (product.sizes && product.sizes[0]) || '-';
+            let selectedColor = color || product.selectedColor || (product.colors && product.colors[0]?.name) || '-';
+
+            if (variantId && Array.isArray(product.variants)) {
+                const variant = product.variants.find((v) => String(v.id) === String(variantId));
+                if (variant) {
+                    selectedSize = variant.size || selectedSize;
+                    selectedColor = variant.color || selectedColor;
+                }
             }
-        }
 
-        if (!variantId && window.selectedVariantId) {
-            variantId = Number(window.selectedVariantId) || null;
-        }
+            const cartItemId = variantId ? `${product.id}-${variantId}` : `${product.id}-${selectedSize}-${selectedColor}`;
+            const existing = this.items.find((item) => item.cartItemId === cartItemId);
 
-        if (!variantId && Array.isArray(product.variants) && product.variants.length === 1) {
-            variantId = product.variants[0].id;
-        }
+            if (existing) {
+                existing.quantity = this.normalizeQuantity(existing.quantity + normalizedQty);
+                if (existing.quantity >= 10) {
+                    this.showNotification('Maximum quantity per item is 10', 'info');
+                }
+            } else {
+                this.items.push({
+                    cartItemId,
+                    backendItemId: null,
+                    id: product.id,
+                    variant_id: variantId,
+                    name: product.name,
+                    price,
+                    originalPrice: this.getOriginalPriceValue(product),
+                    image: normalizeForDisplay(product)?.mainImage || product.primary_image || (product.images ? product.images[0] : product.image),
+                    quantity: normalizedQty,
+                    size: selectedSize,
+                    color: selectedColor
+                });
+            }
+
+            this.saveGuestCart();
+            this.showNotification('Product added to cart!', 'success');
+            if (window.location.pathname.includes('cart.html')) this.renderCart();
+            return true;
+        };
 
         if (this.isAuthenticated()) {
             try {
@@ -257,50 +464,16 @@ class ShoppingCart {
                 if (window.location.pathname.includes('cart.html')) this.renderCart();
                 return true;
             } catch (error) {
+                if (error?.status === 401 || error?.status === 403) {
+                    // Auth cookie missing/expired: fallback to guest cart
+                    return addToGuestCart();
+                }
                 this.showNotification(error?.message || 'Failed to add product', 'error');
                 return false;
             }
         }
 
-        let selectedSize = size || product.selectedSize || (product.sizes && product.sizes[0]) || '-';
-        let selectedColor = color || product.selectedColor || (product.colors && product.colors[0]?.name) || '-';
-
-        if (variantId && Array.isArray(product.variants)) {
-            const variant = product.variants.find((v) => String(v.id) === String(variantId));
-            if (variant) {
-                selectedSize = variant.size || selectedSize;
-                selectedColor = variant.color || selectedColor;
-            }
-        }
-
-        const cartItemId = variantId ? `${product.id}-${variantId}` : `${product.id}-${selectedSize}-${selectedColor}`;
-        const existing = this.items.find((item) => item.cartItemId === cartItemId);
-
-        if (existing) {
-            existing.quantity = this.normalizeQuantity(existing.quantity + normalizedQty);
-            if (existing.quantity >= 10) {
-                this.showNotification('Maximum quantity per item is 10', 'info');
-            }
-        } else {
-            this.items.push({
-                cartItemId,
-                backendItemId: null,
-                id: product.id,
-                variant_id: variantId,
-                name: product.name,
-                price: Number(product.salePrice || product.price || 0),
-                originalPrice: Number(product.price || product.salePrice || 0),
-                image: product.images ? product.images[0] : product.image,
-                quantity: normalizedQty,
-                size: selectedSize,
-                color: selectedColor
-            });
-        }
-
-        this.saveGuestCart();
-        this.showNotification('Product added to cart!', 'success');
-        if (window.location.pathname.includes('cart.html')) this.renderCart();
-        return true;
+        return addToGuestCart();
     }
 
     async removeItem(cartItemId) {
@@ -336,23 +509,27 @@ class ShoppingCart {
 
         const item = this.items.find((entry) => entry.cartItemId === cartItemId);
         if (!item) return;
+        if (this.pendingQuantityUpdates.has(cartItemId)) return;
+        this.pendingQuantityUpdates.add(cartItemId);
 
-        if (this.isAuthenticated()) {
-            try {
+        try {
+            if (this.isAuthenticated()) {
                 await ensureApiLayer();
                 const backendId = item.backendItemId || cartItemId;
                 await window.AMZIRA.cart.updateCartItem(backendId, normalizedQty);
                 await this.refreshBackendCart();
                 this.renderCart();
-            } catch (error) {
-                this.showNotification(error?.message || 'Failed to update quantity', 'error');
+                return;
             }
-            return;
-        }
 
-        item.quantity = normalizedQty;
-        this.saveGuestCart();
-        this.renderCart();
+            item.quantity = normalizedQty;
+            this.saveGuestCart();
+            this.renderCart();
+        } catch (error) {
+            this.showNotification(error?.message || 'Failed to update quantity', 'error');
+        } finally {
+            this.pendingQuantityUpdates.delete(cartItemId);
+        }
     }
 
     async clearCart() {
@@ -453,7 +630,7 @@ class ShoppingCart {
                     ${savedItems.map((item) => `
                         <div class="saved-item" data-id="${item.cartItemId}">
                             <div class="saved-item-image">
-                                <img src="${this.esc(item.image)}" alt="${this.esc(item.name)}" loading="lazy">
+                                <img src="${this.esc(item.image)}" alt="${this.esc(item.name)}" loading="lazy" onerror="this.onerror=null;this.src='images/products/product-1-front.jpg';">
                             </div>
                             <div class="saved-item-info">
                                 <h3>${this.esc(item.name)}</h3>
@@ -461,7 +638,7 @@ class ShoppingCart {
                                     <span>Size: ${this.esc(item.size)}</span>
                                     <span>Color: ${this.esc(item.color)}</span>
                                 </div>
-                                <div class="saved-item-price">$${item.price}</div>
+                                <div class="saved-item-price">${formatMoney(item.price)}</div>
                                 <div class="saved-item-actions">
                                     <button class="btn btn-sm btn-primary move-to-cart-btn" data-id="${this.esc(item.cartItemId)}">Move to Cart</button>
                                     <button class="btn btn-sm btn-secondary remove-saved-btn" data-id="${this.esc(item.cartItemId)}">Remove</button>
@@ -506,7 +683,7 @@ class ShoppingCart {
         return `
             <div class="cart-item" data-id="${this.esc(item.cartItemId)}">
                 <div class="cart-item-image">
-                    <img src="${this.esc(item.image)}" alt="${this.esc(item.name)}" loading="lazy">
+                    <img src="${this.esc(item.image)}" alt="${this.esc(item.name)}" loading="lazy" onerror="this.onerror=null;this.src='images/products/product-1-front.jpg';">
                 </div>
                 <div class="cart-item-details">
                     <h3 class="cart-item-name">${this.esc(item.name)}</h3>
@@ -515,8 +692,8 @@ class ShoppingCart {
                         <span>Color: ${this.esc(item.color || '-')}</span>
                     </div>
                     <div class="cart-item-price">
-                        <span class="price-current">$${Number(item.price).toFixed(2)}</span>
-                        ${Number(item.originalPrice) > Number(item.price) ? `<span class="price-original">$${Number(item.originalPrice).toFixed(2)}</span>` : ''}
+                        <span class="price-current">${formatMoney(item.price, 2)}</span>
+                        ${Number(item.originalPrice) > Number(item.price) ? `<span class="price-original">${formatMoney(item.originalPrice, 2)}</span>` : ''}
                     </div>
                 </div>
                 <div class="cart-item-actions">
@@ -525,7 +702,7 @@ class ShoppingCart {
                         <input type="number" class="qty-input" value="${item.quantity}" min="1" max="10" data-id="${this.esc(item.cartItemId)}">
                         <button class="qty-btn qty-plus" data-id="${this.esc(item.cartItemId)}"><i class="fas fa-plus"></i></button>
                     </div>
-                    <div class="item-total">$${(Number(item.price) * Number(item.quantity)).toFixed(2)}</div>
+                    <div class="item-total">${formatMoney(Number(item.price) * Number(item.quantity), 2)}</div>
                     <div class="cart-item-buttons">
                         <button class="btn-text save-for-later-btn" data-id="${this.esc(item.cartItemId)}"><i class="far fa-bookmark"></i> Save for Later</button>
                         <button class="btn-text remove-item" data-id="${this.esc(item.cartItemId)}"><i class="far fa-trash-alt"></i> Remove</button>
@@ -547,20 +724,32 @@ class ShoppingCart {
     }
 
     getCartSummaryHTML() {
-        const subtotal = this.getTotal();
+        // High-impact UX hardening (pre-launch)
+        const backendSubtotal = Number(this.backendSummary?.subtotal);
+        const backendDiscount = Number(this.backendSummary?.discount);
+        const backendShipping = Number(this.backendSummary?.shipping_amount);
+        const backendTax = Number(this.backendSummary?.tax);
+        const backendTotal = Number(this.backendSummary?.total);
+
+        const subtotal = Number.isFinite(backendSubtotal) ? backendSubtotal : this.getTotal();
         const originalTotal = this.getOriginalTotal();
         const savings = this.getSavings();
-        const shipping = subtotal > 100 ? 0 : 10;
-        const tax = subtotal * 0.08;
-        const total = subtotal + shipping + tax;
+        const discount = Number.isFinite(backendDiscount) ? Math.max(0, backendDiscount) : 0;
+        const shipping = Number.isFinite(backendShipping)
+            ? backendShipping
+            : (subtotal >= LOCALE_CONFIG.shippingThreshold ? 0 : LOCALE_CONFIG.shippingFee);
+        const taxableAmount = Math.max(0, subtotal - discount + shipping);
+        const tax = Number.isFinite(backendTax) ? backendTax : taxableAmount * LOCALE_CONFIG.taxRate;
+        const total = Number.isFinite(backendTotal) ? backendTotal : subtotal - discount + shipping + tax;
 
         return `
             <h3>Order Summary</h3>
-            <div class="summary-row"><span>Subtotal (${this.getItemCount()} items)</span><span>$${subtotal.toFixed(2)}</span></div>
-            ${savings > 0 ? `<div class="summary-row savings"><span>You Save</span><span>-$${savings.toFixed(2)}</span></div>` : ''}
-            <div class="summary-row"><span>Shipping</span><span>${shipping === 0 ? 'FREE' : '$' + shipping.toFixed(2)}</span></div>
-            <div class="summary-row"><span>Tax</span><span>$${tax.toFixed(2)}</span></div>
-            <div class="summary-row total"><strong>Total</strong><strong>$${total.toFixed(2)}</strong></div>
+            <div class="summary-row"><span>Subtotal (${this.getItemCount()} items)</span><span>${formatMoney(subtotal, 2)}</span></div>
+            ${discount > 0 ? `<div class="summary-row savings"><span>Discount</span><span>-${formatMoney(discount, 2)}</span></div>` : ''}
+            ${savings > 0 ? `<div class="summary-row savings"><span>You Save</span><span>-${formatMoney(savings, 2)}</span></div>` : ''}
+            <div class="summary-row"><span>Shipping</span><span>${shipping === 0 ? formatMoney(0, 2) : formatMoney(shipping, 2)}</span></div>
+            <div class="summary-row"><span>${LOCALE_CONFIG.taxLabel} (${LOCALE_CONFIG.taxRate * 100}%)</span><span>${formatMoney(tax, 2)}</span></div>
+            <div class="summary-row total"><strong>Total</strong><strong>${formatMoney(total, 2)}</strong></div>
             <button class="btn btn-primary btn-block checkout-btn">Proceed to Checkout</button>
             <a href="index.html" class="btn btn-secondary btn-block">Continue Shopping</a>
         `;
@@ -624,14 +813,18 @@ class ShoppingCart {
         if (checkoutBtn) {
             checkoutBtn.addEventListener('click', (e) => {
                 e.preventDefault();
+                // Audit Ref: Loading states don't cover checkout action.
+                this.setButtonLoading(checkoutBtn, true, 'Redirecting...');
 
                 if (!this.items.length) {
+                    this.setButtonLoading(checkoutBtn, false);
                     this.showNotification('Your cart is empty', 'error');
                     return;
                 }
 
                 if (!this.isAuthenticated()) {
                     sessionStorage.setItem('returnUrl', 'checkout.html');
+                    this.setButtonLoading(checkoutBtn, false);
                     this.showNotification('Please login to continue', 'error');
                     window.location.href = 'login.html';
                     return;

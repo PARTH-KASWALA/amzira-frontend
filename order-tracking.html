@@ -3,6 +3,37 @@
 <html>
 <head>
     <title>Track Order - AMZIRA</title>
+    <link rel="stylesheet" href="css/main.css">
+    <link rel="stylesheet" href="css/responsive.css">
+    <!-- Fallback styles for JavaScript-disabled browsers -->
+    <noscript>
+        <style>
+            .mobile-menu {
+                display: block !important;
+                position: relative !important;
+                transform: none !important;
+                box-shadow: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .mobile-menu-toggle {
+                display: none !important;
+            }
+
+            .nav-desktop {
+                display: none !important;
+            }
+
+            @media (min-width: 1024px) {
+                .mobile-menu {
+                    display: none !important;
+                }
+                .nav-desktop {
+                    display: flex !important;
+                }
+            }
+        </style>
+    </noscript>
 </head>
 <body>
     <div class="tracking-container">

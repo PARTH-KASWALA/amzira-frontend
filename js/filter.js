@@ -4,9 +4,11 @@
    =================================== */
 
 class ProductFilter {
-    constructor(products) {
+    constructor(products, options = {}) {
         this.allProducts = products;
         this.filteredProducts = [...products];
+        this.categorySlug = String(options.categorySlug || '').toLowerCase();
+        this.isComingSoon = Boolean(options.isComingSoon);
         this.activeFilters = {
             categories: [],
             colors: [],
@@ -17,8 +19,9 @@ class ProductFilter {
         };
         this.sortBy = 'featured';
         this.currentPage = 1;
-        this.itemsPerPage = 12;
+        this.itemsPerPage = 24;
         this._listeners = [];
+        this.renderTimeout = null;
         
         // Parse URL parameters and apply filters
         this.parseURLFilters();
@@ -48,7 +51,7 @@ class ProductFilter {
             // Category filter
             const cat = urlParams.get('cat');
             if (cat) {
-                this.activeFilters.categories.push(cat);
+                this.activeFilters.categories.push(cat.toLowerCase());
             }
 
             // Occasion filter
@@ -68,13 +71,18 @@ class ProductFilter {
             // Collection filter (map to categories for now)
             const collection = urlParams.get('collection');
             if (collection) {
-                this.activeFilters.categories.push(collection);
+                this.activeFilters.categories.push(collection.toLowerCase());
             }
 
             // Style filter
             const style = urlParams.get('style');
             if (style) {
-                this.activeFilters.categories.push(style);
+                this.activeFilters.categories.push(style.toLowerCase());
+            }
+
+            const page = Number(urlParams.get('page'));
+            if (Number.isInteger(page) && page > 0) {
+                this.currentPage = page;
             }
 
             // Pre-check the filter checkboxes based on URL params
@@ -108,7 +116,7 @@ class ProductFilter {
     init() {
         this.setupEventListeners();
         this.renderFilters();
-        this.applyFilters();
+        this.applyFilters({ resetPage: false });
     }
     
     setupEventListeners() {
@@ -184,6 +192,10 @@ class ProductFilter {
             }
         });
         this._listeners = [];
+        if (this.renderTimeout) {
+            clearTimeout(this.renderTimeout);
+            this.renderTimeout = null;
+        }
     }
     
     addFilter(type, value) {
@@ -209,6 +221,7 @@ class ProductFilter {
             colors: [],
             sizes: [],
             occasions: [],
+            fabrics: [],
             priceRange: { min: 0, max: 50000 }
         };
         
@@ -221,33 +234,56 @@ class ProductFilter {
         this.renderActiveFilters();
     }
     
-    applyFilters() {
+    applyFilters(options = {}) {
+        const { resetPage = true } = options;
+        if (resetPage) {
+            this.currentPage = 1;
+            this.updatePageParam(1, true);
+        }
         // Start with all products
         let filtered = [...this.allProducts];
         
         // Filter by categories
         if (this.activeFilters.categories.length > 0) {
-            filtered = filtered.filter(product => 
-                this.activeFilters.categories.includes(product.subcategory)
-            );
+            filtered = filtered.filter(product => {
+                const normalized = this.normalizeForDisplay(product);
+                const categoryValue = String(
+                    product.subcategory ||
+                    normalized?.category ||
+                    product?.category?.name ||
+                    product?.category ||
+                    ''
+                ).toLowerCase();
+                return this.activeFilters.categories.includes(categoryValue);
+            });
         }
         
         // Filter by colors
         if (this.activeFilters.colors.length > 0) {
-            filtered = filtered.filter(product => 
-                product.colors && product.colors.some(color => 
-                    this.activeFilters.colors.includes(color.name.toLowerCase())
-                )
-            );
+            filtered = filtered.filter(product => {
+                const normalized = this.normalizeForDisplay(product);
+                const colors = Array.isArray(normalized?.colors) && normalized.colors.length
+                    ? normalized.colors
+                    : (Array.isArray(product.colors) ? product.colors : []);
+                if (!colors.length && product.color) {
+                    return this.activeFilters.colors.includes(String(product.color).toLowerCase());
+                }
+                return colors.some(color => {
+                    const name = String(color?.name || color || '').toLowerCase();
+                    return this.activeFilters.colors.includes(name);
+                });
+            });
         }
         
         // Filter by sizes
         if (this.activeFilters.sizes.length > 0) {
-            filtered = filtered.filter(product => 
-                product.sizes && product.sizes.some(size => 
-                    this.activeFilters.sizes.includes(size)
-                )
-            );
+            filtered = filtered.filter(product => {
+                const normalized = this.normalizeForDisplay(product);
+                const sizes = Array.isArray(normalized?.sizes) && normalized.sizes.length
+                    ? normalized.sizes
+                    : (Array.isArray(product.sizes) ? product.sizes : []);
+                return sizes.some(size => this.activeFilters.sizes.includes(size));
+            });
         }
         
         // Filter by occasions
@@ -268,7 +304,14 @@ class ProductFilter {
         
         // Filter by price range
         filtered = filtered.filter(product => {
-            const price = product.salePrice || product.price;
+            const normalized = this.normalizeForDisplay(product);
+            const price = Number(
+                normalized?.price ??
+                normalized?.sale_price ??
+                normalized?.salePrice ??
+                normalized?.price ??
+                0
+            );
             return price >= this.activeFilters.priceRange.min && 
                    price <= this.activeFilters.priceRange.max;
         });
@@ -285,19 +328,21 @@ class ProductFilter {
         switch (this.sortBy) {
             case 'price-low-high':
                 products.sort((a, b) => 
-                    (a.salePrice || a.price) - (b.salePrice || b.price)
+                    (this.normalizeForDisplay(a)?.price ?? a.salePrice ?? a.price ?? 0) -
+                    (this.normalizeForDisplay(b)?.price ?? b.salePrice ?? b.price ?? 0)
                 );
                 break;
             
             case 'price-high-low':
                 products.sort((a, b) => 
-                    (b.salePrice || b.price) - (a.salePrice || a.price)
+                    (this.normalizeForDisplay(b)?.price ?? b.salePrice ?? b.price ?? 0) -
+                    (this.normalizeForDisplay(a)?.price ?? a.salePrice ?? a.price ?? 0)
                 );
                 break;
             
             case 'newest':
                 // Assuming newer products have higher IDs
-                products.sort((a, b) => b.id.localeCompare(a.id));
+                products.sort((a, b) => String(b.id || '').localeCompare(String(a.id || '')));
                 break;
             
             case 'rating':
@@ -328,38 +373,126 @@ class ProductFilter {
             container.innerHTML = this.getNoResultsHTML();
             return;
         }
-        
-        container.innerHTML = paginatedProducts.map(product => 
-            this.createProductCardHTML(product)
-        ).join('');
-        
-        // Attach event listeners to new product cards
-        this.attachProductEventListeners();
-        
-        // Attach quick add listeners
-        if (window.quickAdd && typeof window.quickAdd.attachQuickAddListeners === 'function') {
-            setTimeout(() => window.quickAdd.attachQuickAddListeners(), 100);
+
+        if (this.renderTimeout) {
+            clearTimeout(this.renderTimeout);
         }
-        
-        // Render pagination
-        this.renderPagination();
+
+        container.innerHTML = `
+            <div style="grid-column:1/-1; text-align:center; padding:48px 20px;">
+                <div class="spinner"></div>
+                <p>Loading products...</p>
+            </div>
+        `;
+
+        this.renderTimeout = setTimeout(() => {
+            if (container.querySelector('.spinner')) {
+                container.innerHTML = `
+                    <div class="error-state" style="grid-column:1/-1; text-align:center; padding:60px 20px;">
+                        <i class="fas fa-exclamation-triangle" style="font-size:48px; color:var(--text-light); margin-bottom:16px;"></i>
+                        <h3 style="margin-bottom:12px;">Unable to Load Products</h3>
+                        <p style="color:var(--text-gray); margin-bottom:24px;">Please check your connection and try again.</p>
+                        <button class="btn btn-primary" onclick="window.location.reload()">
+                            <i class="fas fa-sync"></i> Retry
+                        </button>
+                    </div>
+                `;
+            }
+        }, 10000);
+
+        setTimeout(() => {
+            container.innerHTML = paginatedProducts.map(product =>
+                this.createProductCardHTML(product)
+            ).join('');
+
+            if (this.renderTimeout) {
+                clearTimeout(this.renderTimeout);
+                this.renderTimeout = null;
+            }
+
+            // Attach event listeners to new product cards
+            this.attachProductEventListeners();
+
+            // Attach quick add listeners
+            if (window.quickAdd && typeof window.quickAdd.attachQuickAddListeners === 'function') {
+                setTimeout(() => window.quickAdd.attachQuickAddListeners(), 100);
+            }
+
+            // Render pagination
+            this.renderPagination();
+        }, 50);
+    }
+
+    getFilterCount(filterType, filterValue) {
+        const target = String(filterValue || '').toLowerCase();
+        return this.allProducts.filter(product => {
+            switch (filterType) {
+                case 'categories': {
+                    const category = String(product?.category?.slug || product?.category || '').toLowerCase();
+                    const subcategory = String(product?.subcategory || '').toLowerCase();
+                    return category === target || subcategory === target;
+                }
+                case 'occasions': {
+                    if (!Array.isArray(product?.occasions)) return false;
+                    return product.occasions.some(occ => String(occ).toLowerCase() === target);
+                }
+                case 'fabrics': {
+                    return String(product?.fabric || '').toLowerCase() === target;
+                }
+                case 'colors': {
+                    if (!Array.isArray(product?.colors)) return false;
+                    return product.colors.some(color => String(color).toLowerCase() === target);
+                }
+                default:
+                    return false;
+            }
+        }).length;
+    }
+
+    normalizeForDisplay(product) {
+        if (window.ProductNormalizer && typeof window.ProductNormalizer.normalize === 'function') {
+            const normalized = window.ProductNormalizer.normalize(product);
+            if (normalized) {
+                return { ...product, ...normalized };
+            }
+        }
+        return product;
     }
     
     createProductCardHTML(product) {
-        const discountPercent = Math.round(
-            ((product.price - (product.salePrice || product.price)) / product.price) * 100
+        const normalized = this.normalizeForDisplay(product);
+        const basePrice = Number(normalized?.basePrice ?? normalized?.base_price ?? normalized?.price ?? 0);
+        const salePrice = Number(normalized?.price ?? normalized?.sale_price ?? normalized?.salePrice ?? basePrice);
+        const currentPrice = Number.isFinite(salePrice) && salePrice > 0 ? salePrice : basePrice;
+        const originalPrice = Number.isFinite(basePrice) && basePrice >= currentPrice ? basePrice : currentPrice;
+        const discountPercent = originalPrice > currentPrice
+            ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100)
+            : 0;
+        const defaultVariantId = Number(
+            product?.default_variant?.variant_id ??
+            product?.default_variant?.id ??
+            product?.default_variant_id ??
+            product?.defaultVariantId
         );
+        const hasDefaultVariant = Number.isInteger(defaultVariantId) && defaultVariantId > 0;
+        const listingAddToCartDisabled = product?.listing_add_to_cart_enabled === false;
+        const categoryLabel = normalized?.category || product?.category?.name || product?.subcategory || product?.category || '';
+        const rawSlug = product?.slug || product?.handle || product?.url_slug || product?.seo_slug || product?.permalink || '';
+        const safeSlug = typeof rawSlug === 'string' ? rawSlug.trim() : String(rawSlug || '').trim();
+        const detailHref = safeSlug ? `product-detail.html?slug=${encodeURIComponent(safeSlug)}` : '#';
+        const imageSrc = normalized?.mainImage || product?.primary_image || (product?.images ? product.images[0] : product.image) || 'images/products/product-1-front.jpg';
         
         const stockStatus = this.getStockStatus(product);
         
         return `
-            <div class="product-card" data-id="${this._esc(product.id)}">
+            <div class="product-card" data-id="${this._esc(product.id)}" data-slug="${this._esc(safeSlug)}">
                 <div class="product-image">
-                    <img src="${this._esc(product.images ? product.images[0] : product.image)}" 
+                    <img src="${this._esc(imageSrc)}" 
                          alt="${this._esc(product.name)}"
-                         loading="lazy">
-                    ${product.badge ? 
-                        `<span class="product-badge ${this._esc(product.badge.toLowerCase())}">${this._esc(product.badge)}</span>` 
+                         loading="lazy"
+                         onerror="this.onerror=null;this.src='images/products/product-1-front.jpg';">
+                    ${normalized?.badge ? 
+                        `<span class="product-badge ${this._esc(String(normalized.badge).toLowerCase())}">${this._esc(normalized.badge)}</span>` 
                         : ''}
                     ${stockStatus.html}
                     <div class="product-actions">
@@ -369,24 +502,33 @@ class ProductFilter {
                         <button class="product-action-btn quick-view-btn" data-id="${this._esc(product.id)}">
                             <i class="far fa-eye"></i>
                         </button>
-                        <button class="product-action-btn quick-add-btn" data-id="${this._esc(product.id)}">
-                            <i class="fas fa-cart-plus"></i>
-                        </button>
+                        ${
+                            listingAddToCartDisabled
+                                ? `<a class="product-action-btn" href="${detailHref}" aria-label="View Details"><i class="fas fa-arrow-right"></i></a>`
+                                : `<button class="product-action-btn quick-add-btn ${hasDefaultVariant ? '' : 'disabled'}" data-id="${this._esc(product.id)}" ${hasDefaultVariant ? `data-variant-id="${this._esc(defaultVariantId)}"` : ''} ${hasDefaultVariant ? '' : 'disabled title="Please select size/color"'}>
+                                    <i class="fas fa-cart-plus"></i>
+                                   </button>`
+                        }
                     </div>
                 </div>
                 <div class="product-info">
-                    <p class="product-category">${this._esc(product.subcategory)}</p>
-                    <h3 class="product-name">${this._esc(product.name)}</h3>
+                    <p class="product-category">${this._esc(categoryLabel)}</p>
+                    <h3 class="product-name">${this._esc(normalized?.name || product.name)}</h3>
                     ${this.getSizeAvailabilityHTML(product)}
                     <div class="product-price">
-                        <span class="price-current">$${product.salePrice || product.price}</span>
-                        ${product.salePrice ? `<span class="price-original">$${product.price}</span>` : ''}
+                        <span class="price-current">₹${Number(currentPrice).toLocaleString('en-IN')}</span>
+                        ${originalPrice > currentPrice ? `<span class="price-original">₹${Number(originalPrice).toLocaleString('en-IN')}</span>` : ''}
                         ${discountPercent > 0 ? `<span class="price-discount">${discountPercent}% OFF</span>` : ''}
                     </div>
-                    ${product.rating ? `
+                    ${
+                        listingAddToCartDisabled
+                            ? '<a class="btn btn-secondary btn-block" href="' + detailHref + '">View Details</a>'
+                            : (!hasDefaultVariant ? '<button class="btn btn-primary btn-block" disabled>Please select size/color</button>' : '')
+                    }
+                    ${normalized?.rating ? `
                         <div class="product-rating">
-                            <span class="stars">${this.generateStars(product.rating)}</span>
-                            <span class="rating-count">(${product.reviews || 0})</span>
+                            <span class="stars">${this.generateStars(normalized.rating)}</span>
+                            <span class="rating-count">(${normalized.reviews || 0})</span>
                         </div>
                     ` : ''}
                 </div>
@@ -395,6 +537,17 @@ class ProductFilter {
     }
     
     getStockStatus(product) {
+        if (typeof product?.stock_quantity !== 'undefined') {
+            const qty = Number(product.stock_quantity || 0);
+            if (qty <= 0) {
+                return { status: 'out-of-stock', html: '<span class="stock-badge out-of-stock">Out of Stock</span>' };
+            }
+            if (qty <= 5) {
+                return { status: 'low-stock', html: '<span class="stock-badge low-stock">Only Few Left</span>' };
+            }
+            return { status: 'in-stock', html: '<span class="stock-badge in-stock">In Stock</span>' };
+        }
+
         if (!product.stockBySizes) {
             return { status: 'in-stock', html: '' };
         }
@@ -465,12 +618,33 @@ class ProductFilter {
     }
     
     getNoResultsHTML() {
+        const categoryLinks = `
+            <div class="empty-actions" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:14px;">
+                <a class="btn btn-secondary" href="men.html">Men</a>
+                <a class="btn btn-secondary" href="women.html">Women</a>
+                <a class="btn btn-secondary" href="kids.html">Kids</a>
+            </div>
+        `;
+
+        if (!this.allProducts.length || this.isComingSoon) {
+            const label = this.categorySlug ? `${this.categorySlug.charAt(0).toUpperCase() + this.categorySlug.slice(1)} collection` : 'This category';
+            return `
+                <div class="no-results">
+                    <i class="fas fa-store-slash"></i>
+                    <h3>Coming Soon</h3>
+                    <p>${this._esc(label)} is not available yet. Please check back soon.</p>
+                    ${categoryLinks}
+                </div>
+            `;
+        }
+
         return `
             <div class="no-results">
                 <i class="fas fa-search"></i>
                 <h3>No products found</h3>
                 <p>Try adjusting your filters to find what you're looking for.</p>
-                <button class="btn btn-primary clear-filters">Clear All Filters</button>
+                <button class="btn btn-primary clear-filters" onclick="productFilter.clearAllFilters()">Clear All Filters</button>
+                ${categoryLinks}
             </div>
         `;
     }
@@ -497,24 +671,30 @@ class ProductFilter {
         }
         
         container.style.display = 'flex';
+        // High-impact UX hardening (pre-launch)
+        const headingHtml = '<span style="font-size:12px;color:var(--text-light);font-weight:600;align-self:center;">Active filters:</span>';
         container.innerHTML = filters.map(filter => `
             <span class="filter-tag">
-                ${filter.value}
-                <button onclick="productFilter.removeFilter('${filter.type}', '${filter.value}')">
+                ${this._esc(filter.value)}
+                <button onclick="productFilter.removeFilter(decodeURIComponent('${encodeURIComponent(filter.type)}'), decodeURIComponent('${encodeURIComponent(filter.value)}'))">
                     <i class="fas fa-times"></i>
                 </button>
             </span>
         `).join('') + `
-            <button class="filter-tag clear-all" onclick="productFilter.clearAllFilters()">
-                Clear All
+            <button class="filter-tag clear-all" onclick="productFilter.clearAllFilters()" aria-label="Clear all filters">
+                Clear filters
             </button>
         `;
+        container.insertAdjacentHTML('afterbegin', headingHtml);
     }
     
     updateProductCount() {
         const countElement = document.querySelector('.products-count');
         if (countElement) {
-            countElement.textContent = `${this.filteredProducts.length} Products`;
+            // High-impact UX hardening (pre-launch)
+            const count = this.filteredProducts.length;
+            const noun = count === 1 ? 'Product' : 'Products';
+            countElement.textContent = `${count} ${noun}`;
         }
     }
     
@@ -566,13 +746,49 @@ class ProductFilter {
         if (page < 1 || page > totalPages) return;
         
         this.currentPage = page;
+        this.updatePageParam(page);
         this.renderProducts();
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    updatePageParam(page, replace = false) {
+        try {
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', String(page));
+            if (replace) {
+                window.history.replaceState({}, '', url.toString());
+            } else {
+                window.history.pushState({}, '', url.toString());
+            }
+        } catch (e) {
+            // Ignore URL update failures
+        }
+    }
     
     renderFilters() {
-        // This would generate the filter sidebar HTML
-        // For now, assuming it's in the HTML already
+        document.querySelectorAll('.filter-option').forEach(option => {
+            const checkbox = option.querySelector('input[type="checkbox"]');
+            if (!checkbox) return;
+
+            const filterType = checkbox.getAttribute('data-filter-type');
+            const filterValue = checkbox.value;
+            const count = this.getFilterCount(filterType, filterValue);
+
+            const label = option.querySelector('span') || option.querySelector('label');
+            if (!label) return;
+
+            const existing = label.querySelector('.filter-count');
+            if (existing) {
+                existing.textContent = `(${count})`;
+                return;
+            }
+
+            const countBadge = document.createElement('span');
+            countBadge.className = 'filter-count';
+            countBadge.textContent = `(${count})`;
+            countBadge.style.cssText = 'color: var(--text-light); font-size: 12px; margin-left: 4px;';
+            label.appendChild(countBadge);
+        });
     }
     
     attachProductEventListeners() {
@@ -580,8 +796,12 @@ class ProductFilter {
         document.querySelectorAll('.product-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 if (!e.target.closest('button')) {
-                    const id = card.getAttribute('data-id');
-                    window.location.href = `product-detail.html?id=${id}`;
+                    const slug = card.getAttribute('data-slug') || '';
+                    if (!slug) {
+                        console.warn('Product slug missing for PDP navigation.');
+                        return;
+                    }
+                    window.location.href = `product-detail.html?slug=${encodeURIComponent(String(slug).trim())}`;
                 }
             });
         });
@@ -614,6 +834,184 @@ class ProductFilter {
 
 // Initialize filter when page loads and dependencies ready
 document.addEventListener('DOMContentLoaded', function() {
+    // Audit Ref: [BLOCKER] Infinite Spinner on API Failure.
+    const PRODUCTS_FETCH_TIMEOUT_MS = 10000;
+
+    function getCurrentCategorySlug() {
+        const pathname = (window.location?.pathname || '').toLowerCase();
+        const fileName = pathname.split('/').pop() || '';
+        if (fileName === 'men.html') return 'men';
+        if (fileName === 'women.html') return 'women';
+        if (fileName === 'kids.html') return 'kids';
+        return '';
+    }
+
+    function toSafeNumber(value) {
+        const parsed = Number(value);
+        return Number.isFinite(parsed) ? parsed : NaN;
+    }
+
+    function hasSellableVariant(product) {
+        const defaultQty = toSafeNumber(product?.default_variant?.stock_quantity);
+        if (Number.isFinite(defaultQty) && defaultQty > 0) return true;
+        if (Array.isArray(product?.variants)) {
+            return product.variants.some((variant) => toSafeNumber(variant?.stock_quantity) > 0);
+        }
+        const stockQty = toSafeNumber(product?.stock_quantity);
+        return (Number.isFinite(stockQty) && stockQty > 0) || product?.in_stock === true;
+    }
+
+    function hasProductImage(product) {
+        if (typeof product?.primary_image === 'string' && product.primary_image.trim()) return true;
+        if (Array.isArray(product?.images) && product.images.length > 0) return true;
+        return Boolean(product?.image || product?.image_front);
+    }
+
+    function isRenderableProduct(product) {
+        if (!product || typeof product !== 'object') return false;
+        const hasId = product?.id != null && String(product.id).trim() !== '';
+        const hasName = typeof product?.name === 'string' && product.name.trim() !== '';
+        const sale = toSafeNumber(product?.sale_price);
+        const base = toSafeNumber(product?.base_price ?? product?.price);
+        const hasPrice = (Number.isFinite(sale) && sale >= 0) || (Number.isFinite(base) && base >= 0);
+        return Boolean(hasId && hasName && hasPrice && hasProductImage(product) && hasSellableVariant(product));
+    }
+
+    function getPageAudience() {
+        const path = String(window.location?.pathname || '').toLowerCase();
+        if (path.includes('women')) return 'women';
+        if (path.includes('kids')) return 'kids';
+        if (path.includes('men')) return 'men';
+        return null;
+    }
+
+    function normalizeCategory(value) {
+        return String(value || '')
+            .trim()
+            .toLowerCase()
+            .replace(/['"]/g, '')
+            .replace(/[_\s]+/g, '-');
+    }
+
+    function buildCategoryAliases(categories) {
+        const aliases = {};
+        if (!Array.isArray(categories)) return aliases;
+
+        const register = (raw, target) => {
+            const key = normalizeCategory(raw);
+            if (key) aliases[key] = target;
+        };
+
+        const hasChildren = categories.some((entry) => Array.isArray(entry?.children));
+        if (hasChildren) {
+            categories.forEach((l1) => {
+                const l1Slug = normalizeCategory(l1?.slug || l1?.name || '');
+                if (!l1Slug) return;
+                register(l1?.slug, l1Slug);
+                register(l1?.name, l1Slug);
+                (l1?.children || []).forEach((l2) => {
+                    register(l2?.slug, l1Slug);
+                    register(l2?.name, l1Slug);
+                    (l2?.children || []).forEach((l3) => {
+                        register(l3?.slug, l1Slug);
+                        register(l3?.name, l1Slug);
+                    });
+                });
+            });
+            return aliases;
+        }
+
+        const byId = new Map();
+        categories.forEach((category) => {
+            if (category?.id != null) byId.set(category.id, category);
+        });
+
+        categories.forEach((category) => {
+            const slug = normalizeCategory(category?.slug || '');
+            const name = normalizeCategory(category?.name || '');
+            const parent = category?.parent_id ? byId.get(category.parent_id) : null;
+            const parentSlug = normalizeCategory(parent?.slug || parent?.name || '');
+            const target = parentSlug || slug;
+            if (slug) aliases[slug] = target || slug;
+            if (name) aliases[name] = target || name;
+        });
+
+        return aliases;
+    }
+
+    async function getCategoryAliases() {
+        const cacheKey = 'amzira_category_aliases_v1';
+        const cacheTtlMs = 10 * 60 * 1000;
+        try {
+            const cachedRaw = sessionStorage.getItem(cacheKey);
+            if (cachedRaw) {
+                const cached = JSON.parse(cachedRaw);
+                if (cached?.timestamp && cached?.aliases && (Date.now() - cached.timestamp) < cacheTtlMs) {
+                    return cached.aliases;
+                }
+            }
+        } catch (_) {
+            sessionStorage.removeItem(cacheKey);
+        }
+
+        try {
+            if (!window.AMZIRA?.categories?.getCategories && !window.AMZIRA?.apiRequest) {
+                return {};
+            }
+            const response = window.AMZIRA?.apiRequest
+                ? await window.AMZIRA.apiRequest('/categories?include_children=true')
+                : await window.AMZIRA.categories.getCategories();
+            const list = response?.data
+                || response?.categories
+                || response?.results
+                || (Array.isArray(response) ? response : []);
+            const aliases = buildCategoryAliases(list);
+            sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), aliases }));
+            return aliases;
+        } catch (_) {
+            return {};
+        }
+    }
+
+    function resolveCategorySlug(product, aliases) {
+        const candidates = [
+            product?.category?.slug,
+            product?.category,
+            product?.category?.name,
+            product?.subcategory,
+            product?.sub_category
+        ].filter(Boolean);
+
+        for (const candidate of candidates) {
+            const normalized = normalizeCategory(candidate);
+            if (!normalized) continue;
+            if (aliases && aliases[normalized]) return aliases[normalized];
+            return normalized;
+        }
+        return '';
+    }
+
+    function resolvePageAudience(rawAudience, aliases) {
+        const normalized = normalizeCategory(rawAudience);
+        if (aliases && aliases[normalized]) return aliases[normalized];
+        return normalized;
+    }
+
+    function filterProductsForPage(products, pageAudience, aliases) {
+        if (!pageAudience) return Array.isArray(products) ? products : [];
+        return (Array.isArray(products) ? products : []).filter((product) => {
+            const category = resolveCategorySlug(product, aliases);
+            const productId = product?.id ?? product?._id ?? product?.product_id ?? '';
+
+            console.log('Audience resolution', {
+                productId,
+                category,
+                page: pageAudience
+            });
+            return category === pageAudience;
+        });
+    }
+
     async function ensureApiLayer() {
         if (window.AMZIRA && window.AMZIRA.apiRequest) return;
         await new Promise((resolve, reject) => {
@@ -634,14 +1032,59 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    async function getProductsWithTimeout(params) {
+        if (!window.AMZIRA?.products?.getProducts) {
+            throw new Error('API client unavailable');
+        }
+
+        const timeoutPromise = new Promise((_, reject) => {
+            window.setTimeout(() => reject(new Error('Product request timed out')), PRODUCTS_FETCH_TIMEOUT_MS);
+        });
+
+        return Promise.race([
+            window.AMZIRA.products.getProducts(params),
+            timeoutPromise
+        ]);
+    }
+
+    async function resolveProducts(params) {
+        const attempts = [
+            params,
+            { category: params?.category, page: 1, limit: 20 },
+            { category_slug: params?.category, page: 1, limit: 20 },
+            { page: 1, limit: 20 }
+        ];
+
+        for (const attempt of attempts) {
+            try {
+                console.warn('Trying product fetch with:', attempt);
+                return await getProductsWithTimeout(attempt);
+            } catch (err) {
+                if (err?.status !== 422) {
+                    throw err;
+                }
+                console.warn('422 rejected params:', attempt, err?.payload || err);
+            }
+        }
+
+        throw new Error('All product query strategies failed');
+    }
+
     // Function to initialize filter
     async function initFilter() {
-        const cacheKey = 'amziraProductsCacheV1';
+        const currentCategory = getCurrentCategorySlug() || 'all';
+        const cacheKey = `amziraProductsCacheV1_${currentCategory}`;
         const cacheTtlMs = 5 * 60 * 1000;
 
         try {
             await ensureApiLayer();
             let products = [];
+            const aliases = await getCategoryAliases();
+            const effectiveCategory = (currentCategory && currentCategory !== 'all')
+                ? (aliases[currentCategory] || currentCategory)
+                : currentCategory;
+            const pageAudience = resolvePageAudience(getPageAudience(), aliases);
+            const shouldFetchAll = ['women', 'men', 'kids'].includes(pageAudience);
             const cachedRaw = sessionStorage.getItem(cacheKey);
             if (cachedRaw) {
                 const cached = JSON.parse(cachedRaw);
@@ -651,10 +1094,9 @@ document.addEventListener('DOMContentLoaded', function() {
             }
 
             if (!products.length) {
-                if (!window.AMZIRA?.products?.getProducts) {
-                    throw new Error('API client unavailable');
-                }
-                const data = await window.AMZIRA.products.getProducts({ limit: 1000 });
+                const data = !shouldFetchAll && effectiveCategory
+                    ? await resolveProducts({ category: effectiveCategory, limit: 100 })
+                    : await resolveProducts({ limit: 100 });
                 products = data?.products || data?.results || (Array.isArray(data) ? data : []);
                 sessionStorage.setItem(cacheKey, JSON.stringify({
                     timestamp: Date.now(),
@@ -662,7 +1104,20 @@ document.addEventListener('DOMContentLoaded', function() {
                 }));
             }
 
-            window.productFilter = new ProductFilter(products);
+            const audience = pageAudience;
+            const audienceFiltered = filterProductsForPage(products, audience, aliases);
+            console.log('Filter result', {
+                page: audience,
+                total: products.length,
+                visible: audienceFiltered.length,
+                categories: (Array.isArray(products) ? products : []).map((p) => p?.category?.slug || p?.category || p?.category?.name || '')
+            });
+            const validProducts = Array.isArray(audienceFiltered) ? audienceFiltered.filter(isRenderableProduct) : [];
+            const isComingSoon = validProducts.length === 0;
+            window.productFilter = new ProductFilter(validProducts, {
+                categorySlug: currentCategory,
+                isComingSoon
+            });
         } catch (error) {
             console.error('Error loading products:', error);
             const grid = document.getElementById('productsGrid');
@@ -671,9 +1126,25 @@ document.addEventListener('DOMContentLoaded', function() {
                     <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
                         <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #EF4444; margin-bottom: 16px;"></i>
                         <h3>Unable to Load Products</h3>
-                        <p style="color: #666; margin-bottom: 20px;">Please refresh and try again.</p>
+                        <p style="color: #666; margin-bottom: 14px;">The catalog is currently unavailable or timed out.</p>
+                        <p style="color: #666; margin-bottom: 20px;">You can retry now or browse another category.</p>
+                        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:16px;">
+                            <a class="btn btn-secondary" href="men.html">Men</a>
+                            <a class="btn btn-secondary" href="women.html">Women</a>
+                            <a class="btn btn-secondary" href="kids.html">Kids</a>
+                        </div>
+                        <button class="btn btn-primary" id="retryProductsLoadBtn">
+                            <i class="fas fa-sync"></i> Retry
+                        </button>
                     </div>
                 `;
+                const retryBtn = document.getElementById('retryProductsLoadBtn');
+                if (retryBtn) {
+                    retryBtn.addEventListener('click', () => {
+                        retryBtn.disabled = true;
+                        initFilter();
+                    }, { once: true });
+                }
             }
         }
     }
@@ -700,6 +1171,7 @@ document.addEventListener('DOMContentLoaded', function() {
 */
 class MobileFilterManager {
     constructor() {
+        this.previousBodyOverflow = '';
         this.init();
     }
     
@@ -815,6 +1287,7 @@ class MobileFilterManager {
         const overlay = document.querySelector('.filter-overlay');
         if (sidebar) sidebar.classList.add('active');
         if (overlay) overlay.classList.add('active');
+        this.previousBodyOverflow = document.body.style.overflow;
         document.body.style.overflow = 'hidden';
     }
     
@@ -823,7 +1296,7 @@ class MobileFilterManager {
         const overlay = document.querySelector('.filter-overlay');
         if (sidebar) sidebar.classList.remove('active');
         if (overlay) overlay.classList.remove('active');
-        document.body.style.overflow = '';
+        document.body.style.overflow = this.previousBodyOverflow || '';
     }
     
     showSortModal() {
@@ -849,6 +1322,8 @@ class MobileFilterManager {
         
         document.body.appendChild(modal);
         setTimeout(() => modal.classList.add('active'), 10);
+        const previousOverflow = document.body.style.overflow;
+        document.body.style.overflow = 'hidden';
         
         // Handle selection
         modal.querySelectorAll('.sort-option').forEach(btn => {
@@ -860,14 +1335,20 @@ class MobileFilterManager {
                 sortSelect.value = btn.dataset.value;
                 sortSelect.dispatchEvent(new Event('change'));
                 modal.classList.remove('active');
-                setTimeout(() => modal.remove(), 300);
+                setTimeout(() => {
+                    modal.remove();
+                    document.body.style.overflow = previousOverflow || '';
+                }, 300);
             });
         });
         
         // Close on overlay click
         modal.querySelector('.sort-modal-overlay').addEventListener('click', () => {
             modal.classList.remove('active');
-            setTimeout(() => modal.remove(), 300);
+            setTimeout(() => {
+                modal.remove();
+                document.body.style.overflow = previousOverflow || '';
+            }, 300);
         });
     }
 }
@@ -886,6 +1367,12 @@ window.addEventListener('resize', () => {
     resizeTimerMobile = setTimeout(() => {
         if (window.innerWidth <= 1024 && !document.querySelector('.mobile-filter-trigger')) {
             new MobileFilterManager();
+        } else if (window.innerWidth > 1024) {
+            const sidebar = document.querySelector('.filter-sidebar');
+            const overlay = document.querySelector('.filter-overlay');
+            if (sidebar) sidebar.classList.remove('active');
+            if (overlay) overlay.classList.remove('active');
+            document.body.style.overflow = '';
         }
     }, 250);
 });

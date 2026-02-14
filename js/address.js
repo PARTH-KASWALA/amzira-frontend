@@ -9,6 +9,19 @@ class AddressManager {
         this.cache = [];
         this.lastLoadedAt = 0;
         this.cacheTtlMs = 15000;
+        this.requestTimeoutMs = 10000;
+    }
+
+    async withTimeout(promise, label = 'Request') {
+        let timeoutId;
+        const timeoutPromise = new Promise((_, reject) => {
+            timeoutId = setTimeout(() => reject(new Error(`${label} timed out`)), this.requestTimeoutMs);
+        });
+        try {
+            return await Promise.race([promise, timeoutPromise]);
+        } finally {
+            clearTimeout(timeoutId);
+        }
     }
 
     async ensureApiReady() {
@@ -106,7 +119,10 @@ class AddressManager {
 
         try {
             await this.ensureApiReady();
-            const created = await window.AMZIRA.users.createAddress(this.toBackendPayload(addressData));
+            const created = await this.withTimeout(
+                window.AMZIRA.users.createAddress(this.toBackendPayload(addressData)),
+                'Save address'
+            );
             await this.refresh(true);
             return { success: true, address: this.normalizeAddress(created) };
         } catch (error) {
@@ -126,7 +142,10 @@ class AddressManager {
 
         try {
             await this.ensureApiReady();
-            const updated = await window.AMZIRA.users.updateAddress(addressId, this.toBackendPayload(addressData));
+            const updated = await this.withTimeout(
+                window.AMZIRA.users.updateAddress(addressId, this.toBackendPayload(addressData)),
+                'Update address'
+            );
             await this.refresh(true);
             return { success: true, address: this.normalizeAddress(updated) };
         } catch (error) {
@@ -222,5 +241,6 @@ class AddressManager {
 const AddressManager_Instance = new AddressManager();
 
 if (typeof window !== 'undefined') {
+    window.AddressManagerClass = AddressManager;
     window.AddressManager = AddressManager_Instance;
 }

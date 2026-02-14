@@ -7,7 +7,7 @@
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -707,6 +707,35 @@
             }
         }
     </style>
+    <!-- Fallback styles for JavaScript-disabled browsers -->
+    <noscript>
+        <style>
+            .mobile-menu {
+                display: block !important;
+                position: relative !important;
+                transform: none !important;
+                box-shadow: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .mobile-menu-toggle {
+                display: none !important;
+            }
+
+            .nav-desktop {
+                display: none !important;
+            }
+
+            @media (min-width: 1024px) {
+                .mobile-menu {
+                    display: none !important;
+                }
+                .nav-desktop {
+                    display: flex !important;
+                }
+            }
+        </style>
+    </noscript>
 </head>
 <body>
     <!-- Header (Include existing header) -->
@@ -1038,6 +1067,24 @@
         let editingAddressId = null;
         const PINCODE_PATTERN = /^\d{6}$/;
 
+        function ensureAddressManager() {
+            if (window.AddressManager && typeof window.AddressManager.getAddresses === 'function') {
+                return window.AddressManager;
+            }
+            if (window.AddressManagerClass) {
+                window.AddressManager = new window.AddressManagerClass();
+                return window.AddressManager;
+            }
+            return null;
+        }
+
+        function ensureOrderManager() {
+            if (window.OrderManager && typeof window.OrderManager.getUserOrders === 'function') {
+                return window.OrderManager;
+            }
+            return null;
+        }
+
         function notifyUser(message, type = 'error') {
             if (window.errorHandler) {
                 if (type === 'success' && typeof window.errorHandler.showSuccess === 'function') {
@@ -1110,12 +1157,16 @@
 
         // Load orders
         async function loadOrders() {
+            const orderManager = ensureOrderManager();
+            if (!orderManager) {
+                return;
+            }
             try {
-                await OrderManager.refreshOrders();
+                await orderManager.refreshOrders();
             } catch (_) {
                 // no-op, empty state handles this
             }
-            const orders = OrderManager.getUserOrders();
+            const orders = orderManager.getUserOrders();
             const ordersList = document.getElementById('ordersList');
             const ordersEmpty = document.getElementById('ordersEmpty');
 
@@ -1131,8 +1182,8 @@
             ordersList.innerHTML = orders.map(order => {
                 const orderDate = new Date(order.orderDate);
                 const deliveryDate = new Date(order.expectedDelivery);
-                const statusDisplay = OrderManager.getStatusDisplay(order.orderStatus);
-                const paymentDisplay = OrderManager.getPaymentMethodDisplay(order.paymentMethod);
+                const statusDisplay = orderManager.getStatusDisplay(order.orderStatus);
+                const paymentDisplay = orderManager.getPaymentMethodDisplay(order.paymentMethod);
                 const safeOrderId = esc(order.orderId);
 
                 // Show first 3 items
@@ -1188,12 +1239,17 @@
 
         // Load addresses
         async function loadAddresses() {
+            const addressManager = ensureAddressManager();
+            if (!addressManager) {
+                notifyUser('Address manager is unavailable. Please refresh and try again.');
+                return;
+            }
             try {
-                await AddressManager.refresh(true);
+                await addressManager.refresh(true);
             } catch (_) {
                 notifyUser('Unable to load addresses right now.');
             }
-            const addresses = AddressManager.getAddresses();
+            const addresses = addressManager.getAddresses();
             const addressesList = document.getElementById('addressesList');
             const addressesEmpty = document.getElementById('addressesEmpty');
 
@@ -1217,7 +1273,7 @@
                         <span class="address-name">${esc(addr.name)}</span>
                     </div>
                     <div class="address-details" style="margin: 12px 0;">
-                        ${esc(AddressManager.formatAddress(addr))}
+                        ${esc(addressManager.formatAddress(addr))}
                     </div>
                     <div class="address-mobile" style="margin-bottom: 16px;">
                         <i class="fas fa-phone"></i>
@@ -1237,14 +1293,19 @@
 
         // View order details
         function viewOrderDetails(orderId) {
-            const order = OrderManager.getOrderById(orderId);
+            const orderManager = ensureOrderManager();
+            if (!orderManager) {
+                notifyUser('Order manager is unavailable. Please refresh and try again.');
+                return;
+            }
+            const order = orderManager.getOrderById(orderId);
             if (!order) return;
 
             const modal = document.getElementById('orderDetailModal');
             
             // Set order ID and status
             document.getElementById('modalOrderId').textContent = order.orderId;
-            const statusDisplay = OrderManager.getStatusDisplay(order.orderStatus);
+            const statusDisplay = orderManager.getStatusDisplay(order.orderStatus);
             const statusEl = document.getElementById('modalOrderStatus');
             statusEl.className = `order-status ${order.orderStatus}`;
             statusEl.innerHTML = `<i class="fas fa-${statusDisplay.icon}"></i> ${statusDisplay.label}`;
@@ -1291,11 +1352,15 @@
 
             // Display address
             const addr = order.deliveryAddress;
+            const addressManager = ensureAddressManager();
+            const formattedAddress = addressManager
+                ? addressManager.formatAddress(addr)
+                : `${addr.address || ''}${addr.locality ? `, ${addr.locality}` : ''}, ${addr.city || ''}, ${addr.state || ''} - ${addr.pincode || ''}`;
             document.getElementById('modalDeliveryAddress').innerHTML = `
                 <div class="detail-row">
                     <div class="detail-label" style="text-align: left;">
                         <strong>${esc(addr.name)}</strong><br>
-                        ${esc(AddressManager.formatAddress(addr))}<br>
+                        ${esc(formattedAddress)}<br>
                         Phone: ${esc(addr.mobile)}
                     </div>
                 </div>
@@ -1308,7 +1373,7 @@
             document.getElementById('modalTax').textContent = `₹${order.pricing.tax.toLocaleString('en-IN')}`;
             document.getElementById('modalTotal').textContent = `₹${order.pricing.total.toLocaleString('en-IN')}`;
             
-            const paymentDisplay = OrderManager.getPaymentMethodDisplay(order.paymentMethod);
+            const paymentDisplay = orderManager.getPaymentMethodDisplay(order.paymentMethod);
             document.getElementById('modalPaymentMethod').textContent = paymentDisplay.label;
 
             // Show modal
@@ -1339,7 +1404,12 @@
 
         function editAddress(addressId) {
             editingAddressId = addressId;
-            const address = AddressManager.getAddressById(addressId);
+            const addressManager = ensureAddressManager();
+            if (!addressManager) {
+                notifyUser('Address manager is unavailable. Please refresh and try again.');
+                return;
+            }
+            const address = addressManager.getAddressById(addressId);
             if (!address) return;
 
             const modal = document.getElementById('addressModal');
@@ -1365,7 +1435,12 @@
 
         async function deleteAddress(addressId) {
             if (confirm('Are you sure you want to delete this address?')) {
-                const result = await AddressManager.deleteAddress(addressId);
+                const addressManager = ensureAddressManager();
+                if (!addressManager) {
+                    notifyUser('Address manager is unavailable. Please refresh and try again.');
+                    return;
+                }
+                const result = await addressManager.deleteAddress(addressId);
                 if (result.success) {
                     await loadAddresses();
                 } else if (result.message) {
@@ -1421,14 +1496,20 @@
                 return;
             }
 
+            const addressManager = ensureAddressManager();
+            if (!addressManager) {
+                notifyUser('Address manager is unavailable. Please refresh and try again.');
+                return;
+            }
+
             saveBtn.disabled = true;
             saveBtn.textContent = 'Saving...';
 
             let result;
             if (editingAddressId) {
-                result = await AddressManager.updateAddress(editingAddressId, addressData);
+                result = await addressManager.updateAddress(editingAddressId, addressData);
             } else {
-                result = await AddressManager.addAddress(addressData);
+                result = await addressManager.addAddress(addressData);
             }
 
             if (result.success) {

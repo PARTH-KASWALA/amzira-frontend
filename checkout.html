@@ -7,7 +7,7 @@
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -421,6 +421,14 @@
             transform: none;
         }
 
+        .checkout-trust-cues {
+            margin-top: 12px;
+            display: grid;
+            gap: 8px;
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+
         /* Empty State */
         .empty-state {
             text-align: center;
@@ -708,6 +716,35 @@
             }
         }
     </style>
+    <!-- Fallback styles for JavaScript-disabled browsers -->
+    <noscript>
+        <style>
+            .mobile-menu {
+                display: block !important;
+                position: relative !important;
+                transform: none !important;
+                box-shadow: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .mobile-menu-toggle {
+                display: none !important;
+            }
+
+            .nav-desktop {
+                display: none !important;
+            }
+
+            @media (min-width: 1024px) {
+                .mobile-menu {
+                    display: none !important;
+                }
+                .nav-desktop {
+                    display: flex !important;
+                }
+            }
+        </style>
+    </noscript>
 </head>
 <body>
     <!-- Header -->
@@ -757,7 +794,7 @@
                     </div>
 
                     <!-- Add New Address Button -->
-                    <button class="btn-add-address" id="addAddressBtn">
+                    <button class="btn-add-address" id="addAddressBtn" type="button" onclick="document.getElementById('addressModal')?.classList.add('active');document.body.style.overflow='hidden';">
                         <i class="fas fa-plus"></i>
                         Add New Address
                     </button>
@@ -766,6 +803,7 @@
                 <!-- Right - Order Summary -->
                 <div class="checkout-sidebar">
                     <div class="order-summary">
+                        <div id="checkoutDebugBanner" style="display:none"></div>
                         <h3 class="summary-title">Order Summary</h3>
 
                         <!-- Cart Items -->
@@ -802,6 +840,11 @@
                         Continue to Payment
                         <i class="fas fa-arrow-right"></i>
                     </button>
+                    <div class="checkout-trust-cues" aria-label="Checkout trust cues">
+                        <span><i class="fas fa-lock"></i> Secure payments</span>
+                        <span><i class="fas fa-undo-alt"></i> Easy returns</span>
+                        <span><i class="fas fa-certificate"></i> Authentic products</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -813,7 +856,7 @@
     <div class="modal-content">
         <div class="modal-header">
             <h3 class="modal-title" id="modalTitle">Add New Address</h3>
-            <button class="modal-close" onclick="closeAddressModal()">
+            <button class="modal-close" id="closeAddressBtn" type="button" onclick="document.getElementById('addressModal')?.classList.remove('active');document.body.style.overflow='';">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -909,7 +952,7 @@
             </div>
 
             <div class="modal-actions">
-                <button type="button" class="btn-modal btn-cancel" onclick="closeAddressModal()">
+                <button type="button" class="btn-modal btn-cancel" id="cancelAddressBtn" onclick="document.getElementById('addressModal')?.classList.remove('active');document.body.style.overflow='';">
                     Cancel
                 </button>
                 <button type="submit" class="btn-modal btn-save" id="saveAddressBtn">
@@ -965,16 +1008,16 @@
     <div class="footer-column">
       <h3 class="footer-heading">CATEGORIES</h3>
       <ul class="footer-links">
-        <li><a href="#">Kurta Pajama</a></li>
-        <li><a href="#">Kurta Jacket Sets</a></li>
-        <li><a href="#">Only Kurtas</a></li>
-        <li><a href="#">Nehru Jackets</a></li>
-        <li><a href="#">Indo Western</a></li>
-        <li><a href="#">Sherwani</a></li>
-        <li><a href="#">Lehenga</a></li>
-        <li><a href="#">Saree</a></li>
-        <li><a href="#">Kidswear</a></li>
-        <li><a href="#">Accessories</a></li>
+        <li><a href="men.html?cat=kurta-pajama">Kurta Pajama</a></li>
+        <li><a href="men.html?cat=kurta-jacket-set">Kurta Jacket Sets</a></li>
+        <li><a href="men.html?cat=only-kurta">Only Kurtas</a></li>
+        <li><a href="men.html?cat=nehru-jacket">Nehru Jackets</a></li>
+        <li><a href="men.html?cat=indo-western">Indo Western</a></li>
+        <li><a href="men.html?cat=sherwani">Sherwani</a></li>
+        <li><a href="women.html?cat=lehenga">Lehenga</a></li>
+        <li><a href="women.html?cat=sarees">Saree</a></li>
+        <li><a href="kids.html">Kidswear</a></li>
+        <li><a href="women.html?cat=accessories">Accessories</a></li>
       </ul>
     </div>
 
@@ -982,9 +1025,9 @@
     <div class="footer-column">
       <h3 class="footer-heading">SUPPORT</h3>
       <ul class="footer-links">
-        <li><a href="#">Track Order</a></li>
-        <li><a href="#">Contact Us</a></li>
-        <li><a href="#">My Account</a></li>
+        <li><a href="order-tracking.html">Track Order</a></li>
+        <li><a href="contact-support.html">Contact Us</a></li>
+        <li><a href="account.html">My Account</a></li>
       </ul>
     </div>
 
@@ -992,12 +1035,12 @@
     <div class="footer-column">
       <h3 class="footer-heading">QUICK LINKS</h3>
       <ul class="footer-links">
-        <li><a href="#">About Us</a></li>
-        <li><a href="#">Brand Story</a></li>
-        <li><a href="#">Blogs</a></li>
-        <li><a href="#">Careers</a></li>
-        <li><a href="#">Book a Video Call</a></li>
-        <li><a href="#">Store Locator</a></li>
+        <li><a href="index.html">About Us</a></li>
+        <li><a href="index.html">Brand Story</a></li>
+        <li><a href="index.html">Blogs</a></li>
+        <li><a href="contact-support.html">Careers</a></li>
+        <li><a href="appointments.html">Book a Video Call</a></li>
+        <li><a href="stores.html">Store Locator</a></li>
       </ul>
     </div>
 
@@ -1005,12 +1048,12 @@
     <div class="footer-column">
       <h3 class="footer-heading">OUR POLICIES</h3>
       <ul class="footer-links">
-        <li><a href="#">FAQs</a></li>
-        <li><a href="#">Shipping Details</a></li>
-        <li><a href="#">Return, Exchange and Refund Policy</a></li>
-        <li><a href="#">Terms of Use</a></li>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="faqs.html">FAQs</a></li>
+        <li><a href="shipping-policy.html">Shipping Details</a></li>
+        <li><a href="returns-refund-policy.html">Return, Exchange and Refund Policy</a></li>
+        <li><a href="terms-and-conditions.html">Terms of Use</a></li>
+        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="privacy-policy.html#cookie-policy">Cookie Policy</a></li>
       </ul>
     </div>
 
@@ -1028,32 +1071,32 @@
       <div class="social-icons">
         <h4 class="social-heading">KEEP IN TOUCH</h4>
         <div class="social-links">
-          <a href="#" aria-label="Facebook">
+          <a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
             </svg>
           </a>
-          <a href="#" aria-label="Twitter">
+          <a href="https://x.com/" target="_blank" rel="noopener" aria-label="Twitter">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
             </svg>
           </a>
-          <a href="#" aria-label="Instagram">
+          <a href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Instagram">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
             </svg>
           </a>
-          <a href="#" aria-label="LinkedIn">
+          <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
             </svg>
           </a>
-          <a href="#" aria-label="YouTube">
+          <a href="https://www.youtube.com/" target="_blank" rel="noopener" aria-label="YouTube">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
             </svg>
           </a>
-          <a href="#" aria-label="Pinterest">
+          <a href="https://www.pinterest.com/" target="_blank" rel="noopener" aria-label="Pinterest">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/>
             </svg>
@@ -1087,13 +1130,237 @@
 </footer>
 
 <!-- Scripts -->
+<script>
+  async function checkoutFallbackLoad() {
+    try {
+      const apiBase = (window.AMZIRA && window.AMZIRA.API_BASE_URL)
+        ? window.AMZIRA.API_BASE_URL
+        : `${window.location.protocol}//${window.location.hostname}:8000/api/v1`;
+
+      const cartRes = await fetch(`${apiBase}/cart/`, { credentials: 'include' });
+      const cartPayload = await cartRes.json();
+      if (cartPayload?.success && cartPayload?.data) {
+        const cart = cartPayload.data;
+        const items = Array.isArray(cart.items) ? cart.items : [];
+        const subtotal = Number(cart.subtotal || 0);
+        const shipping = subtotal >= 2000 ? 0 : 99;
+        const tax = (subtotal + shipping) * 0.18;
+        const total = subtotal + shipping + tax;
+
+        const cartItemsContainer = document.getElementById('cartItems');
+        if (cartItemsContainer) {
+          cartItemsContainer.innerHTML = items.map(item => `
+            <div class="cart-item" data-cart-id="${item.id}">
+              <div class="item-details">
+                <div class="item-name">${item.product_name || 'Item'}</div>
+                <div class="item-meta">Qty:</div>
+                <div class="quantity-control" data-cart-id="${item.id}">
+                  <button class="qty-btn checkout-qty-minus" data-cart-id="${item.id}">−</button>
+                  <input class="qty-input checkout-qty-input" type="number" min="1" max="10" value="${Number(item.quantity || 1)}" data-cart-id="${item.id}">
+                  <button class="qty-btn checkout-qty-plus" data-cart-id="${item.id}">+</button>
+                </div>
+                <button class="btn-text remove-checkout-item" data-cart-id="${item.id}">Remove</button>
+              </div>
+              <div class="item-price">₹${Number(item.total_price || 0).toLocaleString('en-IN')}</div>
+            </div>
+          `).join('');
+        }
+
+        const subtotalEl = document.getElementById('subtotal');
+        const shippingEl = document.getElementById('shipping');
+        const taxEl = document.getElementById('tax');
+        const totalEl = document.getElementById('total');
+        if (subtotalEl) subtotalEl.textContent = `₹${subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        if (shippingEl) shippingEl.textContent = `₹${shipping.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        if (taxEl) taxEl.textContent = `₹${tax.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+        if (totalEl) totalEl.textContent = `₹${total.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+      }
+
+      const addrRes = await fetch(`${apiBase}/users/me/addresses`, { credentials: 'include' });
+      const addrPayload = await addrRes.json();
+      const addresses = Array.isArray(addrPayload?.data) ? addrPayload.data : [];
+      if (addresses.length) {
+        const addressList = document.getElementById('addressList');
+        if (addressList) {
+          const selectedId = localStorage.getItem('selectedAddressId');
+          addressList.innerHTML = addresses.map(addr => `
+            <div class="address-card${String(addr.id) === String(selectedId) ? ' selected' : ''}" data-address-id="${addr.id}">
+              <div class="address-header">
+                <span class="address-type">${addr.address_type || 'home'}</span>
+                <span class="address-name">${addr.full_name || ''}</span>
+              </div>
+              <div class="address-details">${addr.address_line1 || ''}, ${addr.city || ''}</div>
+              <div class="address-mobile">${addr.phone || ''}</div>
+              <button class="btn-address-action select-address-btn" data-address-id="${addr.id}">Select</button>
+            </div>
+          `).join('');
+        }
+      }
+      // Bind remove buttons after render.
+      const removeButtons = document.querySelectorAll('.remove-checkout-item');
+      removeButtons.forEach((btn) => {
+        btn.addEventListener('click', async (event) => {
+          const cartId = event.currentTarget.getAttribute('data-cart-id');
+          if (!cartId) return;
+          try {
+            if (window.AMZIRA?.cart?.removeFromCart) {
+              await window.AMZIRA.cart.removeFromCart(cartId);
+            } else {
+              await fetch(`${apiBase}/cart/items/${cartId}`, {
+                method: 'DELETE',
+                credentials: 'include'
+              });
+            }
+            await checkoutFallbackLoad();
+          } catch (err) {
+            console.error('Failed to remove cart item:', err);
+          }
+        });
+      });
+
+      const updateQuantity = async (cartId, nextQty) => {
+        const qty = Math.max(1, Math.min(10, Number(nextQty) || 1));
+        try {
+          if (window.AMZIRA?.cart?.updateCartItem) {
+            await window.AMZIRA.cart.updateCartItem(cartId, qty);
+          } else {
+            await fetch(`${apiBase}/cart/items/${cartId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              credentials: 'include',
+              body: JSON.stringify({ quantity: qty })
+            });
+          }
+          await checkoutFallbackLoad();
+        } catch (err) {
+          console.error('Failed to update cart quantity:', err);
+        }
+      };
+
+      document.querySelectorAll('.checkout-qty-minus').forEach((btn) => {
+        btn.addEventListener('click', async (event) => {
+          const cartId = event.currentTarget.getAttribute('data-cart-id');
+          const input = document.querySelector(`.checkout-qty-input[data-cart-id="${cartId}"]`);
+          const current = Number(input?.value || 1);
+          if (current <= 1) return;
+          await updateQuantity(cartId, current - 1);
+        });
+      });
+
+      document.querySelectorAll('.checkout-qty-plus').forEach((btn) => {
+        btn.addEventListener('click', async (event) => {
+          const cartId = event.currentTarget.getAttribute('data-cart-id');
+          const input = document.querySelector(`.checkout-qty-input[data-cart-id="${cartId}"]`);
+          const current = Number(input?.value || 1);
+          await updateQuantity(cartId, current + 1);
+        });
+      });
+
+      document.querySelectorAll('.checkout-qty-input').forEach((input) => {
+        input.addEventListener('change', async (event) => {
+          const cartId = event.currentTarget.getAttribute('data-cart-id');
+          const nextQty = event.currentTarget.value;
+          await updateQuantity(cartId, nextQty);
+        });
+      });
+
+      const selectButtons = document.querySelectorAll('.select-address-btn');
+      selectButtons.forEach((btn) => {
+        btn.addEventListener('click', (event) => {
+          const addressId = event.currentTarget.getAttribute('data-address-id');
+          if (!addressId) return;
+          localStorage.setItem('selectedAddressId', String(addressId));
+          document.querySelectorAll('.address-card').forEach(card => card.classList.remove('selected'));
+          const card = event.currentTarget.closest('.address-card');
+          if (card) card.classList.add('selected');
+        });
+      });
+
+      const proceedBtn = document.getElementById('proceedToPayment');
+      if (proceedBtn) {
+        proceedBtn.disabled = false;
+        proceedBtn.addEventListener('click', (event) => {
+          event.preventDefault();
+          const addressId = localStorage.getItem('selectedAddressId');
+          if (!addressId) {
+            alert('Please select a delivery address');
+            return;
+          }
+          const selected = addresses.find(addr => String(addr.id) === String(addressId));
+          if (!selected) {
+            alert('Please select a valid delivery address');
+            return;
+          }
+          sessionStorage.setItem('deliveryAddress', JSON.stringify(selected));
+          window.location.href = 'payment.html';
+        });
+      }
+    } catch (error) {
+      console.error('Checkout fallback failed:', error);
+    }
+  }
+
+  function bindAddressModalFallback() {
+    const form = document.getElementById('addressForm');
+    const addrTypeInput = document.getElementById('addrType');
+    if (!form || form.dataset.bound === 'true') return;
+
+    document.querySelectorAll('.type-option').forEach((option) => {
+      option.addEventListener('click', function () {
+        document.querySelectorAll('.type-option').forEach(opt => opt.classList.remove('selected'));
+        this.classList.add('selected');
+        if (addrTypeInput) addrTypeInput.value = this.getAttribute('data-type');
+      });
+    });
+
+    form.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const payload = {
+        full_name: document.getElementById('addrName')?.value?.trim() || '',
+        phone: document.getElementById('addrMobile')?.value?.trim() || '',
+        pincode: document.getElementById('addrPincode')?.value?.trim() || '',
+        city: document.getElementById('addrCity')?.value?.trim() || '',
+        address_line1: document.getElementById('addrAddress')?.value?.trim() || '',
+        address_line2: document.getElementById('addrLocality')?.value?.trim() || null,
+        state: document.getElementById('addrState')?.value || '',
+        country: 'India',
+        address_type: addrTypeInput?.value || 'home',
+        is_default: Boolean(document.getElementById('addrDefault')?.checked)
+      };
+
+      try {
+        await fetch(`${(window.AMZIRA && window.AMZIRA.API_BASE_URL) ? window.AMZIRA.API_BASE_URL : `${window.location.protocol}//${window.location.hostname}:8000/api/v1`}/users/me/addresses`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(payload)
+        });
+        await checkoutFallbackLoad();
+        const modal = document.getElementById('addressModal');
+        if (modal) modal.classList.remove('active');
+        document.body.style.overflow = '';
+      } catch (err) {
+        console.error('Failed to save address:', err);
+      }
+    });
+
+    form.dataset.bound = 'true';
+  }
+
+  window.addEventListener('load', () => {
+    setTimeout(checkoutFallbackLoad, 0);
+    setTimeout(bindAddressModalFallback, 0);
+  });
+</script>
 <script src="js/api.js"></script>
 <script src="js/auth.js"></script>
 <script src="js/address.js"></script>
-<script src="js/cart.js"></script>
+<script src="js/product-normalizer.js"></script>
+    <script src="js/cart.js"></script>
 <script src="js/orders.js"></script>
 
 <script>
+    try {
     // Require login
     if (!Auth.requireLogin('checkout.html')) {
         // Will redirect to login
@@ -1107,23 +1374,177 @@
     const CART_RESTORE_NOTICE_KEY = 'cartRestoreNotice';
     let checkoutExpiryTimer = null;
     let checkoutExpired = false;
+    let checkoutStockItems = [];
+    let isProceedingToPayment = false;
+    const checkoutDebugState = {
+        cartResponse: null,
+        cartItems: null,
+        addresses: null
+    };
+    const CHECKOUT_PRICE_CONFIG = {
+        shippingThreshold: 2000,
+        shippingFee: 99,
+        taxRate: 0.18
+    };
 
-    function notifyUser(message, type = 'error') {
+    function ensureAddressManager() {
+        if (window.AddressManager && typeof window.AddressManager.getAddresses === 'function') {
+            return window.AddressManager;
+        }
+        if (window.AddressManagerClass) {
+            window.AddressManager = new window.AddressManagerClass();
+            return window.AddressManager;
+        }
+        return null;
+    }
+
+    function getGuestCart() {
+        try {
+            const raw = localStorage.getItem('amziraGuestCart') || localStorage.getItem('amziraCart') || '[]';
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (_) {
+            return [];
+        }
+    }
+
+    function getGuestAddresses() {
+        try {
+            const raw = localStorage.getItem('amziraGuestAddresses') || '[]';
+            const parsed = JSON.parse(raw);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (_) {
+            return [];
+        }
+    }
+
+    function saveGuestAddress(addressData) {
+        const list = getGuestAddresses();
+        const id = `${Date.now()}`;
+        list.unshift({ id, ...addressData, isDefault: Boolean(addressData.isDefault) });
+        localStorage.setItem('amziraGuestAddresses', JSON.stringify(list));
+        return list;
+    }
+
+    // High-impact UX hardening (pre-launch)
+    function ensureCheckoutInlineMessage(target = 'proceed') {
+        const id = target === 'address' ? 'addressInlineMessage' : 'checkoutInlineMessage';
+        let messageEl = document.getElementById(id);
+        if (messageEl) return messageEl;
+
+        if (target === 'address') {
+            const form = document.getElementById('addressForm');
+            const actions = form?.querySelector('.modal-actions');
+            if (!actions) return null;
+            messageEl = document.createElement('div');
+            messageEl.id = id;
+            messageEl.setAttribute('aria-live', 'polite');
+            messageEl.style.cssText = 'min-height:18px;font-size:13px;line-height:1.4;color:var(--text-gray);margin-bottom:10px;';
+            actions.parentNode.insertBefore(messageEl, actions);
+            return messageEl;
+        }
+
+        const proceedBtn = document.getElementById('proceedToPayment');
+        if (!proceedBtn || !proceedBtn.parentNode) return null;
+        messageEl = document.createElement('div');
+        messageEl.id = id;
+        messageEl.setAttribute('aria-live', 'polite');
+        messageEl.style.cssText = 'min-height:18px;font-size:13px;line-height:1.4;color:var(--text-gray);margin-top:10px;';
+        proceedBtn.insertAdjacentElement('afterend', messageEl);
+        return messageEl;
+    }
+
+    function setCheckoutDebugBanner(message) {
+        let banner = document.getElementById('checkoutDebugBanner');
+        if (!banner) {
+            banner = document.createElement('div');
+            banner.id = 'checkoutDebugBanner';
+            banner.style.cssText = 'margin:12px 0;padding:10px 12px;border:1px dashed #c084fc;background:#faf5ff;color:#4c1d95;border-radius:8px;font-size:12px;white-space:pre-wrap;';
+            const summary = document.querySelector('.order-summary');
+            if (summary) {
+                summary.prepend(banner);
+            }
+        }
+        banner.style.display = 'block';
+        banner.textContent = message || '';
+    }
+
+    // High-impact UX hardening (pre-launch)
+    function showCheckoutInlineMessage(message, type = 'error', target = 'proceed') {
+        const messageEl = ensureCheckoutInlineMessage(target);
+        if (!messageEl) return;
+        messageEl.textContent = message || '';
+        messageEl.style.color = type === 'error'
+            ? '#b91c1c'
+            : type === 'success'
+                ? '#047857'
+                : '#7c2d12';
+    }
+
+    // High-impact UX hardening (pre-launch)
+    function formatINR(amount) {
+        const value = Number(amount) || 0;
+        return `₹${value.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    }
+
+    // High-impact UX hardening (pre-launch)
+    function getCartItemUnitPrice(item) {
+        const candidates = [
+            item?.price,
+            item?.unit_price,
+            item?.base_price,
+            item?.basePrice,
+            item?.sale_price,
+            item?.salePrice,
+            item?.product?.price,
+            item?.product?.base_price,
+            item?.product?.basePrice
+        ];
+        for (const candidate of candidates) {
+            const value = Number(candidate);
+            if (Number.isFinite(value) && value > 0) return value;
+        }
+        return 0;
+    }
+
+    // High-impact UX hardening (pre-launch)
+    function deriveCheckoutTotals(cartResponse, cartItems) {
+        const subtotal = Number(
+            cartResponse?.subtotal ??
+            cartItems.reduce((sum, item) => sum + (getCartItemUnitPrice(item) * Number(item.quantity || 0)), 0)
+        ) || 0;
+        const discount = Number(cartResponse?.discount || 0) || 0;
+        const shipping = Number.isFinite(Number(cartResponse?.shipping_amount))
+            ? Number(cartResponse.shipping_amount)
+            : (subtotal >= CHECKOUT_PRICE_CONFIG.shippingThreshold ? 0 : CHECKOUT_PRICE_CONFIG.shippingFee);
+        const taxableAmount = Math.max(0, subtotal - discount + shipping);
+        const tax = Number.isFinite(Number(cartResponse?.tax))
+            ? Number(cartResponse.tax)
+            : (taxableAmount * CHECKOUT_PRICE_CONFIG.taxRate);
+        const computedTotal = subtotal - discount + shipping + tax;
+        const total = Number.isFinite(Number(cartResponse?.total)) ? Number(cartResponse.total) : computedTotal;
+        return { subtotal, discount, shipping, tax, total };
+    }
+
+    function notifyUser(message, type = 'error', target = 'proceed') {
         if (window.errorHandler) {
             if (type === 'success' && typeof window.errorHandler.showSuccess === 'function') {
                 window.errorHandler.showSuccess(message);
+                showCheckoutInlineMessage(message, type, target);
                 return;
             }
             if (type === 'warning' && typeof window.errorHandler.showWarning === 'function') {
                 window.errorHandler.showWarning(message);
+                showCheckoutInlineMessage(message, type, target);
                 return;
             }
             if (typeof window.errorHandler.showError === 'function') {
                 window.errorHandler.showError(message);
+                showCheckoutInlineMessage(message, type, target);
                 return;
             }
         }
-        alert(message);
+        showCheckoutInlineMessage(message, type, target);
     }
 
     function getApiErrorMessage(error, fallback) {
@@ -1179,10 +1600,10 @@
 
     function highlightStockConflicts(affectedItems) {
         clearStockHighlights();
-        const productIds = new Set((affectedItems || []).map((item) => String(item.productId || '')));
-        document.querySelectorAll('.cart-item[data-product-id]').forEach((el) => {
-            const pid = String(el.getAttribute('data-product-id') || '');
-            if (productIds.has(pid)) {
+        const variantIds = new Set((affectedItems || []).map((item) => String(item.variantId || '')));
+        document.querySelectorAll('.cart-item[data-variant-id]').forEach((el) => {
+            const vid = String(el.getAttribute('data-variant-id') || '');
+            if (variantIds.has(vid)) {
                 el.classList.add('stock-conflict');
                 el.style.outline = '2px solid #ef4444';
                 el.style.outlineOffset = '2px';
@@ -1190,25 +1611,59 @@
         });
     }
 
+    function buildStockCheckItems(items) {
+        if (!Array.isArray(items)) return [];
+
+        return items
+            .map((item) => ({
+                variant_id: Number(item?.variant_id || item?.variant?.id),
+                quantity: Number(item?.quantity || 0)
+            }))
+            .filter((entry) =>
+                Number.isInteger(entry.variant_id) &&
+                entry.variant_id > 0 &&
+                Number.isFinite(entry.quantity) &&
+                entry.quantity > 0
+            );
+    }
+
     /**
      * Call backend stock check and block checkout if conflicts exist.
      * @returns {Promise<boolean>}
      */
     async function ensureStockAvailableForCheckout() {
-        const stockPayload = await window.AMZIRA.stock.check();
-        const normalized = window.OrderFlowUtils?.normalizeStockCheck
-            ? window.OrderFlowUtils.normalizeStockCheck(stockPayload)
-            : { available: Boolean(stockPayload?.available !== false), affectedItems: [] };
+        try {
+            if (!checkoutStockItems.length) {
+                notifyUser('Unable to validate stock. Please refresh your cart.', 'warning');
+                return false;
+            }
 
-        if (normalized.available) {
-            clearStockHighlights();
-            return true;
+            const stockPayload = await window.AMZIRA.stock.check(checkoutStockItems);
+            const normalized = window.OrderFlowUtils?.normalizeStockCheck
+                ? window.OrderFlowUtils.normalizeStockCheck(stockPayload)
+                : { available: Boolean(stockPayload?.available !== false), affectedItems: [] };
+
+            if (normalized.available) {
+                clearStockHighlights();
+                return true;
+            }
+
+            highlightStockConflicts(normalized.affectedItems);
+            const firstMessage = normalized.affectedItems[0]?.message || 'Some items are out of stock.';
+            notifyUser(`Stock update: ${firstMessage}`, 'warning');
+            return false;
+        } catch (error) {
+            if (error?.status === 429) {
+                notifyUser('Too many requests. Please wait a few seconds and retry.', 'warning');
+                return false;
+            }
+            if (error?.status === 422) {
+                notifyUser('Stock validation failed. Please review product sizes in cart and try again.', 'warning');
+                return false;
+            }
+            notifyUser(getApiErrorMessage(error, 'Unable to verify stock right now.'), 'warning');
+            return false;
         }
-
-        highlightStockConflicts(normalized.affectedItems);
-        const firstMessage = normalized.affectedItems[0]?.message || 'Some items are out of stock.';
-        notifyUser(`Stock update: ${firstMessage}`);
-        return false;
     }
 
     /**
@@ -1281,125 +1736,358 @@
         }
     }
 
-    // Load cart and addresses on page load
-    document.addEventListener('DOMContentLoaded', async function() {
+    // Ensure auth/session is ready before cart + address fetch.
+    async function ensureCheckoutAuthReady() {
+        if (window.Auth && typeof Auth.checkAuth === 'function') {
+            try {
+                await Auth.checkAuth();
+            } catch (_) {
+                // Auth failures are handled per-request; don't block checkout render.
+            }
+        }
+    }
+
+    let checkoutBootstrapped = false;
+    async function bootstrapCheckout() {
+        if (checkoutBootstrapped) return;
+        checkoutBootstrapped = true;
+        await ensureCheckoutAuthReady();
         await loadCartSummary();
         await loadAddresses();
         initAddressModal();
         await initializeCheckoutExpiryTimer();
-    });
+    }
+
+    // Load cart and addresses on page load (and immediately if DOM already ready).
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', bootstrapCheckout);
+    } else {
+        bootstrapCheckout();
+    }
+
+    // Fire once immediately; guarded to avoid double run.
+    bootstrapCheckout();
+
+    function isCheckoutDebugEnabled() {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('debug') === '1';
+        } catch (_) {
+            return false;
+        }
+    }
+
+    function renderCheckoutDebugPanel() {
+        if (!isCheckoutDebugEnabled()) return;
+        let panel = document.getElementById('checkoutDebugPanel');
+        if (!panel) {
+            panel = document.createElement('div');
+            panel.id = 'checkoutDebugPanel';
+            panel.style.cssText = 'position:fixed;bottom:16px;right:16px;width:360px;max-height:60vh;overflow:auto;background:#111827;color:#f9fafb;border:1px solid #374151;border-radius:8px;padding:12px;z-index:9999;font-size:12px;line-height:1.4;box-shadow:0 6px 18px rgba(0,0,0,0.2);';
+            document.body.appendChild(panel);
+        }
+
+        const payload = {
+            selectedAddressId,
+            cartResponse: checkoutDebugState.cartResponse,
+            cartItems: checkoutDebugState.cartItems,
+            addresses: checkoutDebugState.addresses
+        };
+
+        panel.innerHTML = `
+            <div style="font-weight:700;margin-bottom:8px;">Checkout Debug</div>
+            <pre style="white-space:pre-wrap;word-break:break-word;margin:0;">${esc(JSON.stringify(payload, null, 2))}</pre>
+            <div style="margin-top:8px;opacity:0.7;">Append ?debug=1 to URL to toggle.</div>
+        `;
+    }
 
     // Load cart summary
     async function loadCartSummary() {
         const cartItemsContainer = document.getElementById('cartItems');
-
         try {
+            // Always attempt backend cart first; rely on 401 handling for auth state.
             const cartResponse = await window.AMZIRA.cart.getCart();
-            const cart = cartResponse?.items || cartResponse?.cart_items || [];
+            console.log('Cart response:', cartResponse);
+
+            const normalizedCart = cartResponse?.data ?? cartResponse ?? {};
+            checkoutDebugState.cartResponse = normalizedCart || null;
+
+            let cart = Array.isArray(normalizedCart?.items)
+                ? normalizedCart.items
+                : (Array.isArray(normalizedCart?.cart_items) ? normalizedCart.cart_items : []);
+            checkoutDebugState.cartItems = cart;
+
+            // Guest fallback when backend cart is empty.
+            if (!cart || cart.length === 0) {
+                const guestCart = getGuestCart();
+                if (guestCart.length > 0) {
+                    cart = guestCart;
+                }
+            }
+            checkoutStockItems = buildStockCheckItems(cart);
 
             if (cart.length === 0) {
                 window.location.href = 'cart.html';
                 return;
             }
 
+            if (!checkoutStockItems.length) {
+                notifyUser('Some cart items are missing size/variant. Please update cart before checkout.', 'warning', 'proceed');
+                document.getElementById('proceedToPayment').disabled = true;
+            } else {
+                document.getElementById('proceedToPayment').disabled = false;
+            }
+
             // Render cart items
             cartItemsContainer.innerHTML = cart.map(item => `
-                <div class="cart-item" data-product-id="${esc(item.product_id || item.id || item.product?.id || '')}">
-                    <img src="${esc(item.image || item.product?.image || '')}" alt="${esc(item.name || item.product_name || item.product?.name || 'Item')}" class="item-image">
+                <div class="cart-item" data-product-id="${esc(item.product_id || item.id || item.product?.id || '')}" data-variant-id="${esc(item.variant_id || item.variant?.id || '')}">
+                    <img src="${esc(item.image || item.product_image || item.product?.image || item.product?.images?.[0] || '')}" alt="${esc(item.name || item.product_name || item.product?.name || 'Item')}" class="item-image">
                     <div class="item-details">
                         <div class="item-name">${esc(item.name || item.product_name || item.product?.name || 'Item')}</div>
-                        <div class="item-meta">Size: ${esc(item.size || item.variant?.size || '-')} | Qty: ${Number(item.quantity || 0)}</div>
-                        <div class="item-price">₹${(Number(item.price || item.unit_price || 0) * Number(item.quantity || 0)).toLocaleString('en-IN')}</div>
+                        <div class="item-meta">Size: ${esc(item.size || item.variant?.size || item.variant_details || '-')} | Qty: ${Number(item.quantity || 0)}</div>
+                        <div class="item-price">₹${(getCartItemUnitPrice(item) * Number(item.quantity || 0)).toLocaleString('en-IN')}</div>
                     </div>
                 </div>
             `).join('');
 
             // Calculate prices
-            const subtotal = Number(cartResponse?.subtotal || cart.reduce((sum, item) => sum + (Number(item.price || item.unit_price || 0) * Number(item.quantity || 0)), 0));
-            const discount = Number(cartResponse?.discount || 0);
-            const shipping = Number(cartResponse?.shipping_amount || (subtotal > 1000 ? 0 : 100));
-            const tax = Number(cartResponse?.tax || Math.round((subtotal - discount + shipping) * 0.18));
-            const total = Number(cartResponse?.total || (subtotal - discount + shipping + tax));
+            // High-impact UX hardening (pre-launch)
+            const { subtotal, discount, shipping, tax, total } = deriveCheckoutTotals(normalizedCart, cart);
 
             // Update UI
-            document.getElementById('subtotal').textContent = `₹${subtotal.toLocaleString('en-IN')}`;
-            document.getElementById('discount').textContent = discount > 0 ? `- ₹${discount.toLocaleString('en-IN')}` : '₹0';
-            document.getElementById('shipping').textContent = shipping === 0 ? 'FREE' : `₹${shipping.toLocaleString('en-IN')}`;
-            document.getElementById('tax').textContent = `₹${tax.toLocaleString('en-IN')}`;
-            document.getElementById('total').textContent = `₹${total.toLocaleString('en-IN')}`;
+            document.getElementById('subtotal').textContent = formatINR(subtotal);
+            document.getElementById('discount').textContent = discount > 0 ? `- ${formatINR(discount)}` : formatINR(0);
+            document.getElementById('shipping').textContent = shipping === 0 ? formatINR(0) : formatINR(shipping);
+            document.getElementById('tax').textContent = formatINR(tax);
+            document.getElementById('total').textContent = formatINR(total);
+
+            // If backend returns zero totals but guest cart exists, use guest cart totals
+            if (total === 0) {
+                const guestCart = getGuestCart();
+                if (guestCart.length > 0) {
+                const guestTotals = deriveCheckoutTotals({}, guestCart);
+                document.getElementById('subtotal').textContent = formatINR(guestTotals.subtotal);
+                    document.getElementById('discount').textContent = guestTotals.discount > 0 ? `- ${formatINR(guestTotals.discount)}` : formatINR(0);
+                    document.getElementById('shipping').textContent = guestTotals.shipping === 0 ? formatINR(0) : formatINR(guestTotals.shipping);
+                    document.getElementById('tax').textContent = formatINR(guestTotals.tax);
+                    document.getElementById('total').textContent = formatINR(guestTotals.total);
+                    sessionStorage.setItem('orderTotal', String(guestTotals.total));
+                }
+            }
 
             // Store for payment page
             sessionStorage.setItem('orderTotal', String(total));
+            showCheckoutInlineMessage('Secure payments, easy returns, and transparent delivery updates.', 'success', 'proceed');
+            renderCheckoutDebugPanel();
         } catch (error) {
-            notifyUser(getApiErrorMessage(error, 'Unable to load cart summary'));
+            if (error?.status === 401) {
+                notifyUser('Please login to continue checkout.', 'error', 'proceed');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Fallback to guest cart when backend cart is unavailable.
+            const guestCart = getGuestCart();
+            if (guestCart.length > 0) {
+                checkoutDebugState.cartResponse = null;
+                checkoutDebugState.cartItems = guestCart;
+                checkoutStockItems = buildStockCheckItems(guestCart);
+                cartItemsContainer.innerHTML = guestCart.map(item => `
+                    <div class="cart-item" data-product-id="${esc(item.id || item.product_id || '')}" data-variant-id="${esc(item.variant_id || '')}">
+                        <img src="${esc(item.image || item.mainImage || '')}" alt="${esc(item.name || 'Item')}" class="item-image">
+                        <div class="item-details">
+                            <div class="item-name">${esc(item.name || 'Item')}</div>
+                        <div class="item-meta">Size: ${esc(item.size || '-')} | Qty: ${Number(item.quantity || 0)}</div>
+                        <div class="item-price">₹${(getCartItemUnitPrice(item) * Number(item.quantity || 0)).toLocaleString('en-IN')}</div>
+                    </div>
+                </div>
+            `).join('');
+
+                const { subtotal, discount, shipping, tax, total } = deriveCheckoutTotals({}, guestCart);
+                document.getElementById('subtotal').textContent = formatINR(subtotal);
+                document.getElementById('discount').textContent = discount > 0 ? `- ${formatINR(discount)}` : formatINR(0);
+                document.getElementById('shipping').textContent = shipping === 0 ? formatINR(0) : formatINR(shipping);
+                document.getElementById('tax').textContent = formatINR(tax);
+                document.getElementById('total').textContent = formatINR(total);
+                sessionStorage.setItem('orderTotal', String(total));
+                showCheckoutInlineMessage('Guest cart loaded. Please login to use saved addresses.', 'warning', 'proceed');
+                renderCheckoutDebugPanel();
+                return;
+            }
+
+            notifyUser(getApiErrorMessage(error, 'Unable to load cart summary'), 'error', 'proceed');
+            renderCheckoutDebugPanel();
         }
     }
 
     // Load addresses
+    function clearChildren(el) {
+        while (el.firstChild) el.removeChild(el.firstChild);
+    }
+
+    function buildAddressCard(addr, isSelected, onSelect, onEdit, onDelete) {
+        const card = document.createElement('div');
+        card.className = `address-card${isSelected ? ' selected' : ''}`;
+        card.addEventListener('click', () => onSelect(addr.id, card));
+
+        const header = document.createElement('div');
+        header.className = 'address-header';
+
+        const type = document.createElement('span');
+        type.className = 'address-type';
+        const icon = document.createElement('i');
+        const typeValue = addr.addressType || addr.address_type || 'home';
+        icon.className = `fas fa-${typeValue === 'home' ? 'home' : typeValue === 'work' ? 'briefcase' : 'map-pin'}`;
+        type.appendChild(icon);
+        type.append(` ${typeValue}`);
+
+        const name = document.createElement('span');
+        name.className = 'address-name';
+        name.textContent = addr.name || addr.full_name || 'Unnamed';
+
+        header.appendChild(type);
+        header.appendChild(name);
+
+        const details = document.createElement('div');
+        details.className = 'address-details';
+        const formatted = (addr.address || addr.address_line1 || '');
+        const locality = addr.locality || addr.address_line2 || '';
+        const city = addr.city || '';
+        const state = addr.state || '';
+        const pincode = addr.pincode || '';
+        details.textContent = `${formatted}${locality ? `, ${locality}` : ''}${city ? `, ${city}` : ''}${state ? `, ${state}` : ''}${pincode ? ` - ${pincode}` : ''}`;
+
+        const mobile = document.createElement('div');
+        mobile.className = 'address-mobile';
+        const phoneIcon = document.createElement('i');
+        phoneIcon.className = 'fas fa-phone';
+        mobile.appendChild(phoneIcon);
+        mobile.append(` ${addr.mobile || addr.phone || ''}`);
+
+        const actions = document.createElement('div');
+        actions.className = 'address-actions';
+
+        const editBtn = document.createElement('button');
+        editBtn.className = 'btn-address-action';
+        editBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            onEdit(addr.id);
+        });
+        const editIcon = document.createElement('i');
+        editIcon.className = 'fas fa-edit';
+        editBtn.appendChild(editIcon);
+        editBtn.append(' Edit');
+
+        const delBtn = document.createElement('button');
+        delBtn.className = 'btn-address-action';
+        delBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            onDelete(addr.id);
+        });
+        const delIcon = document.createElement('i');
+        delIcon.className = 'fas fa-trash';
+        delBtn.appendChild(delIcon);
+        delBtn.append(' Delete');
+
+        actions.appendChild(editBtn);
+        actions.appendChild(delBtn);
+
+        card.appendChild(header);
+        card.appendChild(details);
+        card.appendChild(mobile);
+        card.appendChild(actions);
+        return card;
+    }
+
     async function loadAddresses() {
-        let addresses = [];
-        try {
-            await AddressManager.refresh(true);
-            addresses = AddressManager.getAddresses();
-        } catch (error) {
-            notifyUser(getApiErrorMessage(error, 'Unable to load addresses.'));
-        }
         const addressList = document.getElementById('addressList');
         const proceedBtn = document.getElementById('proceedToPayment');
+        clearChildren(addressList);
 
-        if (addresses.length === 0) {
-            addressList.innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-map-marker-alt"></i>
-                    <h3>No Saved Addresses</h3>
-                    <p>Add a delivery address to continue</p>
-                </div>
-            `;
+        let addresses = [];
+        let addressManager = ensureAddressManager();
+
+        try {
+            if (addressManager) {
+                await addressManager.refresh(true);
+                addresses = addressManager.getAddresses();
+            } else if (window.AMZIRA?.users?.getAddresses) {
+                const direct = await window.AMZIRA.users.getAddresses();
+                console.log('Address response:', direct);
+                addresses = Array.isArray(direct)
+                    ? direct
+                    : (direct?.data || direct?.addresses || direct?.results || []);
+            }
+        } catch (error) {
+            if (error?.status === 401) {
+                addresses = getGuestAddresses();
+            } else if (addressManager) {
+                try {
+                    await addressManager.refresh(true);
+                    addresses = addressManager.getAddresses();
+                } catch (_) {
+                    addresses = [];
+                }
+            } else {
+                addresses = getGuestAddresses();
+            }
+            notifyUser(getApiErrorMessage(error, 'Unable to load addresses.'), 'error', 'proceed');
+        }
+        console.log('Address list:', addresses);
+        checkoutDebugState.addresses = addresses;
+
+        if (!addresses.length) {
+            const empty = document.createElement('div');
+            empty.className = 'empty-state';
+            const icon = document.createElement('i');
+            icon.className = 'fas fa-map-marker-alt';
+            const title = document.createElement('h3');
+            title.textContent = 'No Saved Addresses';
+            const text = document.createElement('p');
+            text.textContent = 'Add a delivery address to continue';
+            empty.appendChild(icon);
+            empty.appendChild(title);
+            empty.appendChild(text);
+            addressList.appendChild(empty);
             proceedBtn.disabled = true;
+            showCheckoutInlineMessage('Add a delivery address to continue to payment.', 'warning', 'proceed');
+            renderCheckoutDebugPanel();
             return;
         }
 
-        // Get selected address or default
-        const currentSelected = String(AddressManager.getSelectedAddressId() || addresses[0].id);
+        const firstId = String(addresses[0].id);
+        const storedSelected = addressManager?.getSelectedAddressId
+            ? addressManager.getSelectedAddressId()
+            : localStorage.getItem('selectedAddressId');
+        const currentSelected = String(storedSelected || firstId);
         selectedAddressId = currentSelected;
 
-        // Render addresses
-        addressList.innerHTML = addresses.map(addr => `
-            <div class="address-card ${String(addr.id) === currentSelected ? 'selected' : ''}" 
-                 onclick="selectAddress('${esc(addr.id)}', this)">
-                <div class="address-header">
-                    <span class="address-type">
-                        <i class="fas fa-${addr.addressType === 'home' ? 'home' : addr.addressType === 'work' ? 'briefcase' : 'map-pin'}"></i>
-                        ${esc(addr.addressType)}
-                    </span>
-                    <span class="address-name">${esc(addr.name)}</span>
-                </div>
-                <div class="address-details">
-                    ${esc(AddressManager.formatAddress(addr))}
-                </div>
-                <div class="address-mobile">
-                    <i class="fas fa-phone"></i>
-                    ${esc(addr.mobile)}
-                </div>
-                <div class="address-actions">
-                    <button class="btn-address-action" onclick="event.stopPropagation(); editAddress('${esc(addr.id)}')">
-                        <i class="fas fa-edit"></i> Edit
-                    </button>
-                    <button class="btn-address-action" onclick="event.stopPropagation(); deleteAddress('${esc(addr.id)}')">
-                        <i class="fas fa-trash"></i> Delete
-                    </button>
-                </div>
-            </div>
-        `).join('');
+        addresses.forEach((addr) => {
+            const isSelected = String(addr.id) === currentSelected;
+            const card = buildAddressCard(
+                addr,
+                isSelected,
+                (id, cardEl) => selectAddress(id, cardEl),
+                (id) => editAddress(id),
+                (id) => deleteAddress(id)
+            );
+            addressList.appendChild(card);
+        });
 
-        // Enable proceed button
-        proceedBtn.disabled = false;
+        proceedBtn.disabled = checkoutStockItems.length === 0;
+        if (!proceedBtn.disabled) {
+            showCheckoutInlineMessage('Ready to proceed. Your order details are secure.', 'success', 'proceed');
+        }
+        renderCheckoutDebugPanel();
     }
 
     // Select address
     function selectAddress(addressId, cardEl = null) {
         selectedAddressId = addressId;
-        AddressManager.selectAddress(addressId);
+        const addressManager = ensureAddressManager();
+        if (addressManager && Auth.isLoggedIn()) {
+            addressManager.selectAddress(addressId);
+        }
         
         // Update UI
         document.querySelectorAll('.address-card').forEach(card => {
@@ -1413,7 +2101,18 @@
     // Initialize address modal
     function initAddressModal() {
         const addBtn = document.getElementById('addAddressBtn');
-        addBtn.addEventListener('click', openAddressModal);
+        const closeBtn = document.getElementById('closeAddressBtn');
+        const cancelBtn = document.getElementById('cancelAddressBtn');
+        if (!addBtn) {
+            return;
+        }
+        addBtn.addEventListener('click', () => openAddressModal());
+        if (closeBtn) {
+            closeBtn.addEventListener('click', closeAddressModal);
+        }
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', closeAddressModal);
+        }
 
         // Address type selection
         document.querySelectorAll('.type-option').forEach(option => {
@@ -1440,30 +2139,41 @@
         // Proceed to payment
         document.getElementById('proceedToPayment').addEventListener('click', function() {
             const proceedBtn = this;
+            if (isProceedingToPayment) return;
             if (checkoutExpired) {
-                notifyUser('Order expired, please checkout again', 'warning');
+                notifyUser('Order expired, please checkout again', 'warning', 'proceed');
                 window.location.href = 'cart.html';
                 return;
             }
             if (!selectedAddressId) {
-                notifyUser('Please select a delivery address');
+                notifyUser('Please select a delivery address', 'error', 'proceed');
                 return;
             }
+            isProceedingToPayment = true;
             proceedBtn.disabled = true;
             const originalText = proceedBtn.textContent;
             proceedBtn.textContent = 'Checking stock...';
+            showCheckoutInlineMessage('Checking item availability before payment...', 'warning', 'proceed');
             ensureStockAvailableForCheckout()
                 .then((available) => {
                     if (!available) return;
 
-                    const selectedAddress = AddressManager.getSelectedAddress();
+                    const addressManager = ensureAddressManager();
+                    const selectedAddress = addressManager
+                        ? (addressManager.getAddressById(selectedAddressId) || addressManager.getSelectedAddress())
+                        : null;
+                    if (!selectedAddress) {
+                        notifyUser('Please select a valid delivery address', 'error', 'proceed');
+                        return;
+                    }
                     sessionStorage.setItem('deliveryAddress', JSON.stringify(selectedAddress));
                     window.location.href = 'payment.html';
                 })
                 .catch((error) => {
-                    notifyUser(getApiErrorMessage(error, 'Unable to verify stock right now.'));
+                    notifyUser(getApiErrorMessage(error, 'Unable to verify stock right now.'), 'error', 'proceed');
                 })
                 .finally(() => {
+                    isProceedingToPayment = false;
                     proceedBtn.disabled = false;
                     proceedBtn.textContent = originalText;
                 });
@@ -1480,7 +2190,14 @@
         if (addressId) {
             // Edit mode
             modalTitle.textContent = 'Edit Address';
-            const address = AddressManager.getAddressById(addressId);
+            const addressManager = ensureAddressManager();
+            if (!addressManager) {
+                notifyUser('Address manager is unavailable. Please refresh and try again.', 'error', 'address');
+                return;
+            }
+            const address = Auth.isLoggedIn()
+                ? addressManager.getAddressById(addressId)
+                : getGuestAddresses().find(addr => String(addr.id) === String(addressId));
             
             document.getElementById('addrName').value = address.name;
             document.getElementById('addrMobile').value = address.mobile;
@@ -1510,6 +2227,16 @@
         document.body.style.overflow = 'hidden';
     }
 
+    // Back-compat with older onclick handlers
+    function openAddressModalLegacy(addressId = null) {
+        return openAddressModal(addressId);
+    }
+
+    if (typeof window !== 'undefined') {
+        window.openAddressModal = openAddressModal;
+        window.openAddressModalLegacy = openAddressModalLegacy;
+    }
+
     // Close address modal
     function closeAddressModal() {
         const modal = document.getElementById('addressModal');
@@ -1518,15 +2245,36 @@
         editingAddressId = null;
     }
 
+    if (typeof window !== 'undefined') {
+        window.closeAddressModal = closeAddressModal;
+    }
+
     // Edit address
     function editAddress(addressId) {
         openAddressModal(addressId);
     }
 
+    if (typeof window !== 'undefined') {
+        window.selectAddress = selectAddress;
+        window.editAddress = editAddress;
+        window.deleteAddress = deleteAddress;
+    }
+
     // Delete address
     async function deleteAddress(addressId) {
         if (confirm('Are you sure you want to delete this address?')) {
-            const result = await AddressManager.deleteAddress(addressId);
+            const addressManager = ensureAddressManager();
+            if (!addressManager) {
+                notifyUser('Address manager is unavailable. Please refresh and try again.', 'error', 'address');
+                return;
+            }
+            const result = Auth.isLoggedIn()
+                ? await addressManager.deleteAddress(addressId)
+                : { success: true };
+            if (!Auth.isLoggedIn()) {
+                const remaining = getGuestAddresses().filter(addr => String(addr.id) !== String(addressId));
+                localStorage.setItem('amziraGuestAddresses', JSON.stringify(remaining));
+            }
             if (result.success) {
                 await loadAddresses();
             } else if (result.message) {
@@ -1561,17 +2309,17 @@
             addressData.state;
 
         if (!hasRequiredFields) {
-            notifyUser('Please fill all required address fields');
+            notifyUser('Please fill all required address fields', 'error', 'address');
             return;
         }
 
         if (!Auth.validatePhone(addressData.mobile)) {
-            notifyUser('Please enter a valid 10-digit mobile number');
+            notifyUser('Please enter a valid 10-digit mobile number', 'error', 'address');
             return;
         }
 
         if (!PINCODE_PATTERN.test(addressData.pincode)) {
-            notifyUser('Please enter a valid 6-digit pincode');
+            notifyUser('Please enter a valid 6-digit pincode', 'error', 'address');
             return;
         }
 
@@ -1580,17 +2328,38 @@
 
         let result;
         if (editingAddressId) {
-            result = await AddressManager.updateAddress(editingAddressId, addressData);
+            const addressManager = ensureAddressManager();
+            if (!addressManager) {
+                notifyUser('Address manager is unavailable. Please refresh and try again.', 'error', 'address');
+                return;
+            }
+            if (Auth.isLoggedIn()) {
+                result = await addressManager.updateAddress(editingAddressId, addressData);
+            } else {
+                const remaining = getGuestAddresses().filter(addr => String(addr.id) !== String(editingAddressId));
+                localStorage.setItem('amziraGuestAddresses', JSON.stringify([{ id: editingAddressId, ...addressData }, ...remaining]));
+                result = { success: true };
+            }
         } else {
-            result = await AddressManager.addAddress(addressData);
+            const addressManager = ensureAddressManager();
+            if (!addressManager) {
+                notifyUser('Address manager is unavailable. Please refresh and try again.', 'error', 'address');
+                return;
+            }
+            if (Auth.isLoggedIn()) {
+                result = await addressManager.addAddress(addressData);
+            } else {
+                saveGuestAddress(addressData);
+                result = { success: true };
+            }
         }
 
         if (result.success) {
             closeAddressModal();
             await loadAddresses();
-            notifyUser('Address saved successfully', 'success');
+            notifyUser('Address saved successfully', 'success', 'proceed');
         } else {
-            notifyUser(result.message || 'Failed to save address');
+            notifyUser(result.message || 'Failed to save address', 'error', 'address');
         }
 
         saveBtn.disabled = false;
@@ -1610,4 +2379,13 @@
             checkoutExpiryTimer = null;
         }
     });
+
+    document.addEventListener('DOMContentLoaded', function() {
+        // High-impact UX hardening (pre-launch)
+        ensureCheckoutInlineMessage('proceed');
+        ensureCheckoutInlineMessage('address');
+    });
+    } catch (error) {
+        console.error('Checkout script error:', error);
+    }
 </script>

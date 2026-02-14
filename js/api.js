@@ -4,6 +4,23 @@ const PROD_API_BASE_URL = 'https://api.amzira.com/api/v1';
 const PROTECTED_ROUTE_PATTERNS = ['/account', '/checkout', '/payment', '/order-success'];
 const STOCK_CHECK_ENDPOINT = '/stock/check';
 let unauthorizedHandled = false;
+const RETRYABLE_STATUSES = new Set([429, 502, 503, 504]);
+const DEFAULT_MAX_RETRIES = 2;
+const DEV_CANONICAL_HOST = '127.0.0.1';
+
+// Enforce a single dev host to avoid cookie/localStorage mismatches.
+(() => {
+    const { hostname, protocol, port, pathname, search, hash } = window.location;
+    const isDevHost = hostname === 'localhost' || hostname === '127.0.0.1';
+    if (!isDevHost) return;
+    if (hostname === DEV_CANONICAL_HOST) return;
+    const target = `${protocol}//${DEV_CANONICAL_HOST}${port ? `:${port}` : ''}${pathname}${search}${hash}`;
+    window.location.replace(target);
+})();
+
+function sleep(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 /**
  * Resolve API base URL in an environment-safe order:
@@ -13,6 +30,16 @@ let unauthorizedHandled = false;
  * @returns {string}
  */
 function resolveApiBaseUrl() {
+    const { hostname, protocol } = window.location;
+    if (protocol === 'file:') {
+        console.warn('AMZIRA: file:// detected, defaulting API to localhost.');
+        return DEV_API_BASE_URL;
+    }
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+        // Always align API host with frontend host in dev to avoid cookie mismatches.
+        return `${window.location.protocol}//${hostname}:8000/api/v1`;
+    }
+
     const runtimeOverride = window.__AMZIRA_API_BASE_URL__;
     if (typeof runtimeOverride === 'string' && runtimeOverride.trim()) {
         return runtimeOverride.trim().replace(/\/$/, '');
@@ -23,8 +50,6 @@ function resolveApiBaseUrl() {
         return metaOverride.trim().replace(/\/$/, '');
     }
 
-    const { hostname } = window.location;
-    if (hostname === 'localhost' || hostname === '127.0.0.1') return DEV_API_BASE_URL;
     if (hostname.includes('staging')) return STAGING_API_BASE_URL;
     return PROD_API_BASE_URL;
 }
@@ -32,8 +57,33 @@ function resolveApiBaseUrl() {
 const API_BASE_URL = resolveApiBaseUrl();
 
 const USER_STORAGE_KEY = 'user';
-const CSRF_COOKIE_NAME = 'csrf_token';
-let csrfTokenCache = null;
+const ACCESS_TOKEN_KEY = 'access_token';
+const REFRESH_TOKEN_KEY = 'refresh_token';
+const CHECKOUT_IDEMPOTENCY_KEY = 'checkout_idempotency_key';
+
+// Soft-launch idempotency_key fix
+function generateUUIDv4() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+        const r = Math.random() * 16 | 0;
+        const v = c === 'x' ? r : ((r & 0x3) | 0x8);
+        return v.toString(16);
+    });
+}
+
+// Soft-launch idempotency_key fix
+function getCheckoutIdempotencyKey() {
+    let key = null;
+    try {
+        key = sessionStorage.getItem(CHECKOUT_IDEMPOTENCY_KEY);
+        if (!key) {
+            key = generateUUIDv4();
+            sessionStorage.setItem(CHECKOUT_IDEMPOTENCY_KEY, key);
+        }
+    } catch (_) {
+        key = generateUUIDv4();
+    }
+    return key;
+}
 
 class APIError extends Error {
     constructor(message, { status = null, errors = [], payload = null } = {}) {
@@ -117,6 +167,21 @@ function clearUserProfile() {
     localStorage.removeItem(USER_STORAGE_KEY);
 }
 
+function storeAuthTokens(payload) {
+    if (!payload || typeof payload !== 'object') return;
+    if (payload.access_token) {
+        localStorage.setItem(ACCESS_TOKEN_KEY, payload.access_token);
+    }
+    if (payload.refresh_token) {
+        localStorage.setItem(REFRESH_TOKEN_KEY, payload.refresh_token);
+    }
+}
+
+function clearAuthTokens() {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+}
+
 function readCookie(name) {
     const encoded = `${name}=`;
     const parts = document.cookie.split(';');
@@ -169,6 +234,7 @@ function handleUnauthorizedState() {
     unauthorizedHandled = true;
 
     clearUserProfile();
+    clearAuthTokens();
     window.dispatchEvent(new Event('auth:logout'));
 
     const currentPath = window.location.pathname.toLowerCase();
@@ -197,55 +263,11 @@ async function parseJsonSafe(response) {
     }
 }
 
-async function getCsrfToken(force = false) {
-    const cookieToken = readCookie(CSRF_COOKIE_NAME);
-    if (cookieToken && !force) {
-        csrfTokenCache = cookieToken;
-        return cookieToken;
-    }
-
-    const response = await fetch(`${API_BASE_URL}/auth/csrf-token`, {
-        method: 'GET',
-        credentials: 'include'
-    });
-
-    const payload = await parseJsonSafe(response);
-
-    if (!response.ok || (payload && payload.success === false)) {
-        throw new APIError(extractErrorMessage(payload, 'Failed to fetch CSRF token'), {
-            status: response.status,
-            errors: normalizeErrors(payload),
-            payload
-        });
-    }
-
-    const bodyToken = payload?.data?.csrf_token || payload?.data?.csrfToken || payload?.data?.token || null;
-    const token = readCookie(CSRF_COOKIE_NAME) || bodyToken;
-    csrfTokenCache = token || null;
-
-    if (!csrfTokenCache) {
-        throw new APIError('CSRF token unavailable', {
-            status: response.status,
-            errors: [],
-            payload
-        });
-    }
-
-    return csrfTokenCache;
-}
-
 async function refreshSession() {
     try {
-        const csrfToken = await getCsrfToken();
-        const headers = {};
-        if (csrfToken) {
-            headers['X-CSRF-Token'] = csrfToken;
-        }
-
         const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
             method: 'POST',
-            credentials: 'include',
-            headers
+            credentials: 'include' // Always send auth cookies.
         });
 
         const payload = await parseJsonSafe(response);
@@ -270,9 +292,14 @@ async function apiRequest(endpoint, options = {}) {
         ...(options.headers || {})
     };
 
+    const storedToken = localStorage.getItem(ACCESS_TOKEN_KEY);
+    if (storedToken && !headers['Authorization']) {
+        headers['Authorization'] = `Bearer ${storedToken}`;
+    }
+
     const fetchOptions = {
         method,
-        credentials: 'include',
+        credentials: 'include', // Always send auth cookies.
         headers
     };
 
@@ -283,19 +310,34 @@ async function apiRequest(endpoint, options = {}) {
         }
     }
 
-    if (isUnsafeMethod(method) && options.withoutCsrf !== true) {
-        const csrfToken = await getCsrfToken();
-        headers['X-CSRF-Token'] = csrfToken;
-    }
+    const maxRetries = Number.isInteger(options.maxRetries)
+        ? Math.max(0, options.maxRetries)
+        : (method === 'GET' ? DEFAULT_MAX_RETRIES : 0);
 
     let response;
-    try {
-        response = await fetch(`${API_BASE_URL}${endpoint}`, fetchOptions);
-    } catch (_) {
-        throw new APIError('Unable to reach the server. Please try again.', {
-            status: null,
-            errors: []
-        });
+    let attempt = 0;
+    while (attempt <= maxRetries) {
+        try {
+            response = await fetch(`${API_BASE_URL}${endpoint}`, fetchOptions);
+        } catch (error) {
+            if (attempt >= maxRetries) {
+                throw new APIError('Unable to reach the server. Please try again.', {
+                    status: null,
+                    errors: []
+                });
+            }
+            attempt += 1;
+            await sleep(250 * Math.pow(2, attempt - 1));
+            continue;
+        }
+
+        if (response && RETRYABLE_STATUSES.has(response.status) && attempt < maxRetries) {
+            attempt += 1;
+            await sleep(250 * Math.pow(2, attempt - 1));
+            continue;
+        }
+
+        break;
     }
 
     if (response.status === 401 && retryOn401 && !endpoint.includes('/auth/refresh')) {
@@ -351,6 +393,7 @@ async function login(email, password) {
         body: JSON.stringify({ email, password })
     });
 
+    storeAuthTokens(data);
     storeUserProfile(data?.user || data);
     return data;
 }
@@ -377,6 +420,7 @@ async function logout() {
         });
     } finally {
         clearUserProfile();
+        clearAuthTokens();
     }
 }
 
@@ -415,6 +459,31 @@ async function getProducts(params = {}) {
     return apiRequest(endpoint);
 }
 
+async function getCategories() {
+    return apiRequest('/categories');
+}
+
+async function getProductsByCategory(categorySlug, extraParams = {}) {
+    const slug = String(categorySlug || '').trim();
+    if (!slug) {
+        throw new APIError('Category slug is required', { status: 400, errors: [] });
+    }
+
+    try {
+        // Preferred endpoint contract.
+        return await getProducts({
+            ...extraParams,
+            category: slug
+        });
+    } catch (error) {
+        // Alternate backend route support.
+        if (error?.status === 404 || error?.status === 405) {
+            return apiRequest(`/products/category/${encodeURIComponent(slug)}`);
+        }
+        throw error;
+    }
+}
+
 async function getProductDetail(slug) {
     return apiRequest(`/products/${slug}`);
 }
@@ -424,15 +493,24 @@ async function searchProducts(query) {
 }
 
 async function getCart() {
-    return apiRequest('/cart');
+    // FastAPI cart route is registered with a trailing slash.
+    return apiRequest('/cart/');
 }
 
 async function addToCart(productId, variantId, quantity = 1) {
+    const safeVariantId = Number(variantId);
+    if (!Number.isInteger(safeVariantId) || safeVariantId <= 0) {
+        throw new APIError('Please select size/color before adding to cart.', {
+            status: 422,
+            errors: ['variant_id is required']
+        });
+    }
+
     return apiRequest('/cart/items', {
         method: 'POST',
         body: JSON.stringify({
             product_id: productId,
-            variant_id: variantId,
+            variant_id: safeVariantId,
             quantity
         })
     });
@@ -452,28 +530,33 @@ async function removeFromCart(itemId) {
 }
 
 async function clearCart() {
-    return apiRequest('/cart', {
+    // FastAPI cart route is registered with a trailing slash.
+    return apiRequest('/cart/', {
         method: 'DELETE'
     });
 }
 
 async function createOrder(orderPayload) {
     const sanitizedPayload = {
-        ...orderPayload
+        ...orderPayload,
+        // Soft-launch idempotency_key fix
+        idempotency_key: orderPayload?.idempotency_key || getCheckoutIdempotencyKey()
     };
 
     if (typeof sanitizedPayload.customer_notes === 'string') {
         sanitizedPayload.customer_notes = sanitizedPayload.customer_notes.trim().slice(0, 500);
     }
 
-    return apiRequest('/orders', {
+    // Orders collection route is registered with a trailing slash.
+    return apiRequest('/orders/', {
         method: 'POST',
         body: JSON.stringify(sanitizedPayload)
     });
 }
 
 async function getOrders() {
-    return apiRequest('/orders');
+    // Orders collection route is registered with a trailing slash.
+    return apiRequest('/orders/');
 }
 
 async function getOrderDetail(orderNumber) {
@@ -527,8 +610,34 @@ async function deleteAddress(addressId) {
  * Expects backend to return `available` and optional affected item metadata.
  * @returns {Promise<any>}
  */
-async function checkStock() {
-    return apiRequest(STOCK_CHECK_ENDPOINT);
+async function checkStock(items = []) {
+    const normalizedItems = Array.isArray(items)
+        ? items
+            .map((item) => ({
+                variant_id: Number(item?.variant_id),
+                quantity: Number(item?.quantity)
+            }))
+            .filter((item) =>
+                Number.isInteger(item.variant_id) &&
+                item.variant_id > 0 &&
+                Number.isFinite(item.quantity) &&
+                item.quantity > 0
+            )
+        : [];
+
+    if (!normalizedItems.length) {
+        throw new APIError('No valid cart items found for stock check.', {
+            status: 422,
+            errors: ['Stock validation requires variant_id and quantity for each item.']
+        });
+    }
+
+    return apiRequest(STOCK_CHECK_ENDPOINT, {
+        method: 'POST',
+        body: JSON.stringify({
+            items: normalizedItems
+        })
+    });
 }
 
 function isIpRestrictionError(error) {
@@ -646,9 +755,6 @@ window.AMZIRA = {
     API_BASE_URL,
     APIError,
     apiRequest,
-    csrf: {
-        getCsrfToken
-    },
     auth: {
         login,
         register,
@@ -669,8 +775,12 @@ window.AMZIRA = {
     },
     products: {
         getProducts,
+        getProductsByCategory,
         getProductDetail,
         searchProducts
+    },
+    categories: {
+        getCategories
     },
     cart: {
         getCart,
@@ -703,3 +813,7 @@ window.AMZIRA = {
         escapeHtml
     }
 };
+
+if (typeof window !== 'undefined') {
+    // No CSRF bootstrap required for token-based API usage.
+}

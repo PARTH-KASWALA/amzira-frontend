@@ -7,6 +7,7 @@ class QuickAdd {
     constructor() {
         this.modal = null;
         this.selectedSize = null;
+        this.selectedVariantId = null;
         this.currentProduct = null;
         this.init();
     }
@@ -75,11 +76,51 @@ class QuickAdd {
         e.preventDefault();
         e.stopPropagation();
 
+        const variantIdRaw = e.currentTarget.getAttribute('data-variant-id');
         const productId = e.currentTarget.getAttribute('data-id');
         if (!productId) return;
 
-        // Find product data (assuming it's available globally or we need to fetch it)
-        this.loadProductData(productId);
+        const variantId = Number(variantIdRaw);
+        if (Number.isInteger(variantId) && variantId > 0) {
+            this.addListingItemToCart(productId, variantId, e.currentTarget);
+            return;
+        }
+
+        if (window.errorHandler?.showWarning) {
+            window.errorHandler.showWarning('Please select size/color');
+        } else {
+            alert('Please select size/color');
+        }
+    }
+
+    async addListingItemToCart(productId, variantId, button) {
+        if (!window.cart || typeof window.cart.addItem !== 'function') {
+            if (window.errorHandler?.showError) {
+                window.errorHandler.showError('Cart service unavailable. Please refresh and try again.');
+            } else {
+                alert('Cart service unavailable. Please refresh and try again.');
+            }
+            return;
+        }
+
+        const originalDisabled = button.disabled;
+        button.disabled = true;
+        button.classList.add('is-loading');
+
+        try {
+            const added = await window.cart.addItem(productId, 1, variantId);
+            if (added && window.errorHandler?.showSuccess) {
+                window.errorHandler.showSuccess('Added to cart', 'Cart Updated');
+            }
+        } catch (error) {
+            if (window.errorHandler?.showError) {
+                const msg = window.AMZIRA?.utils?.getApiErrorMessage?.(error, 'Unable to add item right now.');
+                window.errorHandler.showError(msg || 'Unable to add item right now.');
+            }
+        } finally {
+            button.disabled = originalDisabled;
+            button.classList.remove('is-loading');
+        }
     }
 
     async loadProductData(productId) {
@@ -114,6 +155,7 @@ class QuickAdd {
 
     openModal(product) {
         this.selectedSize = null;
+        this.selectedVariantId = null;
 
         const content = `
             <div class="quick-add-image">
@@ -124,8 +166,8 @@ class QuickAdd {
             <div class="quick-add-details">
                 <h3 class="quick-add-title">${this.esc(product.name)}</h3>
                 <div class="quick-add-price">
-                    <span class="price-current">$${product.salePrice || product.price}</span>
-                    ${product.salePrice ? `<span class="price-original">$${product.price}</span>` : ''}
+                    <span class="price-current">₹${Number(product.salePrice || product.price || 0).toLocaleString('en-IN')}</span>
+                    ${product.salePrice ? `<span class="price-original">₹${Number(product.price || 0).toLocaleString('en-IN')}</span>` : ''}
                     ${product.salePrice ? `<span class="price-discount">${Math.round(((product.price - product.salePrice) / product.price) * 100)}% OFF</span>` : ''}
                 </div>
 
@@ -148,7 +190,7 @@ class QuickAdd {
                 </button>
 
                 <div class="quick-add-info">
-                    <p>✓ Free shipping on orders above $100</p>
+                    <p>✓ Free shipping on orders above ₹2,000</p>
                     <p>✓ 30-day return policy</p>
                 </div>
             </div>
@@ -160,6 +202,28 @@ class QuickAdd {
     }
 
     renderSizeOptions(product) {
+        const variants = Array.isArray(product?.variants) ? product.variants : [];
+        if (variants.length > 0) {
+            return variants.map((variant) => {
+                const variantId = Number(variant?.id);
+                const size = this.esc(variant?.size || 'N/A');
+                const stock = Number(variant?.stock_quantity ?? variant?.stock ?? 0);
+                const isOutOfStock = stock <= 0;
+                const isLowStock = stock > 0 && stock <= 2;
+
+                return `
+                    <button class="size-option-quick ${isOutOfStock ? 'out-of-stock' : ''}"
+                            data-size="${size}"
+                            data-variant-id="${variantId}"
+                            onclick="window.quickAdd.selectSize('${size}', '${variantId}')"
+                            ${isOutOfStock ? 'disabled' : ''}>
+                        ${size}
+                        ${isLowStock ? '<span class="low-stock-indicator">Low</span>' : ''}
+                    </button>
+                `;
+            }).join('');
+        }
+
         if (!product.sizes || !product.stockBySizes) {
             return '<p class="size-unavailable">Size information not available</p>';
         }
@@ -172,7 +236,7 @@ class QuickAdd {
             return `
                 <button class="size-option-quick ${isOutOfStock ? 'out-of-stock' : ''}"
                         data-size="${this.esc(size)}"
-                        onclick="window.quickAdd.selectSize('${this.esc(size)}')"
+                        onclick="window.quickAdd.selectSize('${this.esc(size)}', null)"
                         ${isOutOfStock ? 'disabled' : ''}>
                     ${this.esc(size)}
                     ${isLowStock && !isOutOfStock ? '<span class="low-stock-indicator">Low</span>' : ''}
@@ -181,8 +245,9 @@ class QuickAdd {
         }).join('');
     }
 
-    selectSize(size) {
+    selectSize(size, variantId) {
         this.selectedSize = size;
+        this.selectedVariantId = Number(variantId);
 
         // Update UI
         document.querySelectorAll('.size-option-quick').forEach(btn => {
@@ -202,23 +267,20 @@ class QuickAdd {
         }
     }
 
-    addToCart() {
+    async addToCart() {
         if (!this.currentProduct || !this.selectedSize) return;
+        if (!Number.isInteger(this.selectedVariantId) || this.selectedVariantId <= 0) {
+            alert('Please select size/color');
+            return;
+        }
 
         try {
             // Check if cart system exists
             if (window.cart && typeof window.cart.addItem === 'function') {
-                window.cart.addItem({
-                    id: this.currentProduct.id,
-                    name: this.currentProduct.name,
-                    price: this.currentProduct.salePrice || this.currentProduct.price,
-                    image: this.currentProduct.images ? this.currentProduct.images[0] : this.currentProduct.image,
-                    size: this.selectedSize,
-                    quantity: 1
-                });
-
-                // Show success feedback
-                this.showSuccessMessage();
+                const added = await window.cart.addItem(this.currentProduct.id, 1, this.selectedVariantId);
+                if (added) {
+                    this.showSuccessMessage();
+                }
             } else {
                 console.error('Cart system not available');
                 alert('Cart system not available. Please try again.');

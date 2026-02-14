@@ -201,6 +201,8 @@ async function handleRazorpayPayment(orderData, customer) {
                 response.razorpay_signature
             );
 
+            // Soft-launch idempotency_key fix
+            sessionStorage.removeItem('checkout_idempotency_key');
             window.location.href = `order-success.html?order=${encodeURIComponent(orderNumber || orderId)}`;
         },
         modal: {
@@ -252,6 +254,8 @@ async function initiateCheckout(event, explicitPaymentMethod = null) {
         const { number: orderNumber, id: orderId } = getOrderIdentifiers(orderData);
 
         if (isCashOnDelivery(paymentMethod)) {
+            // Soft-launch idempotency_key fix
+            sessionStorage.removeItem('checkout_idempotency_key');
             window.location.href = `order-success.html?order=${encodeURIComponent(orderNumber || orderId)}`;
             return;
         }

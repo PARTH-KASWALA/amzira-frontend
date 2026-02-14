@@ -4,11 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Name | Amzira</title>
-    <meta name="description" content="Shop premium ethnic wear at Amzira. Free shipping on orders above $100.">
+    <meta name="description" content="Shop premium ethnic wear at Amzira. Free shipping on orders above ₹2,000.">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -67,15 +67,20 @@
 
         .pdp-grid {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 60px;
+            /* PDP layout alignment (Manyavar-style) */
+            grid-template-columns: minmax(520px, 560px) minmax(360px, 1fr);
+            gap: 56px;
+            align-items: start;
             margin-bottom: 60px;
         }
 
         /* Image Gallery */
         .pdp-gallery {
             display: flex;
+            /* PDP layout alignment (Manyavar-style) */
             gap: 16px;
+            max-width: 560px;
+            align-items: flex-start;
         }
 
         .gallery-thumbnails {
@@ -109,7 +114,9 @@
         }
 
         .gallery-main-image {
+            /* PDP layout alignment (Manyavar-style) */
             flex: 1;
+            max-width: 480px;
             position: relative;
             background: var(--bg-light);
             border-radius: 8px;
@@ -118,6 +125,7 @@
         }
 
         .gallery-main-image img {
+            /* PDP layout alignment (Manyavar-style) */
             width: 100%;
             height: 100%;
             object-fit: cover;
@@ -160,8 +168,9 @@
         }
 
         .product-title-pdp {
-            font-size: 32px;
-            font-weight: 600;
+            font-family: 'Playfair Display', serif;
+            font-size: 36px;
+            font-weight: 500;
             margin-bottom: 16px;
             color: var(--text-dark);
             line-height: 1.3;
@@ -536,13 +545,42 @@
             }
         }
     </style>
+    <!-- Fallback styles for JavaScript-disabled browsers -->
+    <noscript>
+        <style>
+            .mobile-menu {
+                display: block !important;
+                position: relative !important;
+                transform: none !important;
+                box-shadow: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .mobile-menu-toggle {
+                display: none !important;
+            }
+
+            .nav-desktop {
+                display: none !important;
+            }
+
+            @media (min-width: 1024px) {
+                .mobile-menu {
+                    display: none !important;
+                }
+                .nav-desktop {
+                    display: flex !important;
+                }
+            }
+        </style>
+    </noscript>
 </head>
 <body>
     <!-- Top Banner -->
     <div class="top-banner">
         <div class="marquee">
-            <span>Free Shipping For Orders Above $100 • Your Wedding Look Starts Here • Explore the New Wedding Edit!</span>
-            <span>Free Shipping For Orders Above $100 • Your Wedding Look Starts Here • Explore the New Wedding Edit!</span>
+            <span>Free Shipping For Orders Above ₹2,000 • Your Wedding Look Starts Here • Explore the New Wedding Edit!</span>
+            <span>Free Shipping For Orders Above ₹2,000 • Your Wedding Look Starts Here • Explore the New Wedding Edit!</span>
         </div>
     </div>
 
@@ -670,8 +708,8 @@
 
                 <div class="product-price-pdp">
                     <div class="price-row">
-                        <span class="price-current-pdp" id="priceDisplay">$6,299</span>
-                        <span class="price-original-pdp" id="originalPrice">$8,999</span>
+                        <span class="price-current-pdp" id="priceDisplay">₹6,299</span>
+                        <span class="price-original-pdp" id="originalPrice">₹8,999</span>
                         <span class="price-discount-pdp" id="discountPercent">30% OFF</span>
                     </div>
                     <p class="price-note">Inclusive of all taxes</p>
@@ -691,7 +729,7 @@
                     <div class="size-selector" id="sizeSelector">
                         <!-- Sizes loaded dynamically -->
                     </div>
-                    <a href="#" class="size-guide-link">Size Guide</a>
+                    <button type="button" class="size-guide-link">Size Guide</button>
                 </div>
 
                 <!-- Quantity -->
@@ -706,19 +744,23 @@
 
                 <!-- Delivery Check Section -->
                 <div class="pdp-section">
-                    <h3 class="pdp-section-title">Check Delivery</h3>
+                    <h3 class="pdp-section-title">Delivery Availability</h3>
                     <div class="delivery-checker">
                         <input 
                             type="text" 
                             id="pincodeInput" 
-                            placeholder="Enter Pincode" 
+                            placeholder="Pincode lookup coming soon" 
                             maxlength="6"
                             pattern="[0-9]{6}"
                             class="pincode-input"
+                            disabled
                         >
-                        <button onclick="checkDelivery()" class="btn-check">Check</button>
+                        <button class="btn-check" type="button" disabled>Coming Soon</button>
                     </div>
-                    <div id="deliveryResult" class="delivery-result"></div>
+                    <div id="deliveryResult" class="delivery-result info">
+                        <i class="fas fa-info-circle"></i>
+                        Delivery pincode checker is coming soon. Please contact support for delivery estimates.
+                    </div>
                 </div>
 
                 <!-- Action Buttons -->
@@ -736,7 +778,7 @@
                 <div class="product-features">
                     <div class="feature-item">
                         <i class="fas fa-truck"></i>
-                        <span>Free shipping on orders above $100</span>
+                        <span>Free shipping on orders above ₹2,000</span>
                     </div>
                     <div class="feature-item">
                         <i class="fas fa-undo-alt"></i>
@@ -792,86 +834,25 @@
             <div class="tab-content" id="qa">
                 <div class="qa-header">
                     <h3>Questions & Answers</h3>
-                    <button class="ask-question-btn" onclick="showAskQuestion()">
+                    <button class="ask-question-btn" type="button" disabled>
                         <i class="fas fa-plus"></i>
-                        Ask a Question
+                        Q&A Coming Soon
                     </button>
                 </div>
 
                 <div class="qa-list" id="qaList">
-                    <!-- Q&A items will be loaded here -->
-                    <div class="qa-item">
-                        <div class="qa-question">
-                            <div class="qa-user">
-                                <i class="fas fa-user-circle"></i>
-                                <span class="qa-username">Anonymous Customer</span>
-                            </div>
-                            <div class="qa-content">
-                                <p>Is this product available in different sizes?</p>
-                                <span class="qa-date">2 days ago</span>
-                            </div>
-                        </div>
-                        <div class="qa-answer">
-                            <div class="qa-user">
-                                <i class="fas fa-store"></i>
-                                <span class="qa-username">Amzira Support</span>
-                            </div>
-                            <div class="qa-content">
-                                <p>Yes, this product is available in multiple sizes (S, M, L, XL, XXL). You can select your preferred size from the size selector above.</p>
-                                <span class="qa-date">1 day ago</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="qa-item">
-                        <div class="qa-question">
-                            <div class="qa-user">
-                                <i class="fas fa-user-circle"></i>
-                                <span class="qa-username">Anonymous Customer</span>
-                            </div>
-                            <div class="qa-content">
-                                <p>What is the fabric composition of this kurta?</p>
-                                <span class="qa-date">5 days ago</span>
-                            </div>
-                        </div>
-                        <div class="qa-answer">
-                            <div class="qa-user">
-                                <i class="fas fa-store"></i>
-                                <span class="qa-username">Amzira Support</span>
-                            </div>
-                            <div class="qa-content">
-                                <p>This kurta is made from premium cotton fabric, ensuring comfort and breathability. The fabric is 100% cotton with a soft finish.</p>
-                                <span class="qa-date">4 days ago</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="qa-item unanswered">
-                        <div class="qa-question">
-                            <div class="qa-user">
-                                <i class="fas fa-user-circle"></i>
-                                <span class="qa-username">Anonymous Customer</span>
-                            </div>
-                            <div class="qa-content">
-                                <p>Do you offer customization options for this product?</p>
-                                <span class="qa-date">1 week ago</span>
-                            </div>
-                        </div>
-                        <div class="qa-unanswered">
-                            <p>This question is awaiting a response from our team.</p>
-                        </div>
+                    <div class="qa-empty-content">
+                        <i class="fas fa-comments"></i>
+                        <h4>Q&A Coming Soon</h4>
+                        <p>Questions and answers are not active yet. Please contact support for product-specific help.</p>
                     </div>
                 </div>
 
                 <div class="qa-empty" id="qaEmpty" style="display: none;">
                     <div class="qa-empty-content">
                         <i class="fas fa-comments"></i>
-                        <h4>No questions yet</h4>
-                        <p>Be the first to ask a question about this product!</p>
-                        <button class="ask-question-btn" onclick="showAskQuestion()">
-                            <i class="fas fa-plus"></i>
-                            Ask a Question
-                        </button>
+                        <h4>Q&A Coming Soon</h4>
+                        <p>Questions and answers are not active yet. Please contact support for product-specific help.</p>
                     </div>
                 </div>
             </div>
@@ -930,16 +911,16 @@
     <div class="footer-column">
       <h3 class="footer-heading">CATEGORIES</h3>
       <ul class="footer-links">
-        <li><a href="#">Kurta Pajama</a></li>
-        <li><a href="#">Kurta Jacket Sets</a></li>
-        <li><a href="#">Only Kurtas</a></li>
-        <li><a href="#">Nehru Jackets</a></li>
-        <li><a href="#">Indo Western</a></li>
-        <li><a href="#">Sherwani</a></li>
-        <li><a href="#">Lehenga</a></li>
-        <li><a href="#">Saree</a></li>
-        <li><a href="#">Kidswear</a></li>
-        <li><a href="#">Accessories</a></li>
+        <li><a href="men.html?cat=kurta-pajama">Kurta Pajama</a></li>
+        <li><a href="men.html?cat=kurta-jacket-set">Kurta Jacket Sets</a></li>
+        <li><a href="men.html?cat=only-kurta">Only Kurtas</a></li>
+        <li><a href="men.html?cat=nehru-jacket">Nehru Jackets</a></li>
+        <li><a href="men.html?cat=indo-western">Indo Western</a></li>
+        <li><a href="men.html?cat=sherwani">Sherwani</a></li>
+        <li><a href="women.html?cat=lehenga">Lehenga</a></li>
+        <li><a href="women.html?cat=sarees">Saree</a></li>
+        <li><a href="kids.html">Kidswear</a></li>
+        <li><a href="women.html?cat=accessories">Accessories</a></li>
       </ul>
     </div>
 
@@ -947,9 +928,9 @@
     <div class="footer-column">
       <h3 class="footer-heading">SUPPORT</h3>
       <ul class="footer-links">
-        <li><a href="#">Track Order</a></li>
-        <li><a href="#">Contact Us</a></li>
-        <li><a href="#">My Account</a></li>
+        <li><a href="order-tracking.html">Track Order</a></li>
+        <li><a href="contact-support.html">Contact Us</a></li>
+        <li><a href="account.html">My Account</a></li>
       </ul>
     </div>
 
@@ -957,12 +938,12 @@
     <div class="footer-column">
       <h3 class="footer-heading">QUICK LINKS</h3>
       <ul class="footer-links">
-        <li><a href="#">About Us</a></li>
-        <li><a href="#">Brand Story</a></li>
-        <li><a href="#">Blogs</a></li>
-        <li><a href="#">Careers</a></li>
-        <li><a href="#">Book a Video Call</a></li>
-        <li><a href="#">Store Locator</a></li>
+        <li><a href="index.html">About Us</a></li>
+        <li><a href="index.html">Brand Story</a></li>
+        <li><a href="index.html">Blogs</a></li>
+        <li><a href="contact-support.html">Careers</a></li>
+        <li><a href="appointments.html">Book a Video Call</a></li>
+        <li><a href="stores.html">Store Locator</a></li>
       </ul>
     </div>
 
@@ -970,12 +951,12 @@
     <div class="footer-column">
       <h3 class="footer-heading">OUR POLICIES</h3>
       <ul class="footer-links">
-        <li><a href="#">FAQs</a></li>
-        <li><a href="#">Shipping Details</a></li>
-        <li><a href="#">Return, Exchange and Refund Policy</a></li>
-        <li><a href="#">Terms of Use</a></li>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="faqs.html">FAQs</a></li>
+        <li><a href="shipping-policy.html">Shipping Details</a></li>
+        <li><a href="returns-refund-policy.html">Return, Exchange and Refund Policy</a></li>
+        <li><a href="terms-and-conditions.html">Terms of Use</a></li>
+        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="privacy-policy.html#cookie-policy">Cookie Policy</a></li>
       </ul>
     </div>
 
@@ -993,32 +974,32 @@
       <div class="social-icons">
         <h4 class="social-heading">KEEP IN TOUCH</h4>
         <div class="social-links">
-          <a href="#" aria-label="Facebook">
+          <a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
             </svg>
           </a>
-          <a href="#" aria-label="Twitter">
+          <a href="https://x.com/" target="_blank" rel="noopener" aria-label="Twitter">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
             </svg>
           </a>
-          <a href="#" aria-label="Instagram">
+          <a href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Instagram">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
             </svg>
           </a>
-          <a href="#" aria-label="LinkedIn">
+          <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
             </svg>
           </a>
-          <a href="#" aria-label="YouTube">
+          <a href="https://www.youtube.com/" target="_blank" rel="noopener" aria-label="YouTube">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
             </svg>
           </a>
-          <a href="#" aria-label="Pinterest">
+          <a href="https://www.pinterest.com/" target="_blank" rel="noopener" aria-label="Pinterest">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/>
             </svg>
@@ -1061,6 +1042,7 @@
     <script src="js/error-handler.js"></script>
 
     <!-- 2. Data layer -->
+    <script src="js/product-normalizer.js"></script>
     <script src="js/cart.js"></script>
 
     <!-- 3. UI Components -->
@@ -1069,9 +1051,68 @@
     <script>
         // Product Detail Page Logic
         let currentProduct = null;
+        let activeVariants = [];
         let selectedColor = null;
         let selectedSize = null;
+        let selectedVariantId = null;
         let quantity = 1;
+        let addToCartInFlight = false;
+
+        // High-impact UX hardening (pre-launch)
+        function ensurePdpInlineMessage() {
+            let messageEl = document.getElementById('pdpInlineMessage');
+            if (messageEl) return messageEl;
+
+            const actionContainer = document.querySelector('.pdp-actions');
+            if (!actionContainer) return null;
+
+            messageEl = document.createElement('div');
+            messageEl.id = 'pdpInlineMessage';
+            messageEl.setAttribute('aria-live', 'polite');
+            messageEl.style.cssText = 'min-height:20px;font-size:13px;line-height:1.4;color:var(--text-gray);margin-top:10px;';
+            actionContainer.insertAdjacentElement('afterend', messageEl);
+            return messageEl;
+        }
+
+        // High-impact UX hardening (pre-launch)
+        function setPdpInlineMessage(message, type = 'info') {
+            const messageEl = ensurePdpInlineMessage();
+            if (!messageEl) return;
+            messageEl.textContent = message || '';
+            messageEl.style.color = type === 'error'
+                ? '#b91c1c'
+                : type === 'success'
+                    ? '#047857'
+                    : 'var(--text-gray)';
+        }
+
+        // High-impact UX hardening (pre-launch)
+        function hasSinglePurchasableVariant() {
+            return activeVariants.filter((variant) => Number(variant?.stock_quantity || 0) > 0).length === 1;
+        }
+
+        // High-impact UX hardening (pre-launch)
+        function updateAddToCartState() {
+            const addToCartBtn = document.getElementById('addToCartBtn');
+            if (!addToCartBtn) return;
+
+            const hasValidVariant = Number.isInteger(Number(selectedVariantId)) && Number(selectedVariantId) > 0;
+            const canAdd = hasValidVariant && !addToCartInFlight;
+            addToCartBtn.disabled = !canAdd;
+
+            if (!addToCartInFlight) {
+                addToCartBtn.innerHTML = '<i class="fas fa-shopping-bag"></i> Add to Cart';
+            }
+
+            if (!hasValidVariant) {
+                setPdpInlineMessage(
+                    hasSinglePurchasableVariant()
+                        ? 'Only one size is available and selected for you.'
+                        : 'Please choose color and size to continue.',
+                    'info'
+                );
+            }
+        }
 
         function esc(value) {
             if (window.AMZIRA?.utils?.escapeHtml) return window.AMZIRA.utils.escapeHtml(value);
@@ -1083,6 +1124,82 @@
         function safeHexColor(value, fallback = '#8B1538') {
             const raw = String(value || '').trim();
             return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(raw) ? raw : fallback;
+        }
+
+        function normalizeForDisplayProduct(product) {
+            if (window.ProductNormalizer && typeof window.ProductNormalizer.normalize === 'function') {
+                const normalized = window.ProductNormalizer.normalize(product);
+                if (normalized) return { ...product, ...normalized };
+            }
+            return product;
+        }
+
+        function normalizeVariantColor(value) {
+            if (!value) return '';
+            if (typeof value === 'string') return value.trim();
+            if (typeof value === 'object') return String(value.name || value.title || '').trim();
+            return '';
+        }
+
+        function normalizeVariantSize(value) {
+            if (!value) return '';
+            if (typeof value === 'string') return value.trim();
+            if (typeof value === 'object') return String(value.name || value.label || value.value || '').trim();
+            return '';
+        }
+
+        function flattenVariants(rawVariants) {
+            const flat = [];
+            if (!Array.isArray(rawVariants)) return flat;
+
+            rawVariants.forEach((variant) => {
+                if (!variant) return;
+                if (Array.isArray(variant.variants)) {
+                    variant.variants.forEach((child) => flat.push({ ...variant, ...child }));
+                    return;
+                }
+                if (Array.isArray(variant.sizes)) {
+                    variant.sizes.forEach((sizeEntry) => {
+                        flat.push({ ...variant, ...sizeEntry });
+                    });
+                    return;
+                }
+                flat.push(variant);
+            });
+
+            return flat;
+        }
+
+        function extractVariants(product) {
+            if (!product) return [];
+            let raw = product.variants || product.variant_options || product.variant_groups || product.options || [];
+
+            if (!Array.isArray(raw)) {
+                if (Array.isArray(raw.items)) {
+                    raw = raw.items;
+                } else if (Array.isArray(raw.colors) && Array.isArray(raw.sizes)) {
+                    const combined = [];
+                    raw.colors.forEach((colorEntry) => {
+                        raw.sizes.forEach((sizeEntry) => {
+                            combined.push({
+                                color: normalizeVariantColor(colorEntry?.name || colorEntry),
+                                size: normalizeVariantSize(sizeEntry?.name || sizeEntry),
+                                id: sizeEntry?.id || colorEntry?.id || null,
+                                stock_quantity: sizeEntry?.stock_quantity || sizeEntry?.stock || colorEntry?.stock || 0
+                            });
+                        });
+                    });
+                    return combined;
+                }
+            }
+
+            const flat = flattenVariants(raw);
+            return flat.map((variant) => ({
+                ...variant,
+                id: variant?.id || variant?.variant_id || variant?.sku || null,
+                color: normalizeVariantColor(variant?.color || variant?.colour || variant?.shade),
+                size: normalizeVariantSize(variant?.size || variant?.label)
+            }));
         }
 
         async function ensureApiReady() {
@@ -1106,127 +1223,293 @@
         }
 
         // Get product ID from URL
-        function getProductId() {
+        function getProductSlug() {
             const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('id');
+            return urlParams.get('slug');
+        }
+
+        function renderPdpMessage({ title, message, iconClass, actionsHtml }) {
+            const container = document.querySelector('.pdp-container');
+            if (!container) return;
+            container.innerHTML = `
+                <div style="text-align:center; padding:100px 20px;">
+                    <i class="${iconClass}" style="font-size:64px; color:var(--text-light); margin-bottom:24px;"></i>
+                    <h1 style="font-size:32px; margin-bottom:16px;">${esc(title)}</h1>
+                    <p style="color:var(--text-gray); margin-bottom:32px; font-size:18px;">${esc(message)}</p>
+                    ${actionsHtml || ''}
+                </div>
+            `;
+        }
+
+        function getPdpEl(id, context) {
+            const el = document.getElementById(id);
+            if (!el) {
+                console.warn(`PDP missing element: ${id}${context ? ` (${context})` : ''}`);
+            }
+            return el;
+        }
+
+        function setPdpStatus({ title, message, tone = 'info' }) {
+            const titleEl = getPdpEl('productTitle', 'status');
+            if (titleEl && title) {
+                titleEl.textContent = title;
+            }
+            if (message) {
+                setPdpInlineMessage(message, tone);
+            }
         }
 
         // Load product data
         async function loadProduct() {
-            const productId = getProductId();
-            if (!productId) {
-                alert('Product not found');
-                window.location.href = 'index.html';
+            const productSlug = getProductSlug();
+            if (!productSlug) {
+                setPdpStatus({
+                    title: 'Product Not Found',
+                    message: 'No product slug provided.',
+                    tone: 'error'
+                });
                 return;
             }
 
             try {
+                setPdpStatus({
+                    title: 'Loading product...',
+                    message: 'Please wait while we load this product.',
+                    tone: 'info'
+                });
+
+                let timeoutReached = false;
+                const timeoutId = setTimeout(() => {
+                    timeoutReached = true;
+                    setPdpStatus({
+                        title: 'Unable to Load Product',
+                        message: 'Request timed out. Please try again.',
+                        tone: 'error'
+                    });
+                }, 10000);
+
                 await ensureApiReady();
-                let products = [];
-                if (window.AMZIRA?.products?.getProducts) {
-                    const data = await window.AMZIRA.products.getProducts({ limit: 1000 });
-                    products = data?.products || data?.results || (Array.isArray(data) ? data : []);
+                currentProduct = null;
+                if (window.AMZIRA?.products?.getProductDetail) {
+                    const safeSlug = encodeURIComponent(String(productSlug).trim());
+                    console.log('PDP fetch', {
+                        slug: productSlug,
+                        requestUrl: `/products/${safeSlug}`
+                    });
+                    currentProduct = await window.AMZIRA.products.getProductDetail(safeSlug);
                 }
 
-                currentProduct = products.find((p) =>
-                    String(p.id) === String(productId) ||
-                    String(p.slug || '').toLowerCase() === String(productId).toLowerCase()
-                );
+                clearTimeout(timeoutId);
+
+                if (timeoutReached) {
+                    return;
+                }
 
                 if (!currentProduct) {
-                    alert('Product not found');
-                    window.location.href = 'index.html';
+                    // Audit Ref: [BLOCKER] Product Detail Page Breaks on Invalid ID.
+                    if (!timeoutReached) {
+                        setPdpStatus({
+                            title: 'Product Not Found',
+                            message: 'We could not find this product.',
+                            tone: 'error'
+                        });
+                    }
                     return;
                 }
 
                 displayProduct(currentProduct);
             } catch (error) {
                 console.error('Error loading product:', error);
-                if (window.errorHandler?.showError) {
-                    window.errorHandler.showError('Unable to load product right now.');
-                } else {
-                    alert('Error loading product. Please try again.');
+                const debugInfo = {
+                    slug: productSlug,
+                    requestUrl: `/products/${encodeURIComponent(String(productSlug))}`,
+                    apiBaseUrl: window.AMZIRA?.API_BASE_URL || 'unknown',
+                    errorMessage: error?.message,
+                    errorStatus: error?.status,
+                    errorPayload: error?.payload
+                };
+                console.error('PDP Load Failure Debug Info:', debugInfo);
+                if (error?.status === 404) {
+                    setPdpStatus({
+                        title: 'Product Not Found',
+                        message: 'We could not find this product.',
+                        tone: 'error'
+                    });
+                    return;
                 }
+
+                setPdpStatus({
+                    title: 'Unable to Load Product',
+                    message: error?.message || 'Please try again.',
+                    tone: 'error'
+                });
             }
         }
 
         // Display product
         function displayProduct(product) {
+            const normalized = normalizeForDisplayProduct(product);
+            const categoryName = normalized?.category || product?.category?.name || product?.category || 'Category';
+            const categorySlug = product?.category?.slug || String(categoryName).toLowerCase().replace(/\\s+/g, '-');
+            const subcategoryName = product?.subcategory?.name || product?.subcategory || categoryName;
+            const salePrice = Number(normalized?.price ?? product?.sale_price ?? product?.salePrice ?? 0);
+            const basePrice = Number(normalized?.basePrice ?? product?.base_price ?? product?.price ?? salePrice);
+            const currentPrice = salePrice > 0 ? salePrice : basePrice;
+            const effectiveBasePrice = basePrice >= currentPrice ? basePrice : currentPrice;
+
+            activeVariants = extractVariants(product).filter((variant) => variant && variant.is_active !== false);
+
             // Update page title
-            document.title = `${product.name} | Amzira`;
+            if (product?.name) {
+                document.title = `${product.name} | Amzira`;
+            }
 
             // Breadcrumb
-            document.getElementById('breadcrumbCategory').textContent = product.category.charAt(0).toUpperCase() + product.category.slice(1);
-            document.getElementById('breadcrumbProduct').textContent = product.name;
+            const breadcrumbCategory = getPdpEl('breadcrumbCategory', 'displayProduct');
+            const breadcrumbProduct = getPdpEl('breadcrumbProduct', 'displayProduct');
+            if (!breadcrumbCategory || !breadcrumbProduct) return;
+            breadcrumbCategory.textContent = categoryName;
+            breadcrumbCategory.href = `category.html?slug=${encodeURIComponent(categorySlug)}`;
+            breadcrumbProduct.textContent = product.name || 'Product';
 
             // Product info
-            document.getElementById('productCategory').textContent = product.subcategory.toUpperCase().replace('-', ' ');
-            document.getElementById('productTitle').textContent = product.name;
+            const productCategory = getPdpEl('productCategory', 'displayProduct');
+            const productTitle = getPdpEl('productTitle', 'displayProduct');
+            if (!productCategory || !productTitle) return;
+            productCategory.textContent = String(subcategoryName || '').toUpperCase().replace('-', ' ');
+            productTitle.textContent = normalized?.name || product.name || 'Product';
 
             // Rating
             const stars = generateStars(product.rating || 4.5);
-            document.getElementById('productStars').innerHTML = stars;
-            document.getElementById('ratingText').textContent = `${product.rating || 4.5} (${product.reviews || 0} reviews)`;
+            const productStars = getPdpEl('productStars', 'displayProduct');
+            const ratingText = getPdpEl('ratingText', 'displayProduct');
+            if (productStars) productStars.innerHTML = stars;
+            if (ratingText) {
+                ratingText.textContent = `${normalized?.rating || product.rating || 4.5} (${normalized?.reviews || product.reviews || 0} reviews)`;
+            }
 
             // Price
-            const currentPrice = product.salePrice || product.price;
-            document.getElementById('priceDisplay').textContent = `$${currentPrice}`;
-            if (product.salePrice) {
-                document.getElementById('originalPrice').textContent = `$${product.price}`;
-                const discount = Math.round(((product.price - product.salePrice) / product.price) * 100);
-                document.getElementById('discountPercent').textContent = `${discount}% OFF`;
+            const priceDisplay = getPdpEl('priceDisplay', 'displayProduct');
+            const originalPrice = getPdpEl('originalPrice', 'displayProduct');
+            const discountPercent = getPdpEl('discountPercent', 'displayProduct');
+            if (!priceDisplay || !originalPrice || !discountPercent) return;
+            priceDisplay.textContent = `₹${Number(currentPrice).toLocaleString('en-IN')}`;
+            if (effectiveBasePrice > currentPrice) {
+                originalPrice.textContent = `₹${Number(effectiveBasePrice).toLocaleString('en-IN')}`;
+                const discount = Math.round(((effectiveBasePrice - currentPrice) / effectiveBasePrice) * 100);
+                discountPercent.textContent = `${discount}% OFF`;
+                originalPrice.style.display = '';
+                discountPercent.style.display = '';
             } else {
-                document.getElementById('originalPrice').style.display = 'none';
-                document.getElementById('discountPercent').style.display = 'none';
+                originalPrice.style.display = 'none';
+                discountPercent.style.display = 'none';
             }
 
             // Badge
-            if (product.badge) {
-                const badge = document.getElementById('productBadge');
-                badge.textContent = product.badge;
-                badge.className = `image-badge ${product.badge.toLowerCase()}`;
+            if (normalized?.badge || product.badge) {
+                const badge = getPdpEl('productBadge', 'displayProduct');
+                if (!badge) return;
+                const badgeLabel = normalized?.badge || product.badge;
+                badge.textContent = badgeLabel;
+                badge.className = `image-badge ${String(badgeLabel).toLowerCase()}`;
                 badge.style.display = 'block';
             }
 
             // Images
-            displayImages(product.images || [product.image]);
+            displayImages(normalized?.images || product.images || [product.primary_image || product.image]);
 
-            // Colors
-            if (product.colors && product.colors.length > 0) {
-                displayColors(product.colors);
-                document.getElementById('colorSection').style.display = 'block';
+            const colors = Array.isArray(normalized?.colors) && normalized.colors.length
+                ? normalized.colors
+                : Array.from(
+                    new Set(
+                        activeVariants
+                            .map((variant) => String(variant?.color || '').trim())
+                            .filter(Boolean)
+                    )
+                ).map((name) => ({ name, hex: '#8B1538' }));
+
+            if (colors.length > 0) {
+                displayColors(colors);
+                const colorSection = getPdpEl('colorSection', 'displayProduct');
+                if (colorSection) colorSection.style.display = 'block';
+            } else {
+                const colorSection = getPdpEl('colorSection', 'displayProduct');
+                if (colorSection) colorSection.style.display = 'none';
+                selectedColor = null;
             }
 
             // Sizes
-            if (product.sizes && product.sizes.length > 0) {
-                displaySizes(product.sizes);
-            }
+            displaySizes(activeVariants, selectedColor);
 
             // Description
-            document.getElementById('productDescription').textContent = product.description || 'Premium quality ethnic wear crafted with care.';
+            const productDescription = getPdpEl('productDescription', 'displayProduct');
+            if (!productDescription) return;
+            productDescription.textContent = product.description || 'Premium quality ethnic wear crafted with care.';
 
             // Features
             if (product.features && product.features.length > 0) {
                 const featuresHTML = product.features.map(f => `<li>${esc(f)}</li>`).join('');
-                document.getElementById('productFeatures').innerHTML = featuresHTML;
+                const productFeatures = getPdpEl('productFeatures', 'displayProduct');
+                if (productFeatures) productFeatures.innerHTML = featuresHTML;
             }
 
             // Fabric
-            document.getElementById('fabricInfo').textContent = `Made with ${product.fabric || 'premium fabric'}.`;
+            const fabricInfo = getPdpEl('fabricInfo', 'displayProduct');
+            if (fabricInfo) fabricInfo.textContent = `Made with ${product.fabric || 'premium fabric'}.`;
+
+            // Variant safety (Manyavar-style): render PDP, but disable cart if no variants
+            if (!Array.isArray(product?.variants) || product.variants.length === 0) {
+                const addToCartBtn = getPdpEl('addToCartBtn', 'displayProduct');
+                if (addToCartBtn) addToCartBtn.disabled = true;
+                setPdpInlineMessage('Currently unavailable', 'error');
+            }
+
+            // Related products placeholder (soft launch)
+            const relatedGrid = document.getElementById('relatedProducts');
+            if (relatedGrid && relatedGrid.children.length === 0) {
+                relatedGrid.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 24px 16px; color: var(--text-gray);">
+                        <i class="fas fa-store" style="font-size: 28px; color: var(--text-light); margin-bottom: 10px;"></i>
+                        <h3 style="margin-bottom: 6px;">More styles coming soon</h3>
+                        <p style="margin-bottom: 14px;">Explore Men, Women, or Kids collections while we add more looks.</p>
+                        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
+                            <a class="btn btn-secondary" href="men.html">Men</a>
+                            <a class="btn btn-secondary" href="women.html">Women</a>
+                            <a class="btn btn-secondary" href="kids.html">Kids</a>
+                        </div>
+                    </div>
+                `;
+            }
         }
 
         // Display images
         function displayImages(images) {
-            const thumbsContainer = document.getElementById('thumbnails');
-            const mainImage = document.getElementById('mainImage');
+            const thumbsContainer = getPdpEl('thumbnails', 'displayImages');
+            const mainImage = getPdpEl('mainImage', 'displayImages');
+            if (!thumbsContainer || !mainImage) return;
+            const normalizedImages = (Array.isArray(images) ? images : [])
+                .map((img) => {
+                    if (!img) return '';
+                    if (typeof img === 'string') return img;
+                    return String(img.image_url || img.url || '');
+                })
+                .filter(Boolean);
 
-            thumbsContainer.innerHTML = images.map((img, index) => `
+            if (!normalizedImages.length) {
+                normalizedImages.push('images/products/product-1-front.jpg');
+            }
+
+            thumbsContainer.innerHTML = normalizedImages.map((img, index) => `
                 <div class="thumb-item ${index === 0 ? 'active' : ''}" data-image="${esc(img)}">
-                    <img src="${esc(img)}" alt="Product Image ${index + 1}" loading="lazy">
+                    <img src="${esc(img)}" alt="Product Image ${index + 1}" loading="lazy" onerror="this.onerror=null;this.src='images/products/product-1-front.jpg';">
                 </div>
             `).join('');
 
-            mainImage.src = images[0];
+            mainImage.src = normalizedImages[0];
+            mainImage.onerror = function onMainImageError() {
+                this.onerror = null;
+                this.src = 'images/products/product-1-front.jpg';
+            };
 
             // Thumbnail click events
             document.querySelectorAll('.thumb-item').forEach(thumb => {
@@ -1240,17 +1523,25 @@
 
         // Display colors
         function displayColors(colors) {
-            const container = document.getElementById('colorSelector');
-            container.innerHTML = colors.map((color, index) => `
-                <div class="color-swatch ${index === 0 ? 'selected' : ''}" 
+            const container = getPdpEl('colorSelector', 'displayColors');
+            if (!container) return;
+            container.innerHTML = colors.map((color) => `
+                <div class="color-swatch" 
                      style="background: ${safeHexColor(color.hex)}"
                      data-color="${esc(color.name)}"
                      title="${esc(color.name)}">
                 </div>
             `).join('');
 
-            selectedColor = colors[0].name;
-            document.getElementById('selectedColorName').textContent = selectedColor;
+            selectedColor = null;
+            const selectedColorName = getPdpEl('selectedColorName', 'displayColors');
+            const selectedSizeName = getPdpEl('selectedSizeName', 'displayColors');
+            if (!selectedColorName || !selectedSizeName) return;
+            selectedColorName.textContent = 'Select';
+            selectedSize = null;
+            selectedVariantId = null;
+            selectedSizeName.textContent = 'Select';
+            displaySizes(activeVariants, null);
 
             // Color selection events
             document.querySelectorAll('.color-swatch').forEach(swatch => {
@@ -1258,19 +1549,65 @@
                     document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
                     this.classList.add('selected');
                     selectedColor = this.dataset.color;
-                    document.getElementById('selectedColorName').textContent = selectedColor;
+                    const selectedColorName = getPdpEl('selectedColorName', 'displayColors');
+                    if (selectedColorName) selectedColorName.textContent = selectedColor;
+                    selectedSize = null;
+                    selectedVariantId = null;
+                    const selectedSizeName = getPdpEl('selectedSizeName', 'displayColors');
+                    if (selectedSizeName) selectedSizeName.textContent = 'Select';
+                    displaySizes(activeVariants, selectedColor);
+                    setPdpInlineMessage('Select size to continue.', 'info');
                 });
             });
+
+            updateAddToCartState();
         }
 
         // Display sizes
-        function displaySizes(sizes) {
-            const container = document.getElementById('sizeSelector');
-            container.innerHTML = sizes.map(size => `
-                <div class="size-option" data-size="${esc(size)}">
-                    ${esc(size)}
+        function displaySizes(variants, colorFilter = null) {
+            const container = getPdpEl('sizeSelector', 'displaySizes');
+            const selectedSizeName = getPdpEl('selectedSizeName', 'displaySizes');
+            if (!container || !selectedSizeName) return;
+            const filteredVariants = (Array.isArray(variants) ? variants : []).filter((variant) => {
+                if (!colorFilter) return true;
+                return String(variant?.color || '').toLowerCase() === String(colorFilter).toLowerCase();
+            });
+
+            container.innerHTML = filteredVariants.map((variant) => `
+                <div class="size-option ${Number(variant?.stock_quantity || 0) <= 0 ? 'out-of-stock' : ''}"
+                     data-size="${esc(variant?.size || '-')}"
+                     data-variant-id="${esc(variant?.id || '')}">
+                    ${esc(variant?.size || '-')}
                 </div>
             `).join('');
+
+            if (!filteredVariants.length) {
+                selectedSize = null;
+                selectedVariantId = null;
+                selectedSizeName.textContent = 'Unavailable';
+                setPdpInlineMessage('Selected option is unavailable. Please choose another.', 'error');
+                updateAddToCartState();
+                return;
+            }
+
+            const firstInStock = filteredVariants.find((variant) => Number(variant?.stock_quantity || 0) > 0) || null;
+            const hasOnlyOneVariant = filteredVariants.length === 1 && firstInStock;
+            if (hasOnlyOneVariant) {
+                selectedSize = firstInStock.size;
+                selectedVariantId = Number(firstInStock.id);
+                selectedSizeName.textContent = selectedSize;
+                setPdpInlineMessage(`Selected size ${selectedSize}. Only one option is available.`, 'info');
+            } else {
+                selectedSize = null;
+                selectedVariantId = null;
+                if (firstInStock) {
+                    selectedSizeName.textContent = 'Select';
+                    setPdpInlineMessage('Please select an available size.', 'info');
+                } else {
+                    selectedSizeName.textContent = 'Out of Stock';
+                    setPdpInlineMessage('This product is currently out of stock in selected options.', 'error');
+                }
+            }
 
             // Size selection events
             document.querySelectorAll('.size-option').forEach(option => {
@@ -1280,9 +1617,18 @@
                     document.querySelectorAll('.size-option').forEach(o => o.classList.remove('selected'));
                     this.classList.add('selected');
                     selectedSize = this.dataset.size;
-                    document.getElementById('selectedSizeName').textContent = selectedSize;
+                    selectedVariantId = Number(this.dataset.variantId || 0) || null;
+                    selectedSizeName.textContent = selectedSize;
+                    setPdpInlineMessage('Size selected. You can add this item to cart.', 'success');
+                    updateAddToCartState();
                 });
             });
+
+            if (hasOnlyOneVariant) {
+                const preselected = container.querySelector(`.size-option[data-variant-id="${firstInStock.id}"]`);
+                if (preselected) preselected.classList.add('selected');
+            }
+            updateAddToCartState();
         }
 
         // Generate stars
@@ -1320,34 +1666,58 @@
         });
 
         // Add to cart
-        document.getElementById('addToCartBtn').addEventListener('click', () => {
-            if (!selectedSize) {
-                alert('Please select a size');
+        document.getElementById('addToCartBtn').addEventListener('click', async () => {
+            const addToCartBtn = document.getElementById('addToCartBtn');
+            if (addToCartInFlight) return;
+            if (!selectedSize || !Number.isInteger(Number(selectedVariantId)) || Number(selectedVariantId) <= 0) {
+                // High-impact UX hardening (pre-launch)
+                setPdpInlineMessage('Please choose color and size before adding to cart.', 'error');
+                updateAddToCartState();
                 return;
             }
 
-            const productToAdd = {
-                ...currentProduct,
-                selectedSize: selectedSize,
-                selectedColor: selectedColor,
-                quantity: quantity
-            };
-
-            cart.addItem(productToAdd, quantity);
+            try {
+                // High-impact UX hardening (pre-launch)
+                addToCartInFlight = true;
+                if (window.loadingManager?.setButtonLoading) {
+                    window.loadingManager.setButtonLoading(addToCartBtn, true);
+                    addToCartBtn.textContent = 'Adding...';
+                } else {
+                    addToCartBtn.disabled = true;
+                    addToCartBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
+                }
+                const added = await cart.addItem(currentProduct, quantity, selectedSize, selectedColor);
+                if (!added) {
+                    setPdpInlineMessage('Unable to add this item right now. Please retry.', 'error');
+                } else {
+                    setPdpInlineMessage('Added to cart. Secure payments and easy returns available.', 'success');
+                }
+            } catch (_) {
+                setPdpInlineMessage('Unable to add this item right now. Please retry.', 'error');
+            } finally {
+                addToCartInFlight = false;
+                if (window.loadingManager?.setButtonLoading) {
+                    window.loadingManager.setButtonLoading(addToCartBtn, false);
+                } else {
+                    addToCartBtn.disabled = false;
+                }
+                updateAddToCartState();
+            }
         });
 
         // Add to wishlist
         document.getElementById('addToWishlist').addEventListener('click', function() {
             let wishlist = JSON.parse(localStorage.getItem('amziraWishlist') || '[]');
             const icon = this.querySelector('i');
+            const wishlistKey = currentProduct?.slug || currentProduct?.id;
             
-            if (wishlist.includes(currentProduct.id)) {
-                wishlist = wishlist.filter(id => id !== currentProduct.id);
+            if (wishlistKey && wishlist.includes(wishlistKey)) {
+                wishlist = wishlist.filter(id => id !== wishlistKey);
                 icon.classList.remove('fas');
                 icon.classList.add('far');
                 cart.showNotification('Removed from wishlist', 'info');
             } else {
-                wishlist.push(currentProduct.id);
+                if (wishlistKey) wishlist.push(wishlistKey);
                 icon.classList.remove('far');
                 icon.classList.add('fas');
                 cart.showNotification('Added to wishlist', 'success');
@@ -1372,11 +1742,14 @@
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
             loadProduct();
+            ensurePdpInlineMessage();
+            setPdpInlineMessage('Secure payments, easy returns, and delivery clarity at checkout.', 'info');
+            updateAddToCartState();
             
             // Check wishlist status
             const wishlist = JSON.parse(localStorage.getItem('amziraWishlist') || '[]');
-            const productId = getProductId();
-            if (productId && wishlist.includes(productId)) {
+            const productSlug = getProductSlug();
+            if (productSlug && wishlist.includes(productSlug)) {
                 const icon = document.querySelector('#addToWishlist i');
                 icon.classList.remove('far');
                 icon.classList.add('fas');
@@ -1621,45 +1994,13 @@ document.addEventListener('DOMContentLoaded', function() {
 </script>
 <script>
 function checkDelivery() {
-    const pincode = document.getElementById('pincodeInput').value.trim();
     const resultDiv = document.getElementById('deliveryResult');
-    
-    if (!pincode || pincode.length !== 6 || !/^\d{6}$/.test(pincode)) {
-        resultDiv.className = 'delivery-result error';
-        resultDiv.innerHTML = `
-            <i class="fas fa-exclamation-circle"></i>
-            Please enter a valid 6-digit pincode
-        `;
-        return;
-    }
-    
-    setTimeout(() => {
-        const today = new Date();
-        const deliveryDate = new Date(today.setDate(today.getDate() + Math.floor(Math.random() * 3) + 5));
-        const formattedDate = deliveryDate.toLocaleDateString('en-US', { 
-            month: 'short', 
-            day: 'numeric',
-            year: 'numeric'
-        });
-        
-        resultDiv.className = 'delivery-result success';
-        resultDiv.innerHTML = `
-            <div>
-                <i class="fas fa-check-circle"></i>
-                <strong>Delivery Available</strong>
-            </div>
-            <div class="delivery-details">
-                <div>
-                    <span>Estimated Delivery:</span>
-                    <strong>${formattedDate}</strong>
-                </div>
-                <div>
-                    <span>Shipping:</span>
-                    <strong>FREE</strong>
-                </div>
-            </div>
-        `;
-    }, 500);
+    if (!resultDiv) return;
+    resultDiv.className = 'delivery-result info';
+    resultDiv.innerHTML = `
+        <i class="fas fa-info-circle"></i>
+        Delivery pincode checker is coming soon. Please contact support for delivery estimates.
+    `;
 }
 
 function shareOnWhatsApp() {
@@ -1850,172 +2191,8 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Q&A Functions
-function showAskQuestion() {
-    const modal = document.getElementById('askQuestionModal');
-    const form = document.getElementById('askQuestionForm');
-
-    if (modal && form) {
-        modal.style.display = 'flex';
-        document.body.style.overflow = 'hidden';
-
-        // Reset form
-        form.reset();
-        updateCharCount();
-
-        // Focus first input
-        setTimeout(() => {
-            document.getElementById('questionText').focus();
-        }, 100);
-    }
-}
-
-function closeAskQuestion() {
-    const modal = document.getElementById('askQuestionModal');
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = 'auto';
-    }
-}
-
-function updateCharCount() {
-    const textarea = document.getElementById('questionText');
-    const counter = document.getElementById('charCount');
-
-    if (textarea && counter) {
-        counter.textContent = textarea.value.length;
-    }
-}
-
-async function submitQuestion(event) {
-    event.preventDefault();
-
-    const form = event.target;
-    const submitBtn = document.getElementById('submitQuestionBtn');
-    const btnText = submitBtn.querySelector('.btn-text');
-    const btnLoading = submitBtn.querySelector('.btn-loading');
-
-    // Basic validation
-    const questionText = document.getElementById('questionText').value.trim();
-    if (!questionText) {
-        errorHandler.showFieldError(document.getElementById('questionText'), 'Please enter your question');
-        return;
-    }
-
-    if (questionText.length < 10) {
-        errorHandler.showFieldError(document.getElementById('questionText'), 'Question must be at least 10 characters long');
-        return;
-    }
-
-    // Show loading state
-    submitBtn.disabled = true;
-    btnText.style.display = 'none';
-    btnLoading.style.display = 'flex';
-
-    try {
-        // Simulate API call (replace with actual API endpoint)
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        // Success - close modal and show notification
-        closeAskQuestion();
-
-        // Show success message
-        if (typeof cart !== 'undefined' && cart.showNotification) {
-            cart.showNotification('Question submitted successfully! We\'ll respond within 24 hours.', 'success');
-        } else if (typeof errorHandler !== 'undefined') {
-            errorHandler.showSuccess('Question submitted successfully! We\'ll respond within 24 hours.');
-        }
-
-        // Reset form
-        form.reset();
-        updateCharCount();
-
-    } catch (error) {
-        console.error('Error submitting question:', error);
-
-        // Show error message
-        if (typeof errorHandler !== 'undefined') {
-            errorHandler.showError('Failed to submit question. Please try again.');
-        }
-    } finally {
-        // Reset button state
-        submitBtn.disabled = false;
-        btnText.style.display = 'inline';
-        btnLoading.style.display = 'none';
-    }
-}
-
-// Initialize Q&A functionality
-document.addEventListener('DOMContentLoaded', function() {
-    // Character count for question textarea
-    const questionTextarea = document.getElementById('questionText');
-    if (questionTextarea) {
-        questionTextarea.addEventListener('input', updateCharCount);
-    }
-
-    // Close modal when clicking outside
-    const modal = document.getElementById('askQuestionModal');
-    if (modal) {
-        modal.addEventListener('click', function(e) {
-            if (e.target === modal) {
-                closeAskQuestion();
-            }
-        });
-    }
-
-    // Close modal on escape key
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && modal && modal.style.display === 'flex') {
-            closeAskQuestion();
-        }
-    });
-});
+// Q&A intentionally disabled for soft launch until backend flow is live.
 </script>
-
-<!-- Ask Question Modal -->
-<div id="askQuestionModal" class="modal-overlay" style="display: none;">
-    <div class="modal-content qa-modal">
-        <div class="modal-header">
-            <h3>Ask a Question</h3>
-            <button class="modal-close" onclick="closeAskQuestion()">
-                <i class="fas fa-times"></i>
-            </button>
-        </div>
-
-        <div class="modal-body">
-            <form id="askQuestionForm" onsubmit="submitQuestion(event)">
-                <div class="form-group">
-                    <label for="questionName">Name (Optional)</label>
-                    <input type="text" id="questionName" name="name" placeholder="Your name" maxlength="50">
-                </div>
-
-                <div class="form-group">
-                    <label for="questionEmail">Email (Optional)</label>
-                    <input type="email" id="questionEmail" name="email" placeholder="your.email@example.com">
-                </div>
-
-                <div class="form-group">
-                    <label for="questionText">Your Question *</label>
-                    <textarea id="questionText" name="question" required placeholder="Ask about product details, sizing, fabric, care instructions, etc." rows="4" maxlength="500"></textarea>
-                    <div class="char-count">
-                        <span id="charCount">0</span>/500 characters
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn-secondary" onclick="closeAskQuestion()">Cancel</button>
-                    <button type="submit" class="btn-primary" id="submitQuestionBtn">
-                        <span class="btn-text">Submit Question</span>
-                        <span class="btn-loading" style="display: none;">
-                            <i class="fas fa-spinner fa-spin"></i>
-                            Submitting...
-                        </span>
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
 
 </body>
 </html>

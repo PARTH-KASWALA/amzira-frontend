@@ -8,7 +8,7 @@
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -22,13 +22,42 @@
     <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/responsive.css">
+    <!-- Fallback styles for JavaScript-disabled browsers -->
+    <noscript>
+        <style>
+            .mobile-menu {
+                display: block !important;
+                position: relative !important;
+                transform: none !important;
+                box-shadow: none;
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .mobile-menu-toggle {
+                display: none !important;
+            }
+
+            .nav-desktop {
+                display: none !important;
+            }
+
+            @media (min-width: 1024px) {
+                .mobile-menu {
+                    display: none !important;
+                }
+                .nav-desktop {
+                    display: flex !important;
+                }
+            }
+        </style>
+    </noscript>
 </head>
 <body>
     <!-- Top Banner -->
     <div class="top-banner">
         <div class="marquee">
-            <span>Free Shipping For Orders Above $100 • Your Wedding Look Starts Here • Explore the New Wedding Edit!</span>
-            <span>Free Shipping For Orders Above $100 • Your Wedding Look Starts Here • Explore the New Wedding Edit!</span>
+            <span>Free Shipping For Orders Above ₹2,000 • Your Wedding Look Starts Here • Explore the New Wedding Edit!</span>
+            <span>Free Shipping For Orders Above ₹2,000 • Your Wedding Look Starts Here • Explore the New Wedding Edit!</span>
         </div>
     </div>
 
@@ -45,143 +74,366 @@
                 </div>
 
                 <!-- Desktop Navigation -->
-                <nav class="nav-desktop">
-                    <ul class="nav-menu">
-                        <li class="nav-item has-mega-menu">
-                            <a href="men.html">Men</a>
-                            <div class="mega-menu">
-                                <div class="mega-menu-content">
-                                    <div class="mega-menu-col">
-                                        <h4>Shop By Product</h4>
-                                        <ul>
-                                            <li class="has-submenu">
-                                                <a href="#">Kurta Pajama <i class="fas fa-chevron-right"></i></a>
-                                                <ul class="mega-submenu">
-                                                    <li><a href="#">Silk Kurta Pajama</a></li>
-                                                    <li><a href="#">Cotton Kurta Pajama</a></li>
-                                                    <li><a href="#">Linen Kurta Pajama</a></li>
-                                                    <li><a href="#">Embroidered Kurta</a></li>
-                                                </ul>
+                <nav class="nav-desktop" id="mainNav">
+                    <ul class="nav-menu" role="menubar">
+                        <li class="nav-item has-mega-menu" data-category="men" role="none">
+                            <a href="men.html" class="nav-link" role="menuitem" aria-haspopup="true" aria-expanded="false">Men</a>
+                            <div class="mega-menu" role="menu" aria-label="Men's Categories">
+                                <div class="mega-menu-container">
+                                    <div class="mega-menu-sidebar">
+                                        <ul class="mega-menu-l2-list" role="none">
+                                            <li class="mega-menu-l2-item active" data-subcategory="sherwani">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Sherwani</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
                                             </li>
-                                            <li class="has-submenu">
-                                                <a href="#">Kurta Jacket Set <i class="fas fa-chevron-right"></i></a>
-                                                <ul class="mega-submenu">
-                                                    <li><a href="#">Silk Blend Jackets</a></li>
-                                                    <li><a href="#">Velvet Jackets</a></li>
-                                                    <li><a href="#">Brocade Jackets</a></li>
-                                                    <li><a href="#">Designer Sets</a></li>
-                                                </ul>
+                                            <li class="mega-menu-l2-item" data-subcategory="indo-western">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Indo-Western</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
                                             </li>
-                                            <li class="has-submenu">
-                                                <a href="#">Sherwani <i class="fas fa-chevron-right"></i></a>
-                                                <ul class="mega-submenu">
-                                                    <li><a href="#">Wedding Sherwani</a></li>
-                                                    <li><a href="#">Reception Sherwani</a></li>
-                                                    <li><a href="#">Designer Sherwani</a></li>
-                                                    <li><a href="#">Royal Sherwani</a></li>
-                                                </ul>
+                                            <li class="mega-menu-l2-item" data-subcategory="kurta-sets">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Kurta Sets</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
                                             </li>
-                                            <li><a href="#">Indo Western</a></li>
-                                            <li><a href="#">Nehru Jacket</a></li>
-                                            <li><a href="#">Jodhpuri Suit</a></li>
+                                            <li class="mega-menu-l2-item" data-subcategory="kurta-pajama">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Kurta Pajama</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                            <li class="mega-menu-l2-item" data-subcategory="jackets-waistcoats">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Jackets & Waistcoats</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                            <li class="mega-menu-l2-item" data-subcategory="accessories">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Accessories</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
                                         </ul>
                                     </div>
-
-                                    <div class="mega-menu-col">
-                                        <h4>Shop By Occasion</h4>
-                                        <ul>
-                                            <li><a href="men.html?occasion=wedding">Wedding</a></li>
-                                            <li><a href="men.html?occasion=reception">Reception</a></li>
-                                            <li><a href="men.html?occasion=engagement">Engagement</a></li>
-                                            <li><a href="men.html?occasion=sangeet">Sangeet</a></li>
-                                            <li><a href="men.html?occasion=haldi">Haldi</a></li>
-                                        </ul>
-                                        <h4 class="mt-4">Shop By Fabric</h4>
-                                        <ul>
-                                            <li><a href="#">Silk</a></li>
-                                            <li><a href="#">Cotton</a></li>
-                                            <li><a href="#">Velvet</a></li>
-                                            <li><a href="#">Brocade</a></li>
-                                        </ul>
-                                    </div>
-
-                                    <div class="mega-menu-col">
-                                        <h4>Shop By Collection</h4>
-                                        <ul>
-                                            <li><a href="#">Festival</a></li>
-                                            <li><a href="#">Wedding Attendee</a></li>
-                                            <li><a href="#">Formal</a></li>
-                                            <li><a href="#">Casual</a></li>
-                                        </ul>
-                                        <h4 class="mt-4">Accessories</h4>
-                                        <ul>
-                                            <li><a href="#">Safa</a></li>
-                                            <li><a href="#">Mala</a></li>
-                                            <li><a href="#">Juti</a></li>
-                                            <li><a href="#">Brooch</a></li>
-                                        </ul>
-                                    </div>
-
-                                    <div class="mega-menu-col mega-menu-image">
-                                        <img src="images/categories/men.jpg" alt="Men Collection">
+                                    <div class="mega-menu-content">
+                                        <div class="mega-menu-l3-panel active" data-for="sherwani">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">By Occasion</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Wedding Collection</a></li>
+                                                        <li><a href="#" role="menuitem">Festive Collection</a></li>
+                                                        <li><a href="#" role="menuitem">Designer Sherwani</a></li>
+                                                        <li><a href="#" role="menuitem">Premium Sherwani</a></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">Featured</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">New Arrivals</a></li>
+                                                        <li><a href="#" role="menuitem">Bestsellers</a></li>
+                                                        <li><a href="#" role="menuitem">Wedding Edit</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mega-menu-l3-panel" data-for="indo-western">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">Styles</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Jodhpuri Suits</a></li>
+                                                        <li><a href="#" role="menuitem">Bandhgala</a></li>
+                                                        <li><a href="#" role="menuitem">Nehru Jackets</a></li>
+                                                        <li><a href="#" role="menuitem">Achkan</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mega-menu-l3-panel" data-for="kurta-sets">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">Collections</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Wedding Kurta Sets</a></li>
+                                                        <li><a href="#" role="menuitem">Festive Kurta Sets</a></li>
+                                                        <li><a href="#" role="menuitem">Casual Kurta Sets</a></li>
+                                                        <li><a href="#" role="menuitem">Designer Kurta Sets</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mega-menu-l3-panel" data-for="kurta-pajama">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">Styles</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Wedding</a></li>
+                                                        <li><a href="#" role="menuitem">Festive</a></li>
+                                                        <li><a href="#" role="menuitem">Casual</a></li>
+                                                        <li><a href="#" role="menuitem">Printed</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mega-menu-l3-panel" data-for="jackets-waistcoats">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">By Type</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Nehru Jackets</a></li>
+                                                        <li><a href="#" role="menuitem">Velvet Jackets</a></li>
+                                                        <li><a href="#" role="menuitem">Bundi Jackets</a></li>
+                                                        <li><a href="#" role="menuitem">Waistcoats</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mega-menu-l3-panel" data-for="accessories">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">Accessories</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Mojari</a></li>
+                                                        <li><a href="#" role="menuitem">Stoles</a></li>
+                                                        <li><a href="#" role="menuitem">Turbans</a></li>
+                                                        <li><a href="#" role="menuitem">Brooch & Pins</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </li>
-                        <li class="nav-item has-mega-menu">
-                            <a href="women.html">Women</a>
-                            <div class="mega-menu">
-                                <div class="mega-menu-content">
-                                    <div class="mega-menu-col">
-                                        <h4>Shop By Product</h4>
-                                        <ul>
-                                            <li><a href="#">Lehenga</a></li>
-                                            <li><a href="#">Sarees</a></li>
-                                            <li><a href="#">Indo Western</a></li>
-                                            <li><a href="#">Stitched Suit</a></li>
-                                            <li><a href="#">Blouse</a></li>
-                                            <li><a href="#">Accessories</a></li>
+                        <li class="nav-item has-mega-menu" data-category="women" role="none">
+                            <a href="women.html" class="nav-link" role="menuitem" aria-haspopup="true" aria-expanded="false">Women</a>
+                            <div class="mega-menu" role="menu" aria-label="Women's Categories">
+                                <div class="mega-menu-container">
+                                    <div class="mega-menu-sidebar">
+                                        <ul class="mega-menu-l2-list" role="none">
+                                            <li class="mega-menu-l2-item active" data-subcategory="lehenga-sets">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Lehenga Sets</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                            <li class="mega-menu-l2-item" data-subcategory="sarees">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Sarees</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                            <li class="mega-menu-l2-item" data-subcategory="salwar-suits">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Salwar Suits</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                            <li class="mega-menu-l2-item" data-subcategory="kurta-sets-women">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Kurta Sets</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                            <li class="mega-menu-l2-item" data-subcategory="gowns">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Gowns</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                            <li class="mega-menu-l2-item" data-subcategory="accessories-women">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Accessories</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
                                         </ul>
                                     </div>
-                                    <div class="mega-menu-col">
-                                        <h4>Shop By Collection</h4>
-                                        <ul>
-                                            <li><a href="#">Bridal</a></li>
-                                            <li><a href="#">Casual</a></li>
-                                            <li><a href="#">Festive</a></li>
-                                            <li><a href="#">Wedding</a></li>
-                                        </ul>
-                                    </div>
-                                    <div class="mega-menu-col">
-                                        <h4>Shop By Occasion</h4>
-                                        <ul>
-                                            <li><a href="#">Wedding</a></li>
-                                            <li><a href="#">Engagement</a></li>
-                                            <li><a href="#">Sangeet</a></li>
-                                            <li><a href="#">Reception</a></li>
-                                            <li><a href="#">Mehendi</a></li>
-                                            <li><a href="#">Haldi</a></li>
-                                            <li><a href="#">Cocktail</a></li>
-                                        </ul>
-                                    </div>
-                                    <div class="mega-menu-col mega-menu-image">
-                                        <img src="images/categories/women.jpg" alt="Women Collection">
+                                    <div class="mega-menu-content">
+                                        <div class="mega-menu-l3-panel active" data-for="lehenga-sets">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">Collections</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Bridal Lehenga</a></li>
+                                                        <li><a href="#" role="menuitem">Party Lehenga</a></li>
+                                                        <li><a href="#" role="menuitem">Designer Lehenga</a></li>
+                                                        <li><a href="#" role="menuitem">Festive Lehenga</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mega-menu-l3-panel" data-for="sarees">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">Styles</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Designer Sarees</a></li>
+                                                        <li><a href="#" role="menuitem">Silk Sarees</a></li>
+                                                        <li><a href="#" role="menuitem">Party Sarees</a></li>
+                                                        <li><a href="#" role="menuitem">Festive Sarees</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mega-menu-l3-panel" data-for="salwar-suits">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">Fits</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Anarkali</a></li>
+                                                        <li><a href="#" role="menuitem">Straight Cut</a></li>
+                                                        <li><a href="#" role="menuitem">Palazzo Suits</a></li>
+                                                        <li><a href="#" role="menuitem">Churidar Suits</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mega-menu-l3-panel" data-for="kurta-sets-women">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">Collections</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Festive Kurta Sets</a></li>
+                                                        <li><a href="#" role="menuitem">Casual Kurta Sets</a></li>
+                                                        <li><a href="#" role="menuitem">Designer Kurta Sets</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mega-menu-l3-panel" data-for="gowns">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">Styles</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Party Gowns</a></li>
+                                                        <li><a href="#" role="menuitem">Indo-Western Gowns</a></li>
+                                                        <li><a href="#" role="menuitem">Designer Gowns</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mega-menu-l3-panel" data-for="accessories-women">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">Accessories</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Jewelry</a></li>
+                                                        <li><a href="#" role="menuitem">Clutches</a></li>
+                                                        <li><a href="#" role="menuitem">Footwear</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </li>
-                        <li class="nav-item has-mega-menu">
-                            <a href="kids.html">Kids</a>
-                            <div class="mega-menu">
-                                <div class="mega-menu-content">
-                                    <div class="mega-menu-col">
-                                        <h4>Shop By Product</h4>
-                                        <ul>
-                                            <li><a href="#">Kurta</a></li>
-                                            <li><a href="#">Kurta Jacket</a></li>
-                                            <li><a href="#">Kurta Dhoti</a></li>
-                                            <li><a href="#">Indo Western</a></li>
+                        <li class="nav-item has-mega-menu" data-category="kids" role="none">
+                            <a href="kids.html" class="nav-link" role="menuitem" aria-haspopup="true" aria-expanded="false">Kids</a>
+                            <div class="mega-menu" role="menu" aria-label="Kids Categories">
+                                <div class="mega-menu-container">
+                                    <div class="mega-menu-sidebar">
+                                        <ul class="mega-menu-l2-list" role="none">
+                                            <li class="mega-menu-l2-item active" data-subcategory="boys-kurta-sets">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Boys Kurta Sets</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                            <li class="mega-menu-l2-item" data-subcategory="boys-sherwani">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Boys Sherwani</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                            <li class="mega-menu-l2-item" data-subcategory="girls-lehenga">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Girls Lehenga</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                            <li class="mega-menu-l2-item" data-subcategory="girls-gowns">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Girls Gowns</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
+                                            <li class="mega-menu-l2-item" data-subcategory="kids-accessories">
+                                                <a href="#" class="mega-menu-l2-link" role="menuitem">
+                                                    <span class="l2-name">Accessories</span>
+                                                    <i class="l2-arrow fas fa-chevron-right"></i>
+                                                </a>
+                                            </li>
                                         </ul>
+                                    </div>
+                                    <div class="mega-menu-content">
+                                        <div class="mega-menu-l3-panel active" data-for="boys-kurta-sets">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">Collections</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Wedding</a></li>
+                                                        <li><a href="#" role="menuitem">Festive</a></li>
+                                                        <li><a href="#" role="menuitem">Casual</a></li>
+                                                        <li><a href="#" role="menuitem">Designer</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mega-menu-l3-panel" data-for="boys-sherwani">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">Collections</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Wedding Sherwani</a></li>
+                                                        <li><a href="#" role="menuitem">Festive Sherwani</a></li>
+                                                        <li><a href="#" role="menuitem">Designer Sherwani</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mega-menu-l3-panel" data-for="girls-lehenga">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">Collections</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Wedding Lehenga</a></li>
+                                                        <li><a href="#" role="menuitem">Party Lehenga</a></li>
+                                                        <li><a href="#" role="menuitem">Festive Lehenga</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mega-menu-l3-panel" data-for="girls-gowns">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">Collections</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Party Gowns</a></li>
+                                                        <li><a href="#" role="menuitem">Festive Gowns</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="mega-menu-l3-panel" data-for="kids-accessories">
+                                            <div class="mega-menu-l3-columns">
+                                                <div class="mega-menu-l3-column">
+                                                    <h4 class="mega-menu-l3-heading">Accessories</h4>
+                                                    <ul class="mega-menu-l3-list" role="none">
+                                                        <li><a href="#" role="menuitem">Mojari</a></li>
+                                                        <li><a href="#" role="menuitem">Hair Accessories</a></li>
+                                                        <li><a href="#" role="menuitem">Jewelry</a></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -223,11 +475,127 @@
                 <i class="fas fa-times"></i>
             </button>
         </div>
-                <nav class="mobile-nav">
-            <ul>
-                <li><a href="men.html">Men</a></li>
-                <li><a href="women.html">Women</a></li>
-                <li><a href="kids.html">Kids</a></li>
+        <nav class="mobile-nav">
+            <ul class="mobile-menu-l1">
+                <li class="mobile-menu-l1-item">
+                    <button class="mobile-menu-l1-toggle" aria-expanded="false" aria-controls="men-submenu">
+                        <span>Men</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <ul class="mobile-menu-l2" id="men-submenu" hidden>
+                        <li class="mobile-menu-l2-item">
+                            <button class="mobile-menu-l2-toggle" aria-expanded="false" aria-controls="men-sherwani-submenu">
+                                <span>Sherwani</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <ul class="mobile-menu-l3" id="men-sherwani-submenu" hidden>
+                                <li><a href="#">Wedding Collection</a></li>
+                                <li><a href="#">Festive Collection</a></li>
+                                <li><a href="#">Designer Sherwani</a></li>
+                                <li><a href="#">Premium Sherwani</a></li>
+                            </ul>
+                        </li>
+                        <li class="mobile-menu-l2-item">
+                            <button class="mobile-menu-l2-toggle" aria-expanded="false" aria-controls="men-indo-western-submenu">
+                                <span>Indo-Western</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <ul class="mobile-menu-l3" id="men-indo-western-submenu" hidden>
+                                <li><a href="#">Jodhpuri Suits</a></li>
+                                <li><a href="#">Bandhgala</a></li>
+                                <li><a href="#">Nehru Jackets</a></li>
+                                <li><a href="#">Achkan</a></li>
+                            </ul>
+                        </li>
+                        <li class="mobile-menu-l2-item">
+                            <button class="mobile-menu-l2-toggle" aria-expanded="false" aria-controls="men-kurta-sets-submenu">
+                                <span>Kurta Sets</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <ul class="mobile-menu-l3" id="men-kurta-sets-submenu" hidden>
+                                <li><a href="#">Wedding Kurta Sets</a></li>
+                                <li><a href="#">Festive Kurta Sets</a></li>
+                                <li><a href="#">Casual Kurta Sets</a></li>
+                                <li><a href="#">Designer Kurta Sets</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li class="mobile-menu-l1-item">
+                    <button class="mobile-menu-l1-toggle" aria-expanded="false" aria-controls="women-submenu">
+                        <span>Women</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <ul class="mobile-menu-l2" id="women-submenu" hidden>
+                        <li class="mobile-menu-l2-item">
+                            <button class="mobile-menu-l2-toggle" aria-expanded="false" aria-controls="women-lehenga-submenu">
+                                <span>Lehenga Sets</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <ul class="mobile-menu-l3" id="women-lehenga-submenu" hidden>
+                                <li><a href="#">Bridal Lehenga</a></li>
+                                <li><a href="#">Party Lehenga</a></li>
+                                <li><a href="#">Designer Lehenga</a></li>
+                                <li><a href="#">Festive Lehenga</a></li>
+                            </ul>
+                        </li>
+                        <li class="mobile-menu-l2-item">
+                            <button class="mobile-menu-l2-toggle" aria-expanded="false" aria-controls="women-sarees-submenu">
+                                <span>Sarees</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <ul class="mobile-menu-l3" id="women-sarees-submenu" hidden>
+                                <li><a href="#">Designer Sarees</a></li>
+                                <li><a href="#">Silk Sarees</a></li>
+                                <li><a href="#">Party Sarees</a></li>
+                                <li><a href="#">Festive Sarees</a></li>
+                            </ul>
+                        </li>
+                        <li class="mobile-menu-l2-item">
+                            <button class="mobile-menu-l2-toggle" aria-expanded="false" aria-controls="women-salwar-submenu">
+                                <span>Salwar Suits</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <ul class="mobile-menu-l3" id="women-salwar-submenu" hidden>
+                                <li><a href="#">Anarkali</a></li>
+                                <li><a href="#">Straight Cut</a></li>
+                                <li><a href="#">Palazzo Suits</a></li>
+                                <li><a href="#">Churidar Suits</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+                <li class="mobile-menu-l1-item">
+                    <button class="mobile-menu-l1-toggle" aria-expanded="false" aria-controls="kids-submenu">
+                        <span>Kids</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </button>
+                    <ul class="mobile-menu-l2" id="kids-submenu" hidden>
+                        <li class="mobile-menu-l2-item">
+                            <button class="mobile-menu-l2-toggle" aria-expanded="false" aria-controls="kids-boys-kurta-submenu">
+                                <span>Boys Kurta Sets</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <ul class="mobile-menu-l3" id="kids-boys-kurta-submenu" hidden>
+                                <li><a href="#">Wedding</a></li>
+                                <li><a href="#">Festive</a></li>
+                                <li><a href="#">Casual</a></li>
+                                <li><a href="#">Designer</a></li>
+                            </ul>
+                        </li>
+                        <li class="mobile-menu-l2-item">
+                            <button class="mobile-menu-l2-toggle" aria-expanded="false" aria-controls="kids-girls-lehenga-submenu">
+                                <span>Girls Lehenga</span>
+                                <i class="fas fa-chevron-down"></i>
+                            </button>
+                            <ul class="mobile-menu-l3" id="kids-girls-lehenga-submenu" hidden>
+                                <li><a href="#">Wedding Lehenga</a></li>
+                                <li><a href="#">Party Lehenga</a></li>
+                                <li><a href="#">Festive Lehenga</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
                 <li><a href="appointments.html">Appointments</a></li>
                 <li><a href="stores.html">Stores</a></li>
             </ul>
@@ -236,49 +604,41 @@
 
     <!-- Hero Slider -->
     <section class="hero-section">
-        <div class="swiper hero-swiper">
+        <div class="hero-swiper swiper">
             <div class="swiper-wrapper">
-                <div class="swiper-slide">
-                    <div class="hero-slide hero-groom">
-                        <div class="container">
-                            <div class="hero-content">
-                                <h2 class="hero-title">I'M THE GROOM</h2>
-                                <p class="hero-subtitle">Discover Your Perfect Wedding Look</p>
-                                <a href="men.html" class="btn btn-primary">Shop Now</a>
-                            </div>
+                <div class="swiper-slide hero-slide hero-groom" data-bg="images/hero/hero-1.jpg" data-bg-mobile="images/hero/hero-1-mobile.jpg">
+                    <div class="container">
+                        <div class="hero-content">
+                            <h1 class="hero-title">I'M THE GROOM</h1>
+                            <p class="hero-subtitle">Discover Your Perfect Wedding Look</p>
+                            <a href="men.html" class="btn btn-primary">Shop Now</a>
                         </div>
                     </div>
                 </div>
-                <div class="swiper-slide">
-                    <div class="hero-slide hero-guest">
-                        <div class="container">
-                            <div class="hero-content">
-                                <h2 class="hero-title">I'M ATTENDING A WEDDING</h2>
-                                <p class="hero-subtitle">Look Your Best as a Guest</p>
-                                <a href="men.html" class="btn btn-primary">Explore Collection</a>
-                            </div>
+                <div class="swiper-slide hero-slide hero-guest" data-bg="images/hero/hero-2.jpg" data-bg-mobile="images/hero/hero-2-mobile.jpg">
+                    <div class="container">
+                        <div class="hero-content">
+                            <h2 class="hero-title">I'M ATTENDING A WEDDING</h2>
+                            <p class="hero-subtitle">Look Your Best as a Guest</p>
+                            <a href="men.html" class="btn btn-primary">Explore Collection</a>
                         </div>
                     </div>
                 </div>
-                <div class="swiper-slide">
-                    <div class="hero-slide hero-bride">
-                        <div class="container">
-                            <div class="hero-content">
-                                <h2 class="hero-title">I'M THE BRIDE</h2>
-                                <p class="hero-subtitle">Stunning Bridal Lehengas & More</p>
-                                <a href="women.html" class="btn btn-primary">View Bridal</a>
-                            </div>
+                <div class="swiper-slide hero-slide hero-bride" data-bg="images/hero/hero-3.jpg" data-bg-mobile="images/hero/hero-3-mobile.jpg">
+                    <div class="container">
+                        <div class="hero-content">
+                            <h2 class="hero-title">I'M THE BRIDE</h2>
+                            <p class="hero-subtitle">Stunning Bridal Lehengas & More</p>
+                            <a href="women.html" class="btn btn-primary">View Bridal</a>
                         </div>
                     </div>
                 </div>
-                <div class="swiper-slide">
-                    <div class="hero-slide hero-festival">
-                        <div class="container">
-                            <div class="hero-content">
-                                <h2 class="hero-title">I'M CELEBRATING FESTIVALS</h2>
-                                <p class="hero-subtitle">Festive Collection for Every Occasion</p>
-                                <a href="men.html" class="btn btn-primary">Shop Festive</a>
-                            </div>
+                <div class="swiper-slide hero-slide hero-festival" data-bg="images/hero/hero-4.jpg" data-bg-mobile="images/hero/hero-4-mobile.jpg">
+                    <div class="container">
+                        <div class="hero-content">
+                            <h2 class="hero-title">I'M CELEBRATING FESTIVALS</h2>
+                            <p class="hero-subtitle">Festive Collection for Every Occasion</p>
+                            <a href="men.html" class="btn btn-primary">Shop Festive</a>
                         </div>
                     </div>
                 </div>
@@ -289,51 +649,75 @@
         </div>
     </section>
 
-    <!-- Category Cards -->
-    <section class="category-section">
+    <!-- Featured Collections -->
+    <section class="collections-section">
         <div class="container">
-            <h2 class="section-title">What's Special Today?</h2>
-            <div class="category-grid">
-                <a href="men.html" class="category-card">
-                    <div class="category-image">
-                        <img src="images/occasions/team-groom.jpg" alt="I'm The Groom">
+            <div class="section-header">
+                <h2 class="section-title">Featured Collections</h2>
+                <p class="section-subtitle">Discover our curated selections</p>
+            </div>
+            <div class="collections-grid">
+                <a href="women.html" class="collection-card">
+                    <img src="images/occasions/bride.jpg" alt="Bridal Edit" class="collection-image">
+                    <div class="collection-overlay">
+                        <h3 class="collection-title">Bridal Edit</h3>
+                        <p class="collection-subtitle">Timeless heirlooms</p>
                     </div>
-                    <h3 class="category-title">I'm The Groom</h3>
                 </a>
-                <a href="men.html" class="category-card">
-                    <div class="category-image">
-                        <img src="images/occasions/sherwani.jpg" alt="Attending Wedding">
+                <a href="men.html" class="collection-card">
+                    <img src="images/occasions/sherwani.jpg" alt="Groom Edit" class="collection-image">
+                    <div class="collection-overlay">
+                        <h3 class="collection-title">Groom Edit</h3>
+                        <p class="collection-subtitle">Refined ceremonial wear</p>
                     </div>
-                    <h3 class="category-title">I'm Attending A Wedding</h3>
                 </a>
-                <a href="women.html" class="category-card">
-                    <div class="category-image">
-                        <img src="images/occasions/bride.jpg" alt="I'm The Bride">
+                <a href="men.html" class="collection-card">
+                    <img src="images/occasions/celebrating_festivals.jpg" alt="Festive Edit" class="collection-image">
+                    <div class="collection-overlay">
+                        <h3 class="collection-title">Festive Edit</h3>
+                        <p class="collection-subtitle">For every celebration</p>
                     </div>
-                    <h3 class="category-title">I'm The Bride</h3>
                 </a>
-                <a href="men.html" class="category-card">
-                    <div class="category-image">
-                        <img src="images/occasions/celebrating_festivals.jpg" alt="Celebrating Festivals">
+                <a href="men.html" class="collection-card">
+                    <img src="images/occasions/reception.jpg" alt="Reception Edit" class="collection-image">
+                    <div class="collection-overlay">
+                        <h3 class="collection-title">Reception Edit</h3>
+                        <p class="collection-subtitle">Modern occasion silhouettes</p>
                     </div>
-                    <h3 class="category-title">I'm Celebrating Festivals</h3>
                 </a>
             </div>
         </div>
     </section>
 
-    <!-- Most Loved Products -->
-    <section class="products-section">
+    <!-- Brand Story -->
+    <section class="story-section">
         <div class="container">
-            <div class="section-header">
-                <h2 class="section-title">Most Loved</h2>
-                <div class="slider-nav">
-                    <button class="slider-btn prev" id="mostLovedPrev"><i class="fas fa-chevron-left"></i></button>
-                    <button class="slider-btn next" id="mostLovedNext"><i class="fas fa-chevron-right"></i></button>
+            <div class="story-container">
+                <div class="story-content">
+                    <span class="story-eyebrow">Our Craft</span>
+                    <h2 class="story-heading">Where Heritage Meets Artistry</h2>
+                    <p class="story-text">Each AMZIRA piece reflects generations of Indian craftsmanship, reimagined for modern celebrations and timeless wardrobes.</p>
+                    <a href="stores.html" class="story-link">Learn More <i class="fas fa-arrow-right"></i></a>
+                </div>
+                <div class="story-image">
+                    <img src="images/occasions/team-bride.jpg" alt="Artisan craftsmanship at AMZIRA" loading="lazy">
                 </div>
             </div>
-            <div class="swiper products-swiper" id="mostLovedSwiper">
-                <div class="swiper-wrapper" id="mostLovedProducts">
+        </div>
+    </section>
+
+    <!-- Product Grid -->
+    <section class="products-section new-arrivals-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">New Arrivals</h2>
+                <div class="slider-nav">
+                    <button class="slider-btn prev" id="newArrivalsPrev"><i class="fas fa-chevron-left"></i></button>
+                    <button class="slider-btn next" id="newArrivalsNext"><i class="fas fa-chevron-right"></i></button>
+                </div>
+            </div>
+            <div class="swiper products-swiper auto-slider" id="newArrivalsSwiper">
+                <div class="swiper-wrapper auto-slider-track" id="newArrivalsProducts">
                     <!-- Products will be loaded dynamically -->
                 </div>
             </div>
@@ -342,50 +726,42 @@
 
     <!-- Homepage Canvas Background -->
     <div class="homepage-canvas">
-        
         <!-- Wedding Procession Ornament -->
         <section class="ornament-section">
             <div class="ornament-glow">
-                <img src="images/animations/wedding-procession.gif" 
-                     alt="" 
-                     role="presentation"
-                     loading="lazy">
+                <img
+                    src="images/animations/wedding-procession.gif"
+                    alt=""
+                    role="presentation"
+                    loading="lazy"
+                >
             </div>
         </section>
 
         <!-- Shop by Occasion -->
         <section class="occasion-section">
             <div class="container">
-                <h2 class="section-title">Shop By Occasion</h2>
-            <div class="occasion-grid">
-                <a href="#" class="occasion-card">
-                    <img src="images/occasions/wedding.jpg" alt="Wedding">
-                    <h3>Wedding</h3>
-                </a>
-                <a href="#" class="occasion-card">
-                    <img src="images/occasions/reception.jpg" alt="Reception">
-                    <h3>Reception</h3>
-                </a>
-                <a href="#" class="occasion-card">
-                    <img src="images/occasions/engagement.jpg" alt="Engagement">
-                    <h3>Engagement</h3>
-                </a>
-                <a href="#" class="occasion-card">
-                    <img src="images/occasions/sangeet.jpg" alt="Sangeet">
-                    <h3>Sangeet</h3>
-                </a>
-                <a href="#" class="occasion-card">
-                    <img src="images/occasions/mehendi.jpg" alt="Mehendi">
-                    <h3>Mehendi</h3>
-                </a>
-                <a href="#" class="occasion-card">
-                    <img src="images/occasions/haldi.jpg" alt="Haldi">
-                    <h3>Haldi</h3>
-                </a>
-            </div>
-        </div>
-    </section>
+                <div class="section-heading-ornament">
+                    <h2 class="section-title">Shop By Occasion</h2>
+                </div>
+                <div class="occasion-tabs" role="tablist" aria-label="Shop by occasion tabs">
+                    <button class="occasion-tab is-active" type="button" role="tab" aria-selected="true" data-occasion-tab="men">Men</button>
+                    <button class="occasion-tab" type="button" role="tab" aria-selected="false" data-occasion-tab="women">Women</button>
+                </div>
 
+                <div class="occasion-carousel-wrap">
+                    <button class="occasion-arrow occasion-prev" type="button" aria-label="Previous occasion cards">
+                        <i class="fas fa-chevron-left" aria-hidden="true"></i>
+                    </button>
+                    <div class="swiper occasion-swiper" id="occasionSwiper">
+                        <div class="swiper-wrapper" id="occasionSlides"></div>
+                    </div>
+                    <button class="occasion-arrow occasion-next" type="button" aria-label="Next occasion cards">
+                        <i class="fas fa-chevron-right" aria-hidden="true"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
     </div>
     <!-- End Homepage Canvas -->
 
@@ -395,13 +771,13 @@
             <div class="promo-content">
                 <h2>New Wedding Collection</h2>
                 <p>Explore our exclusive range of wedding wear</p>
-                <a href="#" class="btn btn-light">Shop Collection</a>
+                <a href="women.html" class="btn btn-light">Shop Collection</a>
             </div>
         </div>
     </section>
 
     <!-- Bestsellers -->
-    <section class="products-section">
+    <section class="products-section bestsellers-section">
         <div class="container">
             <div class="section-header">
                 <h2 class="section-title">Bestsellers</h2>
@@ -410,22 +786,155 @@
                     <button class="slider-btn next" id="bestsellersNext"><i class="fas fa-chevron-right"></i></button>
                 </div>
             </div>
-            <div class="swiper products-swiper" id="bestsellersSwiper">
-                <div class="swiper-wrapper" id="bestsellersProducts">
-                    <!-- Products will be loaded dynamically -->
+            <div class="swiper products-swiper auto-slider" id="bestsellersSwiper">
+                <div class="swiper-wrapper auto-slider-track" id="bestsellersProducts">
+                    <!-- UI LOCK: Bestsellers slider — static fallback enabled, production-safe -->
+                    <div class="swiper-slide">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img class="front-image" src="images/Bestsellers/mens/product-1-front.jpg" alt="Bestseller Product 1" loading="lazy">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-category">Men</p>
+                                <h3 class="product-name">Royal Embroidered Kurta Set</h3>
+                                <div class="product-price">
+                                    <span class="price-current">₹5,999</span>
+                                    <span class="price-original">₹7,499</span>
+                                    <span class="price-discount">20% OFF</span>
+                                </div>
+                                <a class="btn btn-secondary btn-block" href="product-detail.html?id=AMZ-KJ-001">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img class="front-image" src="images/Bestsellers/mens/product-2-front.jpg" alt="Bestseller Product 2" loading="lazy">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-category">Men</p>
+                                <h3 class="product-name">Classic Wedding Sherwani</h3>
+                                <div class="product-price">
+                                    <span class="price-current">₹12,499</span>
+                                    <span class="price-original">₹14,999</span>
+                                    <span class="price-discount">17% OFF</span>
+                                </div>
+                                <a class="btn btn-secondary btn-block" href="product-detail.html?id=AMZ-SH-002">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img class="front-image" src="images/Bestsellers/mens/product-3-front.jpg" alt="Bestseller Product 3" loading="lazy">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-category">Men</p>
+                                <h3 class="product-name">Festive Kurta Jacket Combo</h3>
+                                <div class="product-price">
+                                    <span class="price-current">₹7,299</span>
+                                    <span class="price-original">₹8,999</span>
+                                    <span class="price-discount">19% OFF</span>
+                                </div>
+                                <a class="btn btn-secondary btn-block" href="product-detail.html?id=AMZ-KP-003">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img class="front-image" src="images/Bestsellers/mens/product-4-front.jpg" alt="Bestseller Product 4" loading="lazy">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-category">Men</p>
+                                <h3 class="product-name">Signature Indo Western</h3>
+                                <div class="product-price">
+                                    <span class="price-current">₹9,499</span>
+                                    <span class="price-original">₹11,299</span>
+                                    <span class="price-discount">16% OFF</span>
+                                </div>
+                                <a class="btn btn-secondary btn-block" href="product-detail.html?id=AMZ-IW-004">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img class="front-image" src="images/Bestsellers/mens/product-5-front.jpg" alt="Bestseller Product 5" loading="lazy">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-category">Men</p>
+                                <h3 class="product-name">Premium Nehru Jacket Set</h3>
+                                <div class="product-price">
+                                    <span class="price-current">₹6,799</span>
+                                    <span class="price-original">₹8,299</span>
+                                    <span class="price-discount">18% OFF</span>
+                                </div>
+                                <a class="btn btn-secondary btn-block" href="product-detail.html?id=AMZ-KP-005">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img class="front-image" src="images/Bestsellers/mens/product-6-front.jpg" alt="Bestseller Product 6" loading="lazy">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-category">Men</p>
+                                <h3 class="product-name">Regal Reception Jodhpuri</h3>
+                                <div class="product-price">
+                                    <span class="price-current">₹10,999</span>
+                                    <span class="price-original">₹13,499</span>
+                                    <span class="price-discount">19% OFF</span>
+                                </div>
+                                <a class="btn btn-secondary btn-block" href="product-detail.html?id=AMZ-NJ-006">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img class="front-image" src="images/Bestsellers/mens/product-7-front.jpg" alt="Bestseller Product 7" loading="lazy">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-category">Men</p>
+                                <h3 class="product-name">Heritage Silk Kurta</h3>
+                                <div class="product-price">
+                                    <span class="price-current">₹4,999</span>
+                                    <span class="price-original">₹6,299</span>
+                                    <span class="price-discount">21% OFF</span>
+                                </div>
+                                <a class="btn btn-secondary btn-block" href="product-detail.html?id=AMZ-L-007">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-slide">
+                        <div class="product-card">
+                            <div class="product-image">
+                                <img class="front-image" src="images/Bestsellers/mens/product-8-front.jpg" alt="Bestseller Product 8" loading="lazy">
+                            </div>
+                            <div class="product-info">
+                                <p class="product-category">Men</p>
+                                <h3 class="product-name">Occasion Wear Kurta Set</h3>
+                                <div class="product-price">
+                                    <span class="price-current">₹5,499</span>
+                                    <span class="price-original">₹6,899</span>
+                                    <span class="price-discount">20% OFF</span>
+                                </div>
+                                <a class="btn btn-secondary btn-block" href="product-detail.html?id=AMZ-S-008">View Details</a>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
-
-
-    </div>
-    <!-- End Homepage Canvas -->
-
     <!-- Customer Reviews -->
     <section class="reviews-section">
         <div class="container">
-            <h2 class="section-title">What Our Customers Say</h2>
+            <div class="section-heading-ornament">
+                <h2 class="section-title">What Our Customers Say</h2>
+            </div>
             <div class="swiper reviews-swiper">
                 <div class="swiper-wrapper">
                     <!-- Review slides -->
@@ -549,6 +1058,20 @@
         </div>
     </section>
 
+    <!-- Newsletter -->
+    <section class="newsletter-section">
+        <div class="container">
+            <div class="section-heading-ornament">
+                <h2 class="section-title">Stay Updated</h2>
+            </div>
+            <p>Be the first to know about new collections.</p>
+            <form class="newsletter-form" aria-label="Newsletter subscription form">
+                <input type="email" placeholder="Your email address" required>
+                <button type="submit">Subscribe</button>
+            </form>
+        </div>
+    </section>
+
     <!-- Footer -->
 <!-- FEATURES STRIP (Top of Footer) -->
 <section class="features-strip">
@@ -593,16 +1116,16 @@
     <div class="footer-column">
       <h3 class="footer-heading">CATEGORIES</h3>
       <ul class="footer-links">
-        <li><a href="#">Kurta Pajama</a></li>
-        <li><a href="#">Kurta Jacket Sets</a></li>
-        <li><a href="#">Only Kurtas</a></li>
-        <li><a href="#">Nehru Jackets</a></li>
-        <li><a href="#">Indo Western</a></li>
-        <li><a href="#">Sherwani</a></li>
-        <li><a href="#">Lehenga</a></li>
-        <li><a href="#">Saree</a></li>
-        <li><a href="#">Kidswear</a></li>
-        <li><a href="#">Accessories</a></li>
+        <li><a href="men.html?cat=kurta-pajama">Kurta Pajama</a></li>
+        <li><a href="men.html?cat=kurta-jacket-set">Kurta Jacket Sets</a></li>
+        <li><a href="men.html?cat=only-kurta">Only Kurtas</a></li>
+        <li><a href="men.html?cat=nehru-jacket">Nehru Jackets</a></li>
+        <li><a href="men.html?cat=indo-western">Indo Western</a></li>
+        <li><a href="men.html?cat=sherwani">Sherwani</a></li>
+        <li><a href="women.html?cat=lehenga">Lehenga</a></li>
+        <li><a href="women.html?cat=sarees">Saree</a></li>
+        <li><a href="kids.html">Kidswear</a></li>
+        <li><a href="women.html?cat=accessories">Accessories</a></li>
       </ul>
     </div>
 
@@ -610,9 +1133,9 @@
     <div class="footer-column">
       <h3 class="footer-heading">SUPPORT</h3>
       <ul class="footer-links">
-        <li><a href="#">Track Order</a></li>
-        <li><a href="#">Contact Us</a></li>
-        <li><a href="#">My Account</a></li>
+        <li><a href="order-tracking.html">Track Order</a></li>
+        <li><a href="contact-support.html">Contact Us</a></li>
+        <li><a href="account.html">My Account</a></li>
       </ul>
     </div>
 
@@ -620,12 +1143,12 @@
     <div class="footer-column">
       <h3 class="footer-heading">QUICK LINKS</h3>
       <ul class="footer-links">
-        <li><a href="#">About Us</a></li>
-        <li><a href="#">Brand Story</a></li>
-        <li><a href="#">Blogs</a></li>
-        <li><a href="#">Careers</a></li>
-        <li><a href="#">Book a Video Call</a></li>
-        <li><a href="#">Store Locator</a></li>
+        <li><a href="index.html">About Us</a></li>
+        <li><a href="index.html">Brand Story</a></li>
+        <li><a href="index.html">Blogs</a></li>
+        <li><a href="contact-support.html">Careers</a></li>
+        <li><a href="appointments.html">Book a Video Call</a></li>
+        <li><a href="stores.html">Store Locator</a></li>
       </ul>
     </div>
 
@@ -633,12 +1156,12 @@
     <div class="footer-column">
       <h3 class="footer-heading">OUR POLICIES</h3>
       <ul class="footer-links">
-        <li><a href="#">FAQs</a></li>
-        <li><a href="#">Shipping Details</a></li>
-        <li><a href="#">Return, Exchange and Refund Policy</a></li>
-        <li><a href="#">Terms of Use</a></li>
-        <li><a href="#">Privacy Policy</a></li>
-        <li><a href="#">Cookie Policy</a></li>
+        <li><a href="faqs.html">FAQs</a></li>
+        <li><a href="shipping-policy.html">Shipping Details</a></li>
+        <li><a href="returns-refund-policy.html">Return, Exchange and Refund Policy</a></li>
+        <li><a href="terms-and-conditions.html">Terms of Use</a></li>
+        <li><a href="privacy-policy.html">Privacy Policy</a></li>
+        <li><a href="privacy-policy.html#cookie-policy">Cookie Policy</a></li>
       </ul>
     </div>
 
@@ -656,32 +1179,32 @@
       <div class="social-icons">
         <h4 class="social-heading">KEEP IN TOUCH</h4>
         <div class="social-links">
-          <a href="#" aria-label="Facebook">
+          <a href="https://www.facebook.com/" target="_blank" rel="noopener" aria-label="Facebook">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
             </svg>
           </a>
-          <a href="#" aria-label="Twitter">
+          <a href="https://x.com/" target="_blank" rel="noopener" aria-label="Twitter">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
             </svg>
           </a>
-          <a href="#" aria-label="Instagram">
+          <a href="https://www.instagram.com/" target="_blank" rel="noopener" aria-label="Instagram">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12 0C8.74 0 8.333.015 7.053.072 5.775.132 4.905.333 4.14.63c-.789.306-1.459.717-2.126 1.384S.935 3.35.63 4.14C.333 4.905.131 5.775.072 7.053.012 8.333 0 8.74 0 12s.015 3.667.072 4.947c.06 1.277.261 2.148.558 2.913.306.788.717 1.459 1.384 2.126.667.666 1.336 1.079 2.126 1.384.766.296 1.636.499 2.913.558C8.333 23.988 8.74 24 12 24s3.667-.015 4.947-.072c1.277-.06 2.148-.262 2.913-.558.788-.306 1.459-.718 2.126-1.384.666-.667 1.079-1.335 1.384-2.126.296-.765.499-1.636.558-2.913.06-1.28.072-1.687.072-4.947s-.015-3.667-.072-4.947c-.06-1.277-.262-2.149-.558-2.913-.306-.789-.718-1.459-1.384-2.126C21.319 1.347 20.651.935 19.86.63c-.765-.297-1.636-.499-2.913-.558C15.667.012 15.26 0 12 0zm0 2.16c3.203 0 3.585.016 4.85.071 1.17.055 1.805.249 2.227.415.562.217.96.477 1.382.896.419.42.679.819.896 1.381.164.422.36 1.057.413 2.227.057 1.266.07 1.646.07 4.85s-.015 3.585-.074 4.85c-.061 1.17-.256 1.805-.421 2.227-.224.562-.479.96-.899 1.382-.419.419-.824.679-1.38.896-.42.164-1.065.36-2.235.413-1.274.057-1.649.07-4.859.07-3.211 0-3.586-.015-4.859-.074-1.171-.061-1.816-.256-2.236-.421-.569-.224-.96-.479-1.379-.899-.421-.419-.69-.824-.9-1.38-.165-.42-.359-1.065-.42-2.235-.045-1.26-.061-1.649-.061-4.844 0-3.196.016-3.586.061-4.861.061-1.17.255-1.814.42-2.234.21-.57.479-.96.9-1.381.419-.419.81-.689 1.379-.898.42-.166 1.051-.361 2.221-.421 1.275-.045 1.65-.06 4.859-.06l.045.03zm0 3.678c-3.405 0-6.162 2.76-6.162 6.162 0 3.405 2.76 6.162 6.162 6.162 3.405 0 6.162-2.76 6.162-6.162 0-3.405-2.76-6.162-6.162-6.162zM12 16c-2.21 0-4-1.79-4-4s1.79-4 4-4 4 1.79 4 4-1.79 4-4 4zm7.846-10.405c0 .795-.646 1.44-1.44 1.44-.795 0-1.44-.646-1.44-1.44 0-.794.646-1.439 1.44-1.439.793-.001 1.44.645 1.44 1.439z"/>
             </svg>
           </a>
-          <a href="#" aria-label="LinkedIn">
+          <a href="https://www.linkedin.com/" target="_blank" rel="noopener" aria-label="LinkedIn">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
             </svg>
           </a>
-          <a href="#" aria-label="YouTube">
+          <a href="https://www.youtube.com/" target="_blank" rel="noopener" aria-label="YouTube">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
             </svg>
           </a>
-          <a href="#" aria-label="Pinterest">
+          <a href="https://www.pinterest.com/" target="_blank" rel="noopener" aria-label="Pinterest">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 5.079 3.158 9.417 7.618 11.162-.105-.949-.199-2.403.041-3.439.219-.937 1.406-5.957 1.406-5.957s-.359-.72-.359-1.781c0-1.663.967-2.911 2.168-2.911 1.024 0 1.518.769 1.518 1.688 0 1.029-.653 2.567-.992 3.992-.285 1.193.6 2.165 1.775 2.165 2.128 0 3.768-2.245 3.768-5.487 0-2.861-2.063-4.869-5.008-4.869-3.41 0-5.409 2.562-5.409 5.199 0 1.033.394 2.143.889 2.741.099.12.112.225.085.345-.09.375-.293 1.199-.334 1.363-.053.225-.172.271-.401.165-1.495-.69-2.433-2.878-2.433-4.646 0-3.776 2.748-7.252 7.92-7.252 4.158 0 7.392 2.967 7.392 6.923 0 4.135-2.607 7.462-6.233 7.462-1.214 0-2.354-.629-2.758-1.379l-.749 2.848c-.269 1.045-1.004 2.352-1.498 3.146 1.123.345 2.306.535 3.55.535 6.607 0 11.985-5.365 11.985-11.987C23.97 5.39 18.592.026 11.985.026L12.017 0z"/>
             </svg>
@@ -726,6 +1249,7 @@
     <script src="js/error-handler.js"></script>
 
     <!-- 2. Data layer -->
+    <script src="js/product-normalizer.js"></script>
     <script src="js/cart.js"></script>
 
     <!-- 3. UI Components -->
@@ -770,5 +1294,8 @@
 
             </div>
         </div>
+
+    <link rel="stylesheet" href="css/search.css">
+    <script src="js/search.js"></script>
 </body>
 </html>

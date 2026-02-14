@@ -14,6 +14,9 @@ class AuthManager {
 
     init() {
         this.updateHeaderUI();
+        this.ensureApiReady().catch(() => {
+            // API layer load failures are handled per-request.
+        });
         this.checkAuth();
         this.checkRedirect();
     }
@@ -53,7 +56,8 @@ class AuthManager {
 
     isLoggedIn() {
         const user = this.getUser();
-        return Boolean(user && user.id);
+        if (user && user.id) return true;
+        return Boolean(localStorage.getItem('access_token'));
     }
 
     getUser() {
@@ -122,6 +126,8 @@ class AuthManager {
             // Local cleanup still runs for graceful logout UX when backend is down.
         } finally {
             localStorage.removeItem(this.userStorageKey);
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
             this.updateHeaderUI();
             window.dispatchEvent(new Event('auth:logout'));
 
@@ -208,7 +214,12 @@ class AuthManager {
     }
 
     validatePassword(password) {
-        return typeof password === 'string' && password.length >= 6;
+        if (typeof password !== 'string') return false;
+        if (password.length < 8) return false;
+        if (!/[A-Z]/.test(password)) return false;
+        if (!/[a-z]/.test(password)) return false;
+        if (!/\d/.test(password)) return false;
+        return true;
     }
 }
 

@@ -170,7 +170,7 @@
     
     /* Occasion grid */
     .occasion-grid {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: 1fr;
         gap: var(--spacing-md);
     }
     
@@ -398,6 +398,7 @@
     .swiper {
         --swiper-transition-duration: 0ms !important;
     }
+}
 
 /* ===================================
    Mobile Sort Modal Styles (bottom sheet)
@@ -898,6 +899,11 @@
         padding: 14px 24px;
         font-size: 15px;
     }
+
+    .btn-proceed,
+    .btn-pay {
+        min-height: 48px;
+    }
     
     .btn-sm {
         min-height: 44px;
@@ -1075,6 +1081,31 @@
     
     .hero-subtitle {
         font-size: 0.813rem;
+    }
+}
+
+@media (max-width: 1024px) {
+    /* High-impact UX hardening (pre-launch) */
+    .mobile-filter-btn,
+    .mobile-sort-btn {
+        min-height: 44px;
+        padding: 12px 16px;
+    }
+
+    .filter-close-btn {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .filter-option {
+        min-height: 44px;
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .clear-filters,
+    .sort-select {
+        min-height: 44px;
     }
 }
 
@@ -2127,7 +2158,7 @@ body {
         width: 100%;
         padding: 15px;
         font-size: 15px;
-        min-height: 44px;
+        min-height: 48px;
     }
     
     .wishlist-btn-pdp {
@@ -2149,6 +2180,7 @@ body {
     
     .btn-check {
         width: 100%;
+        min-height: 48px;
     }
     
     /* Features */
@@ -2205,6 +2237,15 @@ body {
     .tab-content ul li {
         font-size: 14px;
         margin-bottom: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .btn-proceed,
+    .btn-pay {
+        position: sticky;
+        bottom: 12px;
+        z-index: 5;
     }
 }
 
@@ -2296,9 +2337,5 @@ body {
         height: 64px;
     }
 }
-
-
-
-
 
 
