@@ -4,424 +4,607 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Account | Amzira</title>
-    
-    <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
-    
-    <!-- Font Awesome -->
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Custom CSS -->
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/responsive.css">
-    
+    <link rel="stylesheet" href="css/search.css">
     <style>
+        :root {
+            --gold: #C6A664;
+            --gold-light: #e8d5a8;
+            --gold-pale: #faf5ea;
+            --maroon: #8B1538;
+            --maroon-deep: #6E0F2A;
+            --maroon-soft: #F7E9EC;
+            --ivory: #F8F6F2;
+            --border: #E8E2D6;
+        }
+
+        * { box-sizing: border-box; }
+
         .account-page {
-            padding: 80px 0 60px;
-            background: #fafafa;
+            padding: 80px 0;
             min-height: 100vh;
+            background: var(--ivory);
         }
 
         .account-container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 24px;
         }
 
-        .account-header {
-            background: white;
-            padding: 32px;
+        .account-hero {
+            background: linear-gradient(135deg, var(--maroon) 0%, var(--maroon-deep) 100%);
             border-radius: 12px;
+            padding: 40px;
             margin-bottom: 32px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 24px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .account-header h1 {
-            font-size: 32px;
-            font-family: var(--font-heading);
-            color: var(--text-dark);
-            margin-bottom: 8px;
+        .account-hero::before {
+            content: '';
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: rgba(198, 166, 100, 0.1);
         }
 
-        .account-header p {
-            color: var(--text-gray);
-            font-size: 15px;
+        .account-hero::after {
+            content: '';
+            position: absolute;
+            bottom: -50px;
+            right: 130px;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: rgba(198, 166, 100, 0.06);
+        }
+
+        .hero-text { position: relative; z-index: 1; }
+
+        .hero-text h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: clamp(1.4rem, 2.5vw, 1.9rem);
+            color: #fff;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .hero-text p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            background: rgba(198, 166, 100, 0.18);
+            border: 1px solid rgba(198, 166, 100, 0.3);
+            border-radius: 20px;
+            color: var(--gold-light);
+            font-size: 11px;
+            font-weight: 500;
+            margin-top: 12px;
+            letter-spacing: 0.05em;
+        }
+
+        .hero-avatar {
+            position: relative;
+            z-index: 1;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(198, 166, 100, 0.2);
+            border: 2px solid rgba(198, 166, 100, 0.35);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Playfair Display', serif;
+            font-size: 22px;
+            color: var(--gold-light);
+            font-weight: 600;
         }
 
         .account-grid {
             display: grid;
-            grid-template-columns: 280px 1fr;
-            gap: 32px;
+            grid-template-columns: 248px 1fr;
+            gap: 24px;
+            align-items: start;
         }
 
         .account-sidebar {
-            background: white;
-            padding: 24px;
+            background: #fff;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            height: fit-content;
+            border: 1px solid var(--border);
+            padding: 8px;
+            position: sticky;
+            top: 90px;
         }
 
-        .sidebar-menu {
-            list-style: none;
+        .sidebar-label {
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: rgba(15, 15, 15, 0.38);
+            padding: 12px 16px 6px;
         }
 
-        .sidebar-menu li {
-            margin-bottom: 4px;
-        }
+        .sidebar-menu { list-style: none; }
+        .sidebar-menu li { margin-bottom: 2px; }
 
         .sidebar-menu a {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 12px 16px;
-            color: var(--text-dark);
-            text-decoration: none;
+            padding: 10px 14px;
+            color: rgba(15, 15, 15, 0.65);
             border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            text-decoration: none;
             transition: all 0.2s;
-            font-size: 15px;
+            position: relative;
+        }
+
+        .nav-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 7px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            background: var(--ivory);
+            color: rgba(15, 15, 15, 0.5);
+            flex-shrink: 0;
+            transition: all 0.2s;
         }
 
         .sidebar-menu a:hover {
-            background: #FBF2DE;
-            color: var(--primary-color);
+            background: var(--gold-pale);
+            color: var(--maroon);
+        }
+
+        .sidebar-menu a:hover .nav-icon {
+            background: rgba(139, 21, 56, 0.08);
+            color: var(--maroon);
         }
 
         .sidebar-menu a.active {
-            background: var(--primary-color);
-            color: white;
+            background: var(--maroon-soft);
+            color: var(--maroon);
         }
 
-        .sidebar-menu a i {
-            width: 20px;
-            text-align: center;
+        .sidebar-menu a.active .nav-icon {
+            background: var(--maroon);
+            color: #fff;
+        }
+
+        .sidebar-menu a.active::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 3px;
+            height: 18px;
+            background: var(--maroon);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .sidebar-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 8px 14px;
         }
 
         .logout-btn {
             width: 100%;
-            margin-top: 16px;
-            padding: 12px;
-            background: white;
-            color: var(--primary-color);
-            border: 2px solid var(--primary-color);
-            border-radius: 8px;
-            font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
             display: flex;
             align-items: center;
-            justify-content: center;
-            gap: 8px;
+            gap: 12px;
+            padding: 10px 14px;
+            background: transparent;
+            color: rgba(15, 15, 15, 0.65);
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            transition: all 0.2s;
+            margin: 4px 0;
+        }
+
+        .logout-btn .nav-icon {
+            background: var(--ivory);
+            color: rgba(15, 15, 15, 0.5);
+            flex-shrink: 0;
         }
 
         .logout-btn:hover {
-            background: var(--primary-color);
-            color: white;
+            background: #FEF2F2;
+            color: #991B1B;
+        }
+
+        .logout-btn:hover .nav-icon {
+            background: rgba(153, 27, 27, 0.1);
+            color: #991B1B;
         }
 
         .account-content {
-            background: white;
-            padding: 32px;
+            background: #fff;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--border);
+            overflow: hidden;
         }
 
-        .content-section {
-            display: none;
+        .content-section { display: none; }
+        .content-section.active { display: block; }
+
+        .sec-header {
+            padding: 26px 30px 18px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
         }
 
-        .content-section.active {
-            display: block;
+        .sec-header h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.3rem;
+            color: #0F0F0F;
+            font-weight: 600;
+            margin: 0;
         }
 
-        .section-title {
-            font-size: 24px;
-            font-family: var(--font-heading);
-            color: var(--text-dark);
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid var(--border-color);
+        .sec-header-meta {
+            font-size: 12px;
+            color: rgba(15, 15, 15, 0.42);
         }
 
-        .info-grid {
+        .sec-body { padding: 26px 30px; }
+
+        .profile-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 24px;
-            margin-bottom: 32px;
+            gap: 14px;
+            margin-bottom: 26px;
         }
 
-        .info-item {
-            padding: 20px;
-            background: #fafafa;
-            border-radius: 8px;
+        .pf {
+            background: var(--ivory);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 15px 18px;
         }
 
-        .info-item label {
+        .pf label {
             display: block;
-            font-size: 13px;
-            color: var(--text-gray);
-            margin-bottom: 6px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
             text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: rgba(15, 15, 15, 0.38);
+            margin-bottom: 5px;
         }
 
-        .info-item .value {
-            font-size: 16px;
-            color: var(--text-dark);
-            font-weight: 500;
-        }
-
-        .btn-edit {
-            padding: 12px 24px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 6px;
+        .pf .val {
             font-size: 15px;
+            font-weight: 500;
+            color: #0F0F0F;
+        }
+
+        .btn-primary,
+        .btn-secondary,
+        .btn-ghost,
+        .btn-solid,
+        .btn-cancel,
+        .btn-save,
+        .btn-addr {
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 11px 24px;
+            background: var(--maroon);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            transition: all 0.22s;
+        }
+
+        .btn-primary:hover {
+            background: var(--maroon-deep);
+            transform: translateY(-1px);
+            box-shadow: 0 5px 16px rgba(110, 15, 42, 0.22);
+        }
+
+        .btn-secondary {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 9px 18px;
+            background: transparent;
+            color: var(--maroon);
+            border: 1.5px solid rgba(139, 21, 56, 0.3);
+            border-radius: 8px;
+            font-size: 13px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            text-decoration: none;
         }
 
-        .btn-edit:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
+        .btn-secondary:hover {
+            background: var(--maroon-soft);
+            border-color: var(--maroon);
         }
 
         .empty-state {
             text-align: center;
-            padding: 60px 20px;
+            padding: 60px 24px;
         }
 
-        .empty-state i {
-            font-size: 64px;
-            color: var(--text-light);
-            margin-bottom: 16px;
+        .empty-ico {
+            width: 76px;
+            height: 76px;
+            border-radius: 50%;
+            background: var(--ivory);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 18px;
+        }
+
+        .empty-ico i {
+            font-size: 26px;
+            color: rgba(15, 15, 15, 0.3);
         }
 
         .empty-state h3 {
-            font-size: 20px;
-            color: var(--text-dark);
+            font-family: 'Playfair Display', serif;
+            font-size: 1.2rem;
+            color: #0F0F0F;
             margin-bottom: 8px;
         }
 
         .empty-state p {
-            color: var(--text-gray);
-            margin-bottom: 24px;
+            color: rgba(15, 15, 15, 0.55);
+            font-size: 14px;
+            margin-bottom: 22px;
+            line-height: 1.7;
         }
 
-        .btn-primary {
-            padding: 12px 32px;
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            border-radius: 6px;
+        .orders-loading {
+            display: none;
+            gap: 14px;
+            flex-direction: column;
+        }
+
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skel {
+            border-radius: 10px;
+            background: linear-gradient(90deg, var(--ivory) 25%, #f2ede2 50%, var(--ivory) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite linear;
+        }
+
+        .skel-order { height: 156px; }
+
+        .orders-error {
+            display: none;
+            align-items: flex-start;
+            gap: 10px;
+            background: #FEF2F2;
+            border: 1px solid rgba(153, 27, 27, 0.18);
+            border-radius: 10px;
+            padding: 14px 18px;
+            font-size: 14px;
+            color: #991B1B;
+            margin-bottom: 16px;
+        }
+
+        .orders-error i {
             font-size: 15px;
-            font-weight: 600;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: all 0.2s;
+            margin-top: 1px;
+            flex-shrink: 0;
         }
 
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
-        }
-
-        @media (max-width: 968px) {
-            .account-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .account-sidebar {
-                position: sticky;
-                top: 80px;
-            }
-
-            .info-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .account-header {
-                padding: 24px;
-            }
-
-            .account-header h1 {
-                font-size: 24px;
-            }
-
-            .account-content {
-                padding: 24px;
-            }
-        }
-        /* Order Cards */
         .orders-list {
             display: grid;
-            gap: 20px;
+            gap: 14px;
         }
 
         .order-card {
-            border: 1px solid var(--border-color);
+            border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 24px;
-            background: white;
-            transition: all 0.2s;
-            cursor: pointer;
+            background: #fff;
+            overflow: hidden;
+            transition: box-shadow 0.25s, transform 0.25s, border-color 0.25s;
         }
 
         .order-card:hover {
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            border-color: rgba(139, 21, 56, 0.22);
+            box-shadow: 0 8px 28px rgba(15, 15, 15, 0.09);
             transform: translateY(-2px);
         }
 
-        .order-header {
+        .card-stripe {
+            height: 3px;
+            background: linear-gradient(90deg, var(--maroon), var(--gold));
+        }
+
+        .card-body { padding: 20px 22px; }
+
+        .card-head {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
+            gap: 14px;
             margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 14px;
+            border-bottom: 1px solid var(--border);
         }
 
-        .order-header-left {
-            flex: 1;
-        }
-
-        .order-id-row {
+        .order-num-row {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 8px;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 4px;
         }
 
-        .order-id {
-            font-size: 16px;
+        .order-num {
+            font-size: 14px;
             font-weight: 600;
-            color: var(--text-dark);
+            color: #0F0F0F;
             font-family: monospace;
         }
 
-        .order-status {
+        .order-dt {
+            font-size: 12px;
+            color: rgba(15, 15, 15, 0.42);
+        }
+
+        .badge {
             display: inline-flex;
             align-items: center;
-            gap: 6px;
-            padding: 4px 12px;
+            gap: 4px;
+            padding: 3px 10px;
             border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
         }
 
-        .order-status.confirmed {
-            background: #D1FAE5;
+        .badge.delivered,
+        .badge.confirmed {
+            background: #ECFDF5;
             color: #065F46;
         }
 
-        .order-status.processing {
-            background: #DBEAFE;
-            color: #1E40AF;
+        .badge.shipped,
+        .badge.out_for_delivery {
+            background: #EFF6FF;
+            color: #1D4ED8;
         }
 
-        .order-status.shipped {
-            background: #E9D5FF;
-            color: #6B21A8;
+        .badge.processing,
+        .badge.placed,
+        .badge.pending {
+            background: #FFFBEB;
+            color: #92400E;
         }
 
-        .order-status.delivered {
-            background: #D1FAE5;
-            color: #065F46;
-        }
-
-        .order-status.cancelled {
-            background: #FEE2E2;
+        .badge.cancelled {
+            background: #FEF2F2;
             color: #991B1B;
         }
 
-        .order-date {
-            font-size: 13px;
-            color: var(--text-gray);
-        }
+        .order-amt { text-align: right; flex-shrink: 0; }
 
-        .order-amount {
-            text-align: right;
-        }
-
-        .order-total {
-            font-size: 20px;
+        .order-amt-total {
+            font-size: 19px;
             font-weight: 700;
-            color: var(--primary-color);
+            color: var(--maroon);
+            line-height: 1.2;
         }
 
-        .order-payment {
-            font-size: 12px;
-            color: var(--text-gray);
-            margin-top: 4px;
+        .order-amt-sub {
+            font-size: 11px;
+            color: rgba(15, 15, 15, 0.4);
+            margin-top: 2px;
         }
 
-        .order-items {
-            display: flex;
-            gap: 12px;
+        .product-row {
+            display: grid;
+            grid-template-columns: 76px 1fr;
+            gap: 14px;
+            align-items: center;
             margin-bottom: 16px;
-            flex-wrap: wrap;
         }
 
-        .order-item-preview {
-            width: 60px;
-            height: 60px;
+        .prod-img {
+            width: 76px;
+            height: 92px;
             object-fit: cover;
             border-radius: 8px;
-            border: 1px solid var(--border-color);
+            background: var(--ivory);
+            border: 1px solid var(--border);
+            display: block;
         }
 
-        .order-item-count {
-            width: 60px;
-            height: 60px;
-            background: #fafafa;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 13px;
+        .prod-meta h3 {
+            font-size: 15px;
             font-weight: 600;
-            color: var(--text-gray);
+            color: #0F0F0F;
+            margin-bottom: 4px;
+            line-height: 1.4;
         }
 
-        .order-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 16px;
-            border-top: 1px solid var(--border-color);
-        }
-
-        .delivery-info-small {
+        .prod-meta p {
             font-size: 13px;
-            color: var(--text-gray);
+            color: rgba(15, 15, 15, 0.55);
+            margin-bottom: 3px;
         }
 
-        .delivery-info-small i {
-            color: var(--primary-color);
-            margin-right: 4px;
-        }
-
-        .order-actions {
+        .delivery-est {
+            font-size: 12px;
+            color: rgba(15, 15, 15, 0.4);
             display: flex;
-            gap: 8px;
+            align-items: center;
+            gap: 5px;
         }
 
-        .btn-order-action {
+        .delivery-est i { color: var(--maroon); }
+
+        .card-foot {
+            display: flex;
+            justify-content: flex-end;
+            gap: 8px;
+            padding-top: 14px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-ghost {
             padding: 8px 16px;
-            background: white;
-            color: var(--primary-color);
-            border: 1px solid var(--primary-color);
+            background: transparent;
+            color: var(--maroon);
+            border: 1.5px solid rgba(139, 21, 56, 0.28);
             border-radius: 6px;
             font-size: 13px;
             font-weight: 600;
@@ -429,285 +612,567 @@
             transition: all 0.2s;
         }
 
-        .btn-order-action:hover {
-            background: var(--primary-color);
-            color: white;
+        .btn-ghost:hover {
+            background: var(--maroon-soft);
+            border-color: var(--maroon);
         }
 
-        /* Order Detail Modal */
-        .order-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.6);
-            z-index: 10000;
-            overflow-y: auto;
-            padding: 20px;
+        .btn-solid {
+            padding: 8px 16px;
+            background: var(--maroon);
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
         }
 
-        .order-modal.active {
+        .btn-solid:hover {
+            background: var(--maroon-deep);
+            box-shadow: 0 4px 12px rgba(110, 15, 42, 0.22);
+        }
+
+        .addr-grid {
+            display: grid;
+            gap: 14px;
+            margin-bottom: 22px;
+        }
+
+        .addr-card {
+            border: 1.5px solid var(--border);
+            border-radius: 12px;
+            padding: 18px 20px;
+            position: relative;
+            background: #fff;
+            transition: all 0.22s;
+        }
+
+        .addr-card:hover {
+            border-color: rgba(139, 21, 56, 0.22);
+            box-shadow: 0 4px 14px rgba(15, 15, 15, 0.07);
+        }
+
+        .addr-card.is-default {
+            border-color: var(--gold);
+            background: linear-gradient(135deg, #fffdf7 0%, #fff 100%);
+        }
+
+        .default-ribbon {
+            position: absolute;
+            top: 13px;
+            right: 13px;
+            display: inline-flex;
+            align-items: center;
+            gap: 3px;
+            padding: 3px 9px;
+            background: linear-gradient(90deg, var(--gold), #b8934a);
+            color: #fff;
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 0.07em;
+            text-transform: uppercase;
+            border-radius: 20px;
+        }
+
+        .addr-type-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 2px 9px;
+            background: var(--ivory);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            color: rgba(15, 15, 15, 0.55);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin-bottom: 9px;
+        }
+
+        .addr-name {
+            font-size: 15px;
+            font-weight: 600;
+            color: #0F0F0F;
+            margin-bottom: 5px;
+        }
+
+        .addr-text {
+            font-size: 13px;
+            color: rgba(15, 15, 15, 0.55);
+            line-height: 1.7;
+            margin-bottom: 8px;
+        }
+
+        .addr-phone {
+            font-size: 13px;
+            font-weight: 500;
+            color: #0F0F0F;
             display: flex;
             align-items: center;
-            justify-content: center;
+            gap: 5px;
+            margin-bottom: 14px;
         }
 
-        .order-modal-content {
-            background: white;
-            border-radius: 12px;
-            max-width: 800px;
-            width: 100%;
-            max-height: 90vh;
-            overflow-y: auto;
-            padding: 32px;
-            position: relative;
-            animation: modalSlideIn 0.3s ease-out;
+        .addr-phone i {
+            color: var(--maroon);
+            font-size: 11px;
         }
 
-        .modal-close {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            width: 32px;
-            height: 32px;
-            border: none;
+        .addr-actions {
+            display: flex;
+            gap: 7px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-addr {
+            padding: 6px 14px;
             background: transparent;
-            color: var(--text-gray);
-            font-size: 24px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
             cursor: pointer;
             display: flex;
             align-items: center;
+            gap: 4px;
+            transition: all 0.18s;
+        }
+
+        .btn-addr.edit {
+            color: var(--maroon);
+            border: 1.5px solid rgba(139, 21, 56, 0.25);
+        }
+
+        .btn-addr.edit:hover {
+            background: var(--maroon-soft);
+            border-color: var(--maroon);
+        }
+
+        .btn-addr.del {
+            color: #991B1B;
+            border: 1.5px solid rgba(153, 27, 27, 0.2);
+        }
+
+        .btn-addr.del:hover {
+            background: #FEF2F2;
+            border-color: #991B1B;
+        }
+
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.52);
+            z-index: 10000;
+            overflow-y: auto;
+            padding: 20px 16px;
+            backdrop-filter: blur(2px);
+        }
+
+        .modal-overlay.active {
+            display: flex;
+            align-items: flex-start;
             justify-content: center;
+        }
+
+        .modal-box {
+            background: #fff;
+            border-radius: 16px;
+            max-width: 740px;
+            width: 100%;
+            margin: auto;
+            padding: 34px;
+            position: relative;
+            animation: slideIn 0.28s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        .modal-box.sm { max-width: 540px; }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-14px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        .modal-x {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            width: 32px;
+            height: 32px;
+            border: 1px solid var(--border);
+            background: #fff;
+            color: rgba(15, 15, 15, 0.5);
             border-radius: 50%;
-            transition: all 0.2s;
-        }
-
-        .modal-close:hover {
-            background: var(--border-color);
-            color: var(--text-dark);
-        }
-
-        .order-detail-header {
-            margin-bottom: 32px;
-        }
-
-        .order-detail-title {
-            font-size: 28px;
-            font-family: var(--font-heading);
-            color: var(--text-dark);
-            margin-bottom: 8px;
-        }
-
-        .order-detail-meta {
             display: flex;
             align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .order-detail-section {
-            margin-bottom: 32px;
-        }
-
-        .section-heading {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text-dark);
-            margin-bottom: 16px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-heading i {
-            color: var(--primary-color);
-        }
-
-        .order-timeline {
-            position: relative;
-            padding-left: 32px;
-        }
-
-        .order-timeline::before {
-            content: '';
-            position: absolute;
-            left: 8px;
-            top: 8px;
-            bottom: 8px;
-            width: 2px;
-            background: var(--border-color);
-        }
-
-        .timeline-item {
-            position: relative;
-            padding-bottom: 24px;
-        }
-
-        .timeline-item:last-child {
-            padding-bottom: 0;
-        }
-
-        .timeline-dot {
-            position: absolute;
-            left: -28px;
-            top: 4px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            background: white;
-            border: 3px solid var(--border-color);
-        }
-
-        .timeline-item.active .timeline-dot {
-            border-color: var(--primary-color);
-            background: var(--primary-color);
-        }
-
-        .timeline-content {
+            justify-content: center;
+            cursor: pointer;
             font-size: 14px;
-            color: var(--text-dark);
-            font-weight: 500;
+            transition: all 0.18s;
+        }
+
+        .modal-x:hover {
+            background: var(--ivory);
+            color: #0F0F0F;
+        }
+
+        .modal-title {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.35rem;
+            color: #0F0F0F;
+            font-weight: 600;
             margin-bottom: 4px;
         }
 
-        .timeline-date {
+        .modal-sub {
+            font-size: 13px;
+            color: rgba(15, 15, 15, 0.5);
+            margin-bottom: 24px;
+        }
+
+        .modal-meta-row {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .modal-oid {
+            font-size: 13px;
+            font-weight: 600;
+            color: #0F0F0F;
+            font-family: monospace;
+        }
+
+        .m-sec { margin-bottom: 28px; }
+
+        .m-sec-title {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: rgba(15, 15, 15, 0.42);
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .m-sec-title i { color: var(--maroon); }
+
+        .tl {
+            position: relative;
+            padding-left: 26px;
+        }
+
+        .tl::before {
+            content: '';
+            position: absolute;
+            left: 6px;
+            top: 8px;
+            bottom: 8px;
+            width: 2px;
+            background: var(--border);
+        }
+
+        .tl-step {
+            position: relative;
+            padding-bottom: 20px;
+        }
+
+        .tl-step:last-child { padding-bottom: 0; }
+
+        .tl-dot {
+            position: absolute;
+            left: -22px;
+            top: 2px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: #fff;
+            border: 2.5px solid var(--border);
+        }
+
+        .tl-step.done .tl-dot {
+            background: var(--maroon);
+            border-color: var(--maroon);
+        }
+
+        .tl-step.done .tl-dot::after {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            border-radius: 50%;
+            background: #fff;
+        }
+
+        .tl-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0F0F0F;
+            margin-bottom: 2px;
+        }
+
+        .tl-step:not(.done) .tl-label {
+            color: rgba(15, 15, 15, 0.45);
+        }
+
+        .tl-date {
             font-size: 12px;
-            color: var(--text-gray);
+            color: rgba(15, 15, 15, 0.4);
         }
 
-        .detail-card {
-            background: #fafafa;
-            border-radius: 8px;
-            padding: 20px;
+        .price-tbl {
+            background: var(--ivory);
+            border-radius: 10px;
+            padding: 14px 18px;
         }
 
-        .detail-row {
+        .pr {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
-        }
-
-        .detail-label {
+            align-items: center;
+            padding: 6px 0;
             font-size: 14px;
-            color: var(--text-gray);
         }
 
-        .detail-value {
-            font-size: 14px;
-            font-weight: 600;
-            color: var(--text-dark);
-            text-align: right;
+        .pr .lbl { color: rgba(15, 15, 15, 0.55); }
+        .pr .vl { font-weight: 600; color: #0F0F0F; }
+        .pr .vl.grn { color: #065F46; }
+
+        .pr.tot {
+            border-top: 1.5px solid var(--border);
+            padding-top: 12px;
+            margin-top: 6px;
         }
 
-        .order-detail-items {
-            display: grid;
-            gap: 16px;
-        }
-
-        .order-detail-item {
-            display: flex;
-            gap: 16px;
-            padding: 16px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-        }
-
-        .detail-item-image {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-        }
-
-        .detail-item-info {
-            flex: 1;
-        }
-
-        .detail-item-name {
+        .pr.tot .lbl {
             font-size: 15px;
-            font-weight: 600;
-            color: var(--text-dark);
-            margin-bottom: 6px;
+            font-weight: 700;
+            color: #0F0F0F;
         }
 
-        .detail-item-meta {
-            font-size: 13px;
-            color: var(--text-gray);
+        .pr.tot .vl {
+            font-size: 19px;
+            color: var(--maroon);
+        }
+
+        .m-item {
+            display: flex;
+            gap: 12px;
+            padding: 12px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
             margin-bottom: 8px;
         }
 
-        .detail-item-price {
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--primary-color);
+        .m-item:last-child { margin-bottom: 0; }
+
+        .m-item img {
+            width: 68px;
+            height: 82px;
+            object-fit: cover;
+            border-radius: 7px;
+            background: var(--ivory);
+            flex-shrink: 0;
         }
 
-        /* Address Cards */
-        .address-grid {
+        .m-item-info { flex: 1; }
+
+        .m-item-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #0F0F0F;
+            margin-bottom: 3px;
+        }
+
+        .m-item-meta {
+            font-size: 12px;
+            color: rgba(15, 15, 15, 0.5);
+            margin-bottom: 5px;
+        }
+
+        .m-item-price {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--maroon);
+        }
+
+        .form-row {
             display: grid;
-            gap: 16px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
-        .saved-address-card {
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            padding: 20px;
-            position: relative;
-            transition: all 0.2s;
-        }
-
-        .saved-address-card:hover {
-            border-color: var(--primary-color);
-            box-shadow: 0 4px 12px rgba(139, 21, 56, 0.1);
-        }
-
-        .saved-address-card.default {
-            border-color: var(--primary-color);
-            background: rgba(139, 21, 56, 0.02);
-        }
-
-        .default-badge {
-            position: absolute;
-            top: 16px;
-            right: 16px;
-            background: var(--primary-color);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 20px;
+        .fg label {
+            display: block;
             font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.05em;
+            color: #0F0F0F;
+            margin-bottom: 6px;
+        }
+
+        .fg label .req { color: #EF4444; }
+
+        .fg input,
+        .fg select,
+        .fg textarea {
+            width: 100%;
+            padding: 10px 13px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: 'Poppins', sans-serif;
+            color: #0F0F0F;
+            background: #fff;
+            transition: border-color 0.18s, box-shadow 0.18s;
+        }
+
+        .fg textarea {
+            resize: vertical;
+            min-height: 78px;
+        }
+
+        .fg input:focus,
+        .fg select:focus,
+        .fg textarea:focus {
+            outline: none;
+            border-color: var(--maroon);
+            box-shadow: 0 0 0 3px rgba(139, 21, 56, 0.08);
+        }
+
+        .type-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 7px;
+        }
+
+        .t-chip {
+            padding: 9px 6px;
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 12px;
             font-weight: 600;
-            text-transform: uppercase;
+            color: rgba(15, 15, 15, 0.55);
+            transition: all 0.18s;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        .t-chip:hover {
+            border-color: var(--maroon);
+            color: var(--maroon);
+        }
+
+        .t-chip.sel {
+            background: var(--maroon);
+            border-color: var(--maroon);
+            color: #fff;
+        }
+
+        .chk-lbl {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            cursor: pointer;
+            font-size: 13px;
+            color: #0F0F0F;
+            margin: 12px 0;
+        }
+
+        .chk-lbl input {
+            width: 15px;
+            height: 15px;
+            cursor: pointer;
+            accent-color: var(--maroon);
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 6px;
+            padding-top: 18px;
+            border-top: 1px solid var(--border);
+        }
+
+        .btn-cancel {
+            flex: 1;
+            padding: 12px;
+            background: #fff;
+            color: rgba(15, 15, 15, 0.55);
+            border: 1.5px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.18s;
+        }
+
+        .btn-cancel:hover { background: var(--ivory); }
+
+        .btn-save {
+            flex: 2;
+            padding: 12px;
+            background: var(--maroon);
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.22s;
+        }
+
+        .btn-save:hover {
+            background: var(--maroon-deep);
+            box-shadow: 0 4px 14px rgba(110, 15, 42, 0.2);
+        }
+
+        .btn-save:disabled {
+            background: rgba(15, 15, 15, 0.22);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+
+        @media (max-width: 900px) {
+            .account-grid { grid-template-columns: 1fr; }
+            .account-sidebar { position: static; }
+            .sidebar-menu { display: flex; flex-wrap: wrap; gap: 3px; }
+            .sidebar-menu a.active::before { display: none; }
         }
 
         @media (max-width: 640px) {
-            .order-header {
-                flex-direction: column;
-                gap: 12px;
-            }
-
-            .order-amount {
-                text-align: left;
-            }
-
-            .order-footer {
-                flex-direction: column;
-                gap: 12px;
-                align-items: flex-start;
-            }
-
-            .order-detail-meta {
+            .account-hero {
+                padding: 26px 22px;
                 flex-direction: column;
                 align-items: flex-start;
             }
 
-            .order-modal-content {
-                padding: 24px;
-            }
+            .hero-avatar { display: none; }
+            .sec-body, .sec-header { padding-left: 18px; padding-right: 18px; }
+            .profile-grid { grid-template-columns: 1fr; }
+            .card-head { flex-direction: column; gap: 8px; }
+            .order-amt { text-align: left; }
+            .card-foot { flex-wrap: wrap; }
+            .modal-box { padding: 22px 18px; }
+            .form-row { grid-template-columns: 1fr; }
         }
     </style>
-    <!-- Fallback styles for JavaScript-disabled browsers -->
     <noscript>
         <style>
             .mobile-menu {
@@ -718,153 +1183,165 @@
                 border-bottom: 1px solid var(--border-color);
             }
 
-            .mobile-menu-toggle {
-                display: none !important;
-            }
-
-            .nav-desktop {
-                display: none !important;
-            }
+            .mobile-menu-toggle { display: none !important; }
+            .nav-desktop { display: none !important; }
 
             @media (min-width: 1024px) {
-                .mobile-menu {
-                    display: none !important;
-                }
-                .nav-desktop {
-                    display: flex !important;
-                }
+                .mobile-menu { display: none !important; }
+                .nav-desktop { display: flex !important; }
             }
         </style>
     </noscript>
 </head>
 <body>
-    <!-- Header (Include existing header) -->
-    <header class="header">
-        <!-- Your existing header code -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/logo/Amzira_logo.png" alt="Amzira Logo" class="logo-icon">
+                        <img src="images/logo/Amzira_name.png" alt="Amzira" class="logo-name">
+                    </a>
+                </div>
+                <nav class="nav-desktop" id="mainNav" aria-label="Primary navigation">
+                    <ul class="nav-menu" role="menubar">
+                        <li class="nav-item"><a href="men.html" class="nav-link">Men</a></li>
+                        <li class="nav-item"><a href="women.html" class="nav-link">Women</a></li>
+                        <li class="nav-item"><a href="kids.html" class="nav-link">Kids</a></li>
+                        <li class="nav-item"><a href="appointments.html" class="nav-link">Appointments</a></li>
+                        <li class="nav-item"><a href="stores.html" class="nav-link">Stores</a></li>
+                    </ul>
+                </nav>
+                <div class="header-actions">
+                    <button class="header-icon" id="searchBtn" aria-label="Search products"><i class="fas fa-search"></i></button>
+                    <button class="header-icon" aria-label="Wishlist"><i class="far fa-heart"></i></button>
+                    <a href="account.html" class="header-icon" id="accountBtn" title="My Account" aria-label="Account"><i class="far fa-user"></i></a>
+                    <button class="header-icon cart-icon" id="cartBtn" aria-label="Cart">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span class="cart-count">0</span>
+                    </button>
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle" aria-label="Open menu"><i class="fas fa-bars"></i></button>
+                </div>
+            </div>
+        </div>
     </header>
 
-    <!-- Account Page -->
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <h2>AMZIRA</h2>
+            <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Close menu">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <nav class="mobile-nav" aria-label="Mobile navigation">
+            <ul>
+                <li><a href="men.html">Men</a></li>
+                <li><a href="women.html">Women</a></li>
+                <li><a href="kids.html">Kids</a></li>
+                <li><a href="appointments.html">Appointments</a></li>
+                <li><a href="stores.html">Stores</a></li>
+            </ul>
+        </nav>
+    </div>
+
     <main class="account-page">
         <div class="account-container">
-            <!-- Header -->
-            <div class="account-header">
-                <h1>My Account</h1>
-                <p id="welcomeMessage">Welcome back!</p>
+            <div class="account-hero">
+                <div class="hero-text">
+                    <h1>My Account</h1>
+                    <p id="welcomeMessage">Welcome back!</p>
+                    <div class="hero-badge"><i class="fas fa-star" style="font-size:9px;"></i> Amzira Member</div>
+                </div>
+                <div class="hero-avatar" id="heroAvatar">A</div>
             </div>
 
-            <!-- Account Grid -->
             <div class="account-grid">
-                <!-- Sidebar -->
                 <aside class="account-sidebar">
-                    <ul class="sidebar-menu">
-                        <li>
-                            <a href="#" class="active" data-section="profile">
-                                <i class="fas fa-user"></i>
-                                <span>Profile</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" data-section="orders">
-                                <i class="fas fa-shopping-bag"></i>
-                                <span>My Orders</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" data-section="addresses">
-                                <i class="fas fa-map-marker-alt"></i>
-                                <span>Addresses</span>
-                            </a>
-                        </li>
-                        <li>
-                            <a href="#" data-section="wishlist">
-                                <i class="fas fa-heart"></i>
-                                <span>Wishlist</span>
-                            </a>
-                        </li>
+                    <div class="sidebar-label">Navigation</div>
+                    <ul class="sidebar-menu" id="sidebarMenu">
+                        <li><a href="#" class="active" data-section="profile"><span class="nav-icon"><i class="fas fa-user"></i></span>Profile</a></li>
+                        <li><a href="#" data-section="orders"><span class="nav-icon"><i class="fas fa-shopping-bag"></i></span>My Orders</a></li>
+                        <li><a href="#" data-section="addresses"><span class="nav-icon"><i class="fas fa-map-marker-alt"></i></span>Addresses</a></li>
+                        <li><a href="#" data-section="wishlist"><span class="nav-icon"><i class="fas fa-heart"></i></span>Wishlist</a></li>
                     </ul>
+                    <div class="sidebar-divider"></div>
                     <button class="logout-btn" onclick="Auth.logout()">
-                        <i class="fas fa-sign-out-alt"></i>
-                        Logout
+                        <span class="nav-icon"><i class="fas fa-sign-out-alt"></i></span>Logout
                     </button>
                 </aside>
 
-                <!-- Content -->
                 <div class="account-content">
-                    <!-- Profile Section -->
                     <section class="content-section active" id="profile">
-                        <h2 class="section-title">Profile Information</h2>
-                        
-                        <div class="info-grid">
-                            <div class="info-item">
-                                <label>Full Name</label>
-                                <div class="value" id="profileName">-</div>
-                            </div>
-                            <div class="info-item">
-                                <label>Email Address</label>
-                                <div class="value" id="profileEmail">-</div>
-                            </div>
-                            <div class="info-item">
-                                <label>Mobile Number</label>
-                                <div class="value" id="profilePhone">-</div>
-                            </div>
-                            <div class="info-item">
-                                <label>Member Since</label>
-                                <div class="value" id="profileDate">-</div>
-                            </div>
+                        <div class="sec-header">
+                            <h2>Profile Information</h2>
+                            <span class="sec-header-meta">Your personal details</span>
                         </div>
-
-                        <button class="btn-edit" onclick="alert('Edit profile feature coming soon!')">
-                            <i class="fas fa-edit"></i> Edit Profile
-                        </button>
-                    </section>
-
-                    <!-- Orders Section (REPLACE EXISTING) -->
-                    <section class="content-section" id="orders">
-                        <h2 class="section-title">My Orders</h2>
-                        
-                        <div class="orders-list" id="ordersList">
-                            <!-- Orders will be loaded here -->
-                        </div>
-
-                        <div class="empty-state" id="ordersEmpty" style="display: none;">
-                            <i class="fas fa-shopping-bag"></i>
-                            <h3>No Orders Yet</h3>
-                            <p>You haven't placed any orders yet</p>
-                            <a href="index.html" class="btn-primary">Start Shopping</a>
-                        </div>
-                    </section>
-
-                    <!-- Addresses Section (REPLACE EXISTING) -->
-                    <section class="content-section" id="addresses">
-                        <h2 class="section-title">Saved Addresses</h2>
-                        
-                        <div class="address-grid" id="addressesList">
-                            <!-- Addresses will be loaded here -->
-                        </div>
-
-                        <button class="btn-primary" onclick="openAddAddressModal()" style="margin-top: 20px;">
-                            <i class="fas fa-plus"></i> Add New Address
-                        </button>
-
-                        <div class="empty-state" id="addressesEmpty" style="display: none;">
-                            <i class="fas fa-map-marker-alt"></i>
-                            <h3>No Addresses Saved</h3>
-                            <p>Add an address for faster checkout</p>
-                            <button class="btn-primary" onclick="openAddAddressModal()">
-                                Add New Address
+                        <div class="sec-body">
+                            <div class="profile-grid">
+                                <div class="pf"><label>Full Name</label><div class="val" id="profileName">-</div></div>
+                                <div class="pf"><label>Email Address</label><div class="val" id="profileEmail">-</div></div>
+                                <div class="pf"><label>Mobile Number</label><div class="val" id="profilePhone">-</div></div>
+                                <div class="pf"><label>Member Since</label><div class="val" id="profileDate">-</div></div>
+                            </div>
+                            <button class="btn-primary" onclick="alert('Edit profile feature coming soon!')">
+                                <i class="fas fa-pen"></i> Edit Profile
                             </button>
                         </div>
                     </section>
 
-                    <!-- Wishlist Section -->
+                    <section class="content-section" id="orders">
+                        <div class="sec-header">
+                            <h2>My Orders</h2>
+                            <span class="sec-header-meta" id="ordersMeta"></span>
+                        </div>
+                        <div class="sec-body">
+                            <div class="orders-loading" id="ordersLoading">
+                                <div class="skel skel-order"></div>
+                                <div class="skel skel-order"></div>
+                            </div>
+                            <div class="orders-error" id="ordersError">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span id="ordersErrorMsg">Unable to load orders. Please try again.</span>
+                            </div>
+                            <div class="orders-list" id="ordersList"></div>
+                            <div class="empty-state" id="ordersEmpty" style="display:none;">
+                                <div class="empty-ico"><i class="fas fa-shopping-bag"></i></div>
+                                <h3>No Orders Yet</h3>
+                                <p>You haven't placed any orders yet.<br>Explore our collection and find something you love.</p>
+                                <a href="index.html" class="btn-primary">Start Shopping</a>
+                            </div>
+                        </div>
+                    </section>
+
+                    <section class="content-section" id="addresses">
+                        <div class="sec-header">
+                            <h2>Saved Addresses</h2>
+                            <button class="btn-secondary" onclick="openAddAddressModal()">
+                                <i class="fas fa-plus"></i> Add New
+                            </button>
+                        </div>
+                        <div class="sec-body">
+                            <div class="addr-grid" id="addressesList"></div>
+                            <div class="empty-state" id="addressesEmpty" style="display:none;">
+                                <div class="empty-ico"><i class="fas fa-map-marker-alt"></i></div>
+                                <h3>No Saved Addresses</h3>
+                                <p>Add a delivery address for a faster checkout experience.</p>
+                                <button class="btn-primary" onclick="openAddAddressModal()">
+                                    <i class="fas fa-plus"></i> Add New Address
+                                </button>
+                            </div>
+                        </div>
+                    </section>
+
                     <section class="content-section" id="wishlist">
-                        <h2 class="section-title">My Wishlist</h2>
-                        
-                        <div class="empty-state">
-                            <i class="fas fa-heart"></i>
-                            <h3>Your Wishlist is Empty</h3>
-                            <p>Save items you love for later</p>
-                            <a href="index.html" class="btn-primary">Browse Products</a>
+                        <div class="sec-header"><h2>My Wishlist</h2></div>
+                        <div class="sec-body">
+                            <div class="empty-state">
+                                <div class="empty-ico"><i class="fas fa-heart"></i></div>
+                                <h3>Your Wishlist is Empty</h3>
+                                <p>Save the pieces you love and revisit them anytime.</p>
+                                <a href="index.html" class="btn-primary">Browse Collection</a>
+                            </div>
                         </div>
                     </section>
                 </div>
@@ -872,205 +1349,131 @@
         </div>
     </main>
 
-    <!-- Footer (Include existing footer) -->
-    <footer class="footer">
-        <!-- Your existing footer code -->
-    </footer>
-
-    <!-- Order Detail Modal -->
-    <div class="order-modal" id="orderDetailModal">
-        <div class="order-modal-content">
-            <button class="modal-close" onclick="closeOrderModal()">
-                <i class="fas fa-times"></i>
-            </button>
-
-            <div class="order-detail-header">
-                <h2 class="order-detail-title">Order Details</h2>
-                <div class="order-detail-meta">
-                    <div class="order-id">Order ID: <span id="modalOrderId">-</span></div>
-                    <div class="order-status" id="modalOrderStatus">-</div>
-                </div>
+    <div class="modal-overlay" id="orderDetailModal">
+        <div class="modal-box">
+            <button class="modal-x" onclick="closeOrderModal()"><i class="fas fa-times"></i></button>
+            <div class="modal-title" id="modalOrderTitle">Order Details</div>
+            <div class="modal-meta-row">
+                <span class="modal-oid" id="modalOrderId"></span>
+                <span class="badge" id="modalOrderStatus"></span>
             </div>
 
-            <!-- Order Timeline -->
-            <div class="order-detail-section">
-                <h3 class="section-heading">
-                    <i class="fas fa-truck"></i>
-                    Order Tracking
-                </h3>
-                <div class="order-timeline" id="orderTimeline">
-                    <!-- Timeline will be loaded here -->
-                </div>
+            <div class="m-sec">
+                <div class="m-sec-title"><i class="fas fa-truck"></i> Order Tracking</div>
+                <div class="tl" id="orderTimeline"></div>
             </div>
-
-            <!-- Order Items -->
-            <div class="order-detail-section">
-                <h3 class="section-heading">
-                    <i class="fas fa-box"></i>
-                    Items in Order
-                </h3>
-                <div class="order-detail-items" id="modalOrderItems">
-                    <!-- Items will be loaded here -->
-                </div>
+            <div class="m-sec">
+                <div class="m-sec-title"><i class="fas fa-box-open"></i> Items Ordered</div>
+                <div id="modalOrderItems"></div>
             </div>
-
-            <!-- Delivery Address -->
-            <div class="order-detail-section">
-                <h3 class="section-heading">
-                    <i class="fas fa-map-marker-alt"></i>
-                    Delivery Address
-                </h3>
-                <div class="detail-card" id="modalDeliveryAddress">
-                    <!-- Address will be loaded here -->
-                </div>
+            <div class="m-sec">
+                <div class="m-sec-title"><i class="fas fa-map-marker-alt"></i> Delivery Address</div>
+                <div id="modalDeliveryAddress" class="price-tbl"></div>
             </div>
-
-            <!-- Price Breakdown -->
-            <div class="order-detail-section">
-                <h3 class="section-heading">
-                    <i class="fas fa-receipt"></i>
-                    Price Details
-                </h3>
-                <div class="detail-card">
-                    <div class="detail-row">
-                        <span class="detail-label">Subtotal</span>
-                        <span class="detail-value" id="modalSubtotal">₹0</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Discount</span>
-                        <span class="detail-value" style="color: #10B981;" id="modalDiscount">- ₹0</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Shipping</span>
-                        <span class="detail-value" id="modalShipping">₹0</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Tax (GST 18%)</span>
-                        <span class="detail-value" id="modalTax">₹0</span>
-                    </div>
-                    <div class="detail-row" style="padding-top: 16px; border-top: 2px solid var(--border-color); margin-top: 8px;">
-                        <span class="detail-label" style="font-size: 16px; font-weight: 600; color: var(--text-dark);">Total Amount</span>
-                        <span class="detail-value" style="font-size: 20px; color: var(--primary-color);" id="modalTotal">₹0</span>
-                    </div>
-                    <div class="detail-row">
-                        <span class="detail-label">Payment Method</span>
-                        <span class="detail-value" id="modalPaymentMethod">-</span>
-                    </div>
+            <div class="m-sec">
+                <div class="m-sec-title"><i class="fas fa-receipt"></i> Price Details</div>
+                <div class="price-tbl">
+                    <div class="pr"><span class="lbl">Subtotal</span><span class="vl" id="modalSubtotal">₹0</span></div>
+                    <div class="pr"><span class="lbl">Discount</span><span class="vl grn" id="modalDiscount">₹0</span></div>
+                    <div class="pr"><span class="lbl">Shipping</span><span class="vl" id="modalShipping">₹0</span></div>
+                    <div class="pr"><span class="lbl">GST (18%)</span><span class="vl" id="modalTax">₹0</span></div>
+                    <div class="pr tot"><span class="lbl">Total Paid</span><span class="vl" id="modalTotal">₹0</span></div>
+                    <div class="pr" style="padding-top:10px;"><span class="lbl">Payment</span><span class="vl" id="modalPaymentMethod">-</span></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Address Modal (Add/Edit) -->
-    <div class="order-modal" id="addressModal">
-        <div class="order-modal-content" style="max-width: 600px;">
-            <button class="modal-close" onclick="closeAddressModal()">
-                <i class="fas fa-times"></i>
-            </button>
-
-            <div class="order-detail-header">
-                <h2 class="order-detail-title" id="addressModalTitle">Add New Address</h2>
-            </div>
-
-            <form id="addressForm">
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;">
-                    <div class="form-group">
-                        <label>Full Name <span style="color: #EF4444;">*</span></label>
-                        <input type="text" id="addrName" placeholder="Enter full name" required>
-                    </div>
-                    <div class="form-group">
-                        <label>Mobile Number <span style="color: #EF4444;">*</span></label>
-                        <input type="tel" id="addrMobile" placeholder="10-digit mobile" maxlength="10" required>
-                    </div>
+    <div class="modal-overlay" id="addressModal">
+        <div class="modal-box sm">
+            <button class="modal-x" onclick="closeAddressModal()"><i class="fas fa-times"></i></button>
+            <div class="modal-title" id="addressModalTitle">Add New Address</div>
+            <div class="modal-sub">Fill in the details below to save your address.</div>
+            <form id="addressForm" autocomplete="off">
+                <div class="form-row">
+                    <div class="fg"><label>Full Name <span class="req">*</span></label><input type="text" id="addrName" placeholder="Enter full name" required></div>
+                    <div class="fg"><label>Mobile <span class="req">*</span></label><input type="tel" id="addrMobile" placeholder="10-digit number" maxlength="10" required></div>
                 </div>
-
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; margin-bottom: 20px;">
-                    <div class="form-group">
-                        <label>Pincode <span style="color: #EF4444;">*</span></label>
-                        <input type="text" id="addrPincode" placeholder="6-digit pincode" maxlength="6" required>
-                    </div>
-                    <div class="form-group">
-                        <label>City <span style="color: #EF4444;">*</span></label>
-                        <input type="text" id="addrCity" placeholder="Enter city" required>
-                    </div>
+                <div class="form-row">
+                    <div class="fg"><label>Pincode <span class="req">*</span></label><input type="text" id="addrPincode" placeholder="6-digit pincode" maxlength="6" required></div>
+                    <div class="fg"><label>City <span class="req">*</span></label><input type="text" id="addrCity" placeholder="Enter city" required></div>
                 </div>
-
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label>Address <span style="color: #EF4444;">*</span></label>
-                    <textarea id="addrAddress" placeholder="House No., Building Name, Street" required style="width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 6px; font-family: var(--font-primary); resize: vertical; min-height: 80px;"></textarea>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label>Locality (Optional)</label>
-                    <input type="text" id="addrLocality" placeholder="Locality / Area">
-                </div>
-
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label>State <span style="color: #EF4444;">*</span></label>
-                    <select id="addrState" required style="width: 100%; padding: 12px 16px; border: 1px solid var(--border-color); border-radius: 6px; font-family: var(--font-primary);">
+                <div class="fg" style="margin-bottom:12px;"><label>Street Address <span class="req">*</span></label><textarea id="addrAddress" placeholder="House No., Building, Street" required></textarea></div>
+                <div class="fg" style="margin-bottom:12px;"><label>Locality <span style="color:rgba(15,15,15,0.4);font-weight:400;">(optional)</span></label><input type="text" id="addrLocality" placeholder="Area / Locality"></div>
+                <div class="fg" style="margin-bottom:12px;">
+                    <label>State <span class="req">*</span></label>
+                    <select id="addrState" required>
                         <option value="">Select State</option>
                         <option value="Andhra Pradesh">Andhra Pradesh</option>
+                        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
+                        <option value="Assam">Assam</option>
+                        <option value="Bihar">Bihar</option>
+                        <option value="Chhattisgarh">Chhattisgarh</option>
+                        <option value="Goa">Goa</option>
                         <option value="Gujarat">Gujarat</option>
+                        <option value="Haryana">Haryana</option>
+                        <option value="Himachal Pradesh">Himachal Pradesh</option>
+                        <option value="Jharkhand">Jharkhand</option>
                         <option value="Karnataka">Karnataka</option>
+                        <option value="Kerala">Kerala</option>
+                        <option value="Madhya Pradesh">Madhya Pradesh</option>
                         <option value="Maharashtra">Maharashtra</option>
+                        <option value="Manipur">Manipur</option>
+                        <option value="Meghalaya">Meghalaya</option>
+                        <option value="Mizoram">Mizoram</option>
+                        <option value="Nagaland">Nagaland</option>
+                        <option value="Odisha">Odisha</option>
+                        <option value="Punjab">Punjab</option>
+                        <option value="Rajasthan">Rajasthan</option>
+                        <option value="Sikkim">Sikkim</option>
                         <option value="Tamil Nadu">Tamil Nadu</option>
+                        <option value="Telangana">Telangana</option>
+                        <option value="Tripura">Tripura</option>
+                        <option value="Uttar Pradesh">Uttar Pradesh</option>
+                        <option value="Uttarakhand">Uttarakhand</option>
+                        <option value="West Bengal">West Bengal</option>
                         <option value="Delhi">Delhi</option>
-                        <!-- Add more states as needed -->
                     </select>
                 </div>
-
-                <div class="form-group" style="margin-bottom: 20px;">
+                <div class="fg" style="margin-bottom:4px;">
                     <label>Address Type</label>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
-                        <div class="type-option selected" data-type="home" style="padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.2s; font-weight: 500;">
-                            <i class="fas fa-home"></i> Home
-                        </div>
-                        <div class="type-option" data-type="work" style="padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.2s; font-weight: 500;">
-                            <i class="fas fa-briefcase"></i> Work
-                        </div>
-                        <div class="type-option" data-type="other" style="padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.2s; font-weight: 500;">
-                            <i class="fas fa-map-pin"></i> Other
-                        </div>
+                    <div class="type-grid">
+                        <div class="t-chip sel" data-type="home"><i class="fas fa-home"></i> Home</div>
+                        <div class="t-chip" data-type="work"><i class="fas fa-briefcase"></i> Work</div>
+                        <div class="t-chip" data-type="other"><i class="fas fa-map-pin"></i> Other</div>
                     </div>
                     <input type="hidden" id="addrType" value="home">
                 </div>
-
-                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 24px;">
-                    <input type="checkbox" id="addrDefault" style="width: 18px; height: 18px; cursor: pointer;">
-                    <label for="addrDefault" style="margin: 0; cursor: pointer;">Set as default address</label>
-                </div>
-
-                <div style="display: flex; gap: 12px;">
-                    <button type="button" class="btn-primary" onclick="closeAddressModal()" style="flex: 1; background: white; color: var(--primary-color); border: 2px solid var(--primary-color);">
-                        Cancel
-                    </button>
-                    <button type="submit" class="btn-primary" id="saveAddressBtn" style="flex: 1;">
-                        Save Address
-                    </button>
+                <label class="chk-lbl"><input type="checkbox" id="addrDefault"> Set as default address</label>
+                <div class="modal-actions">
+                    <button type="button" class="btn-cancel" onclick="closeAddressModal()">Cancel</button>
+                    <button type="submit" class="btn-save" id="saveAddressBtn">Save Address</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Scripts -->
+    <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/address.js"></script>
     <script src="js/order.js"></script>
-
+    <script src="js/loading-states.js"></script>
+    <script src="js/error-handler.js"></script>
+    <script src="js/product-normalizer.js"></script>
+    <script type="module" src="js/cart-utils.js"></script>
+    <script src="js/cart.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/filter.js"></script>
+    <script src="js/quick-add.js"></script>
+    <script src="js/search.js"></script>
     <script>
-        // Require login
-        if (!Auth.requireLogin('account.html')) {
-            // Will redirect to login if not logged in
-        }
+        if (!Auth.requireLogin('account.html')) { }
 
-        // Global variables
         let editingAddressId = null;
         const PINCODE_PATTERN = /^\d{6}$/;
 
         function ensureAddressManager() {
-            if (window.AddressManager && typeof window.AddressManager.getAddresses === 'function') {
-                return window.AddressManager;
-            }
+            if (window.AddressManager && typeof window.AddressManager.getAddresses === 'function') return window.AddressManager;
             if (window.AddressManagerClass) {
                 window.AddressManager = new window.AddressManagerClass();
                 return window.AddressManager;
@@ -1079,50 +1482,49 @@
         }
 
         function ensureOrderManager() {
-            if (window.OrderManager && typeof window.OrderManager.getUserOrders === 'function') {
-                return window.OrderManager;
-            }
+            if (window.OrderManager && typeof window.OrderManager.getUserOrders === 'function') return window.OrderManager;
             return null;
         }
 
-        function notifyUser(message, type = 'error') {
+        function notifyUser(msg, type = 'error') {
             if (window.errorHandler) {
                 if (type === 'success' && typeof window.errorHandler.showSuccess === 'function') {
-                    window.errorHandler.showSuccess(message);
+                    window.errorHandler.showSuccess(msg);
                     return;
                 }
                 if (type === 'warning' && typeof window.errorHandler.showWarning === 'function') {
-                    window.errorHandler.showWarning(message);
+                    window.errorHandler.showWarning(msg);
                     return;
                 }
                 if (typeof window.errorHandler.showError === 'function') {
-                    window.errorHandler.showError(message);
+                    window.errorHandler.showError(msg);
                     return;
                 }
             }
-            alert(message);
+            alert(msg);
         }
 
-        function esc(value) {
-            if (window.AMZIRA?.utils?.escapeHtml) return window.AMZIRA.utils.escapeHtml(value);
-            const div = document.createElement('div');
-            div.textContent = value == null ? '' : String(value);
-            return div.innerHTML;
+        function esc(v) {
+            if (window.AMZIRA?.utils?.escapeHtml) return window.AMZIRA.utils.escapeHtml(v);
+            const d = document.createElement('div');
+            d.textContent = v == null ? '' : String(v);
+            return d.innerHTML;
         }
 
-        // Load user data
         const user = Auth.getUser();
         if (user) {
-            const safeName = String(user.name || 'Customer').trim();
-            document.getElementById('welcomeMessage').textContent = `Welcome back, ${safeName.split(' ')[0]}!`;
-            document.getElementById('profileName').textContent = safeName;
+            const name = String(user.name || 'Customer').trim();
+            const firstName = name.split(' ')[0];
+            document.getElementById('welcomeMessage').textContent = `Welcome back, ${firstName}!`;
+            document.getElementById('profileName').textContent = name;
             document.getElementById('profileEmail').textContent = user.email || '-';
             document.getElementById('profilePhone').textContent = user.phone || '-';
+            document.getElementById('heroAvatar').textContent = firstName.charAt(0).toUpperCase();
 
-            const createdAt = user.createdAt || user.created_at || null;
+            const createdAt = user.createdAt || user.created_at;
             if (createdAt) {
                 const date = new Date(createdAt);
-                if (!Number.isNaN(date.getTime())) {
+                if (!isNaN(date.getTime())) {
                     document.getElementById('profileDate').textContent = date.toLocaleDateString('en-IN', {
                         year: 'numeric',
                         month: 'long',
@@ -1132,21 +1534,15 @@
             }
         }
 
-        // Section navigation
-        document.querySelectorAll('.sidebar-menu a').forEach(link => {
-            link.addEventListener('click', function(e) {
-                e.preventDefault();
-                
-                // Remove active class
-                document.querySelectorAll('.sidebar-menu a').forEach(l => l.classList.remove('active'));
-                document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-                
-                // Add active class
+        document.querySelectorAll('#sidebarMenu a').forEach((link) => {
+            link.addEventListener('click', function onNavigate(event) {
+                event.preventDefault();
+                document.querySelectorAll('#sidebarMenu a').forEach((item) => item.classList.remove('active'));
+                document.querySelectorAll('.content-section').forEach((section) => section.classList.remove('active'));
                 this.classList.add('active');
                 const sectionId = this.getAttribute('data-section');
                 document.getElementById(sectionId).classList.add('active');
 
-                // Load data for section
                 if (sectionId === 'orders') {
                     loadOrders();
                 } else if (sectionId === 'addresses') {
@@ -1155,266 +1551,263 @@
             });
         });
 
-        // Load orders
+        function normalizeOrder(order) {
+            return {
+                orderId: order.order_number || order.order_id || order.id,
+                orderStatus: String(order.public_status || order.status || 'placed').toLowerCase(),
+                paymentStatus: String(order.payment_status || 'pending').toLowerCase(),
+                paymentMethod: String(order.payment_method || 'razorpay').toLowerCase(),
+                orderDate: order.created_at,
+                expectedDelivery: order.estimated_delivery,
+                deliveryAddress: order.shipping_address || order.address || {},
+                pricing: {
+                    subtotal: Number(order.subtotal || 0),
+                    shipping: Number(order.shipping_amount || order.shipping_charge || 0),
+                    discount: Number(order.discount || order.discount_amount || 0),
+                    tax: Number(order.tax || order.tax_amount || 0),
+                    total: Number(order.total || order.total_amount || 0)
+                },
+                items: (order.items || []).map((item) => ({
+                    name: item.product_name,
+                    image: item.image,
+                    size: item.size || item.variant_details || '-',
+                    quantity: Number(item.quantity || 0),
+                    price: Number(item.price || item.unit_price || 0),
+                    totalPrice: Number(item.total_price || 0)
+                }))
+            };
+        }
+
         async function loadOrders() {
-            const orderManager = ensureOrderManager();
-            if (!orderManager) {
-                return;
-            }
+            const list = document.getElementById('ordersList');
+            const empty = document.getElementById('ordersEmpty');
+            const loading = document.getElementById('ordersLoading');
+            const errEl = document.getElementById('ordersError');
+            const meta = document.getElementById('ordersMeta');
+            const mgr = ensureOrderManager();
+
+            loading.style.display = 'flex';
+            errEl.style.display = 'none';
+            list.style.display = 'none';
+            empty.style.display = 'none';
+            list.innerHTML = '';
+            meta.textContent = '';
+
             try {
-                await orderManager.refreshOrders();
-            } catch (_) {
-                // no-op, empty state handles this
+                const envelope = await window.AMZIRA.orders.getOrdersPage(1, 10);
+                const rawOrders = Array.isArray(envelope?.data) ? envelope.data : [];
+                const orders = rawOrders.map(normalizeOrder);
+                const pageMeta = envelope?.meta || {};
+                const orderAdapter = mgr || window.OrderManager;
+
+                if (orderAdapter) {
+                    orderAdapter.cache = orders;
+                    orderAdapter.lastError = null;
+                }
+
+                meta.textContent = `${pageMeta.total || orders.length} order${orders.length !== 1 ? 's' : ''}`;
+
+                if (!orders.length) {
+                    empty.style.display = 'block';
+                    return;
+                }
+
+                list.style.display = 'grid';
+                list.innerHTML = orders.map((order) => {
+                    const orderDate = new Date(order.orderDate || new Date().toISOString());
+                    const deliveryDate = order.expectedDelivery ? new Date(order.expectedDelivery) : null;
+                    const statusDisplay = (orderAdapter || window.OrderManager).getStatusDisplay(order.orderStatus);
+                    const safeOrderId = esc(order.orderId);
+                    const firstItem = order.items[0] || {};
+                    const image = esc(firstItem.image || 'images/logo/amzira_logo.png');
+                    const productName = esc(firstItem.name || 'Order items');
+                    const quantity = `${Number(firstItem.quantity || 0)} piece${Number(firstItem.quantity || 0) === 1 ? '' : 's'}${order.items.length > 1 ? ` + ${order.items.length - 1} more` : ''}`;
+
+                    return `<article class="order-card">
+                        <div class="card-stripe"></div>
+                        <div class="card-body">
+                            <div class="card-head">
+                                <div>
+                                    <div class="order-num-row">
+                                        <span class="order-num">${safeOrderId}</span>
+                                        <span class="badge ${order.orderStatus}"><i class="fas fa-${statusDisplay.icon}" style="font-size:8px;"></i> ${statusDisplay.label}</span>
+                                    </div>
+                                    <div class="order-dt">Placed on ${orderDate.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}</div>
+                                </div>
+                                <div class="order-amt">
+                                    <div class="order-amt-total">₹${order.pricing.total.toLocaleString('en-IN')}</div>
+                                    <div class="order-amt-sub">Total Amount</div>
+                                </div>
+                            </div>
+                            <div class="product-row">
+                                <img src="${image}" alt="${productName}" class="prod-img" onerror="this.src='images/logo/amzira_logo.png'">
+                                <div class="prod-meta">
+                                    <h3>${productName}</h3>
+                                    <p>${esc(quantity)}</p>
+                                    <p class="delivery-est"><i class="fas fa-truck"></i>${deliveryDate ? `Expected by ${deliveryDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}` : 'Delivery details will be updated shortly'}</p>
+                                </div>
+                            </div>
+                            <div class="card-foot">
+                                <button class="btn-ghost" onclick="viewOrderDetails('${safeOrderId}')"><i class="fas fa-file-alt"></i> View Details</button>
+                                <button class="btn-solid" onclick="window.location.href='order-tracking.html?order=${encodeURIComponent(order.orderId)}'"><i class="fas fa-map-marker-alt"></i> Track Order</button>
+                            </div>
+                        </div>
+                    </article>`;
+                }).join('');
+            } catch (error) {
+                const orderAdapter = mgr || window.OrderManager;
+                if (orderAdapter) {
+                    orderAdapter.cache = [];
+                    orderAdapter.lastError = error;
+                }
+
+                document.getElementById('ordersErrorMsg').textContent = error?.message || 'Unable to load your orders right now. Please try again.';
+                errEl.style.display = 'flex';
+                meta.textContent = 'Error loading orders';
+            } finally {
+                loading.style.display = 'none';
             }
-            const orders = orderManager.getUserOrders();
-            const ordersList = document.getElementById('ordersList');
-            const ordersEmpty = document.getElementById('ordersEmpty');
-
-            if (!orders || orders.length === 0) {
-                ordersList.style.display = 'none';
-                ordersEmpty.style.display = 'block';
-                return;
-            }
-
-            ordersList.style.display = 'grid';
-            ordersEmpty.style.display = 'none';
-
-            ordersList.innerHTML = orders.map(order => {
-                const orderDate = new Date(order.orderDate);
-                const deliveryDate = new Date(order.expectedDelivery);
-                const statusDisplay = orderManager.getStatusDisplay(order.orderStatus);
-                const paymentDisplay = orderManager.getPaymentMethodDisplay(order.paymentMethod);
-                const safeOrderId = esc(order.orderId);
-
-                // Show first 3 items
-                const itemsToShow = order.items.slice(0, 3);
-                const remainingCount = Math.max(0, order.items.length - 3);
-
-                return `
-                    <div class="order-card" onclick="viewOrderDetails('${safeOrderId}')">
-                        <div class="order-header">
-                            <div class="order-header-left">
-                                <div class="order-id-row">
-                                    <span class="order-id">${safeOrderId}</span>
-                                    <span class="order-status ${order.orderStatus}">
-                                        <i class="fas fa-${statusDisplay.icon}"></i>
-                                        ${statusDisplay.label}
-                                    </span>
-                                </div>
-                                <div class="order-date">
-                                    Placed on ${orderDate.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' })}
-                                </div>
-                            </div>
-                            <div class="order-amount">
-                                <div class="order-total">₹${order.pricing.total.toLocaleString('en-IN')}</div>
-                                <div class="order-payment">
-                                    <i class="fas fa-${paymentDisplay.icon}"></i>
-                                    ${paymentDisplay.label}
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="order-items">
-                            ${itemsToShow.map(item => `
-                                <img src="${item.image}" alt="${item.name}" class="order-item-preview">
-                            `).join('')}
-                            ${remainingCount > 0 ? `<div class="order-item-count">+${remainingCount} more</div>` : ''}
-                        </div>
-
-                        <div class="order-footer">
-                            <div class="delivery-info-small">
-                                <i class="fas fa-truck"></i>
-                                Expected by ${deliveryDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}
-                            </div>
-                            <div class="order-actions" onclick="event.stopPropagation()">
-                                <button class="btn-order-action" onclick="viewOrderDetails('${safeOrderId}')">
-                                    View Details
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }).join('');
         }
 
-        // Load addresses
         async function loadAddresses() {
-            const addressManager = ensureAddressManager();
-            if (!addressManager) {
-                notifyUser('Address manager is unavailable. Please refresh and try again.');
+            const mgr = ensureAddressManager();
+            if (!mgr) {
+                notifyUser('Address manager unavailable.');
                 return;
             }
+
             try {
-                await addressManager.refresh(true);
+                await mgr.refresh(true);
             } catch (_) {
-                notifyUser('Unable to load addresses right now.');
+                notifyUser('Unable to load addresses.');
             }
-            const addresses = addressManager.getAddresses();
-            const addressesList = document.getElementById('addressesList');
-            const addressesEmpty = document.getElementById('addressesEmpty');
 
-            if (!addresses || addresses.length === 0) {
-                addressesList.style.display = 'none';
-                addressesEmpty.style.display = 'block';
+            const addresses = mgr.getAddresses();
+            const list = document.getElementById('addressesList');
+            const empty = document.getElementById('addressesEmpty');
+
+            if (!addresses || !addresses.length) {
+                list.style.display = 'none';
+                empty.style.display = 'block';
                 return;
             }
 
-            addressesList.style.display = 'grid';
-            addressesEmpty.style.display = 'none';
-
-            addressesList.innerHTML = addresses.map(addr => `
-                <div class="saved-address-card ${addr.isDefault ? 'default' : ''}">
-                    ${addr.isDefault ? '<span class="default-badge">Default</span>' : ''}
-                    <div class="address-header">
-                        <span class="address-type">
-                            <i class="fas fa-${addr.addressType === 'home' ? 'home' : addr.addressType === 'work' ? 'briefcase' : 'map-pin'}"></i>
-                            ${esc(addr.addressType)}
-                        </span>
-                        <span class="address-name">${esc(addr.name)}</span>
-                    </div>
-                    <div class="address-details" style="margin: 12px 0;">
-                        ${esc(addressManager.formatAddress(addr))}
-                    </div>
-                    <div class="address-mobile" style="margin-bottom: 16px;">
-                        <i class="fas fa-phone"></i>
-                        ${esc(addr.mobile)}
-                    </div>
-                    <div class="address-actions">
-                        <button class="btn-address-action" onclick="editAddress('${esc(addr.id)}')">
-                            <i class="fas fa-edit"></i> Edit
-                        </button>
-                        <button class="btn-address-action" onclick="deleteAddress('${esc(addr.id)}')">
-                            <i class="fas fa-trash"></i> Delete
-                        </button>
-                    </div>
+            list.style.display = 'grid';
+            empty.style.display = 'none';
+            list.innerHTML = addresses.map((address) => `<div class="addr-card ${address.isDefault ? 'is-default' : ''}">
+                ${address.isDefault ? '<div class="default-ribbon"><i class="fas fa-star" style="font-size:8px;"></i> Default</div>' : ''}
+                <div class="addr-type-pill"><i class="fas fa-${address.addressType === 'home' ? 'home' : address.addressType === 'work' ? 'briefcase' : 'map-pin'}"></i> ${esc(address.addressType)}</div>
+                <div class="addr-name">${esc(address.name)}</div>
+                <div class="addr-text">${esc(mgr.formatAddress(address))}</div>
+                <div class="addr-phone"><i class="fas fa-phone"></i> ${esc(address.mobile)}</div>
+                <div class="addr-actions">
+                    <button class="btn-addr edit" onclick="editAddress('${esc(address.id)}')"><i class="fas fa-pen"></i> Edit</button>
+                    <button class="btn-addr del" onclick="deleteAddress('${esc(address.id)}')"><i class="fas fa-trash"></i> Delete</button>
                 </div>
-            `).join('');
+            </div>`).join('');
         }
 
-        // View order details
         function viewOrderDetails(orderId) {
-            const orderManager = ensureOrderManager();
-            if (!orderManager) {
-                notifyUser('Order manager is unavailable. Please refresh and try again.');
+            const mgr = ensureOrderManager();
+            if (!mgr) {
+                notifyUser('Order manager unavailable.');
                 return;
             }
-            const order = orderManager.getOrderById(orderId);
+
+            const order = mgr.getOrderById(orderId);
             if (!order) return;
 
-            const modal = document.getElementById('orderDetailModal');
-            
-            // Set order ID and status
             document.getElementById('modalOrderId').textContent = order.orderId;
-            const statusDisplay = orderManager.getStatusDisplay(order.orderStatus);
+            document.getElementById('modalOrderTitle').textContent = `Order #${order.orderId}`;
+
+            const statusDisplay = mgr.getStatusDisplay(order.orderStatus);
             const statusEl = document.getElementById('modalOrderStatus');
-            statusEl.className = `order-status ${order.orderStatus}`;
-            statusEl.innerHTML = `<i class="fas fa-${statusDisplay.icon}"></i> ${statusDisplay.label}`;
+            statusEl.className = `badge ${order.orderStatus}`;
+            statusEl.innerHTML = `<i class="fas fa-${statusDisplay.icon}" style="font-size:8px;"></i> ${statusDisplay.label}`;
 
-            // Build timeline
-            const timeline = document.getElementById('orderTimeline');
             const orderDate = new Date(order.orderDate);
-            const deliveryDate = new Date(order.expectedDelivery);
+            const expectedDate = order.expectedDelivery ? new Date(order.expectedDelivery) : null;
+            const steps = [
+                {
+                    label: 'Order Placed',
+                    done: true,
+                    date: orderDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric', year: 'numeric' })
+                },
+                {
+                    label: 'Processing',
+                    done: ['processing', 'shipped', 'out_for_delivery', 'delivered'].includes(order.orderStatus),
+                    date: ['processing', 'shipped', 'out_for_delivery', 'delivered'].includes(order.orderStatus) ? 'In Progress' : 'Pending'
+                },
+                {
+                    label: 'Shipped',
+                    done: ['shipped', 'out_for_delivery', 'delivered'].includes(order.orderStatus),
+                    date: ['shipped', 'out_for_delivery', 'delivered'].includes(order.orderStatus) ? 'Out for Delivery' : 'Not Yet'
+                },
+                {
+                    label: 'Delivered',
+                    done: order.orderStatus === 'delivered',
+                    date: expectedDate ? `Expected by ${expectedDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}` : 'Delivery estimate pending'
+                }
+            ];
 
-            timeline.innerHTML = `
-                <div class="timeline-item active">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">Order Confirmed</div>
-                    <div class="timeline-date">${orderDate.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</div>
+            document.getElementById('orderTimeline').innerHTML = steps.map((step) => `<div class="tl-step ${step.done ? 'done' : ''}"><div class="tl-dot"></div><div class="tl-label">${step.label}</div><div class="tl-date">${step.date}</div></div>`).join('');
+            document.getElementById('modalOrderItems').innerHTML = order.items.map((item) => `<div class="m-item">
+                <img src="${esc(item.image || 'images/logo/amzira_logo.png')}" alt="${esc(item.name)}" onerror="this.src='images/logo/amzira_logo.png'">
+                <div class="m-item-info">
+                    <div class="m-item-name">${esc(item.name)}</div>
+                    <div class="m-item-meta">Size: ${esc(item.size)} &nbsp;|&nbsp; Qty: ${Number(item.quantity || 0)}</div>
+                    <div class="m-item-price">₹${(Number(item.price || 0) * Number(item.quantity || 0)).toLocaleString('en-IN')}</div>
                 </div>
-                <div class="timeline-item ${['processing','shipped','delivered'].includes(order.orderStatus) ? 'active' : ''}">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">Processing</div>
-                    <div class="timeline-date">${['processing','shipped','delivered'].includes(order.orderStatus) ? 'In Progress' : 'Pending'}</div>
-                </div>
-                <div class="timeline-item ${['shipped','delivered'].includes(order.orderStatus) ? 'active' : ''}">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">Shipped</div>
-                    <div class="timeline-date">${['shipped','delivered'].includes(order.orderStatus) ? 'Out for Delivery' : 'Not Yet Shipped'}</div>
-                </div>
-                <div class="timeline-item ${order.orderStatus === 'delivered' ? 'active' : ''}">
-                    <div class="timeline-dot"></div>
-                    <div class="timeline-content">Delivered</div>
-                    <div class="timeline-date">Expected by ${deliveryDate.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' })}</div>
-                </div>
-            `;
+            </div>`).join('');
 
-            // Display items
-            document.getElementById('modalOrderItems').innerHTML = order.items.map(item => `
-                <div class="order-detail-item">
-                    <img src="${esc(item.image)}" alt="${esc(item.name)}" class="detail-item-image">
-                    <div class="detail-item-info">
-                        <div class="detail-item-name">${esc(item.name)}</div>
-                        <div class="detail-item-meta">Size: ${esc(item.size)} | Quantity: ${Number(item.quantity || 0)}</div>
-                        <div class="detail-item-price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
-                    </div>
-                </div>
-            `).join('');
-
-            // Display address
-            const addr = order.deliveryAddress;
+            const deliveryAddress = order.deliveryAddress || {};
             const addressManager = ensureAddressManager();
             const formattedAddress = addressManager
-                ? addressManager.formatAddress(addr)
-                : `${addr.address || ''}${addr.locality ? `, ${addr.locality}` : ''}, ${addr.city || ''}, ${addr.state || ''} - ${addr.pincode || ''}`;
-            document.getElementById('modalDeliveryAddress').innerHTML = `
-                <div class="detail-row">
-                    <div class="detail-label" style="text-align: left;">
-                        <strong>${esc(addr.name)}</strong><br>
-                        ${esc(formattedAddress)}<br>
-                        Phone: ${esc(addr.mobile)}
-                    </div>
-                </div>
-            `;
+                ? addressManager.formatAddress(deliveryAddress)
+                : `${deliveryAddress.address || ''}, ${deliveryAddress.city || ''}, ${deliveryAddress.state || ''} - ${deliveryAddress.pincode || ''}`;
 
-            // Display prices
+            document.getElementById('modalDeliveryAddress').innerHTML = `<p style="font-weight:600;margin-bottom:4px;">${esc(deliveryAddress.name || deliveryAddress.full_name || 'Customer')}</p><p style="font-size:13px;color:rgba(15,15,15,0.55);line-height:1.7;">${esc(formattedAddress)}</p><p style="font-size:13px;margin-top:5px;">📞 ${esc(deliveryAddress.mobile || deliveryAddress.phone || '-')}</p>`;
+
             document.getElementById('modalSubtotal').textContent = `₹${order.pricing.subtotal.toLocaleString('en-IN')}`;
             document.getElementById('modalDiscount').textContent = order.pricing.discount > 0 ? `- ₹${order.pricing.discount.toLocaleString('en-IN')}` : '₹0';
             document.getElementById('modalShipping').textContent = order.pricing.shipping === 0 ? 'FREE' : `₹${order.pricing.shipping.toLocaleString('en-IN')}`;
             document.getElementById('modalTax').textContent = `₹${order.pricing.tax.toLocaleString('en-IN')}`;
             document.getElementById('modalTotal').textContent = `₹${order.pricing.total.toLocaleString('en-IN')}`;
-            
-            const paymentDisplay = orderManager.getPaymentMethodDisplay(order.paymentMethod);
+
+            const paymentDisplay = mgr.getPaymentMethodDisplay(order.paymentMethod);
             document.getElementById('modalPaymentMethod').textContent = paymentDisplay.label;
 
-            // Show modal
-            modal.classList.add('active');
+            document.getElementById('orderDetailModal').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
-        // Close order modal
         function closeOrderModal() {
-            const modal = document.getElementById('orderDetailModal');
-            modal.classList.remove('active');
+            document.getElementById('orderDetailModal').classList.remove('active');
             document.body.style.overflow = '';
         }
 
-        // Address management functions
         function openAddAddressModal() {
             editingAddressId = null;
-            const modal = document.getElementById('addressModal');
             document.getElementById('addressModalTitle').textContent = 'Add New Address';
             document.getElementById('addressForm').reset();
             document.getElementById('addrType').value = 'home';
-            document.querySelectorAll('.type-option').forEach(opt => {
-                opt.classList.toggle('selected', opt.getAttribute('data-type') === 'home');
-            });
-            modal.classList.add('active');
+            document.querySelectorAll('.t-chip').forEach((chip) => chip.classList.toggle('sel', chip.dataset.type === 'home'));
+            document.getElementById('addressModal').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
-        function editAddress(addressId) {
-            editingAddressId = addressId;
-            const addressManager = ensureAddressManager();
-            if (!addressManager) {
-                notifyUser('Address manager is unavailable. Please refresh and try again.');
+        function editAddress(id) {
+            editingAddressId = id;
+            const mgr = ensureAddressManager();
+            if (!mgr) {
+                notifyUser('Address manager unavailable.');
                 return;
             }
-            const address = addressManager.getAddressById(addressId);
+
+            const address = mgr.getAddressById(id);
             if (!address) return;
 
-            const modal = document.getElementById('addressModal');
             document.getElementById('addressModalTitle').textContent = 'Edit Address';
-            
             document.getElementById('addrName').value = address.name;
             document.getElementById('addrMobile').value = address.mobile;
             document.getElementById('addrPincode').value = address.pincode;
@@ -1424,43 +1817,36 @@
             document.getElementById('addrState').value = address.state;
             document.getElementById('addrType').value = address.addressType;
             document.getElementById('addrDefault').checked = address.isDefault;
-
-            document.querySelectorAll('.type-option').forEach(opt => {
-                opt.classList.toggle('selected', opt.getAttribute('data-type') === address.addressType);
-            });
-
-            modal.classList.add('active');
+            document.querySelectorAll('.t-chip').forEach((chip) => chip.classList.toggle('sel', chip.dataset.type === address.addressType));
+            document.getElementById('addressModal').classList.add('active');
             document.body.style.overflow = 'hidden';
         }
 
-        async function deleteAddress(addressId) {
-            if (confirm('Are you sure you want to delete this address?')) {
-                const addressManager = ensureAddressManager();
-                if (!addressManager) {
-                    notifyUser('Address manager is unavailable. Please refresh and try again.');
-                    return;
-                }
-                const result = await addressManager.deleteAddress(addressId);
-                if (result.success) {
-                    await loadAddresses();
-                } else if (result.message) {
-                    notifyUser(result.message);
-                }
+        async function deleteAddress(id) {
+            if (!confirm('Delete this address?')) return;
+            const mgr = ensureAddressManager();
+            if (!mgr) {
+                notifyUser('Address manager unavailable.');
+                return;
+            }
+
+            const result = await mgr.deleteAddress(id);
+            if (result.success) {
+                await loadAddresses();
+            } else {
+                notifyUser(result.message || 'Failed to delete.');
             }
         }
 
         function closeAddressModal() {
-            const modal = document.getElementById('addressModal');
-            modal.classList.remove('active');
+            document.getElementById('addressModal').classList.remove('active');
             document.body.style.overflow = '';
             editingAddressId = null;
         }
 
-        // Address form submission
-        document.getElementById('addressForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-
-            const addressData = {
+        document.getElementById('addressForm').addEventListener('submit', async function onSubmit(event) {
+            event.preventDefault();
+            const data = {
                 name: document.getElementById('addrName').value.trim(),
                 mobile: document.getElementById('addrMobile').value.trim(),
                 pincode: document.getElementById('addrPincode').value.trim(),
@@ -1472,45 +1858,34 @@
                 isDefault: document.getElementById('addrDefault').checked
             };
 
-            const saveBtn = document.getElementById('saveAddressBtn');
-            const hasRequiredFields =
-                addressData.name &&
-                addressData.mobile &&
-                addressData.pincode &&
-                addressData.city &&
-                addressData.address &&
-                addressData.state;
-
-            if (!hasRequiredFields) {
-                notifyUser('Please fill all required address fields');
+            if (!data.name || !data.mobile || !data.pincode || !data.city || !data.address || !data.state) {
+                notifyUser('Please fill all required fields');
                 return;
             }
 
-            if (!Auth.validatePhone(addressData.mobile)) {
-                notifyUser('Please enter a valid 10-digit mobile number');
+            if (!Auth.validatePhone(data.mobile)) {
+                notifyUser('Enter a valid 10-digit mobile number');
                 return;
             }
 
-            if (!PINCODE_PATTERN.test(addressData.pincode)) {
-                notifyUser('Please enter a valid 6-digit pincode');
+            if (!PINCODE_PATTERN.test(data.pincode)) {
+                notifyUser('Enter a valid 6-digit pincode');
                 return;
             }
 
-            const addressManager = ensureAddressManager();
-            if (!addressManager) {
-                notifyUser('Address manager is unavailable. Please refresh and try again.');
+            const mgr = ensureAddressManager();
+            if (!mgr) {
+                notifyUser('Address manager unavailable.');
                 return;
             }
 
-            saveBtn.disabled = true;
-            saveBtn.textContent = 'Saving...';
+            const button = document.getElementById('saveAddressBtn');
+            button.disabled = true;
+            button.textContent = 'Saving...';
 
-            let result;
-            if (editingAddressId) {
-                result = await addressManager.updateAddress(editingAddressId, addressData);
-            } else {
-                result = await addressManager.addAddress(addressData);
-            }
+            const result = editingAddressId
+                ? await mgr.updateAddress(editingAddressId, data)
+                : await mgr.addAddress(data);
 
             if (result.success) {
                 closeAddressModal();
@@ -1520,46 +1895,34 @@
                 notifyUser(result.message || 'Failed to save address');
             }
 
-            saveBtn.disabled = false;
-            saveBtn.textContent = 'Save Address';
+            button.disabled = false;
+            button.textContent = 'Save Address';
         });
 
-        // Address type selection
-        document.querySelectorAll('.type-option').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.type-option').forEach(opt => {
-                    opt.classList.remove('selected');
-                    opt.style.borderColor = 'var(--border-color)';
-                    opt.style.background = 'white';
-                    opt.style.color = 'var(--text-dark)';
-                });
-                this.classList.add('selected');
-                this.style.borderColor = 'var(--primary-color)';
-                this.style.background = 'var(--primary-color)';
-                this.style.color = 'white';
-                document.getElementById('addrType').value = this.getAttribute('data-type');
+        document.querySelectorAll('.t-chip').forEach((chip) => {
+            chip.addEventListener('click', function onChipClick() {
+                document.querySelectorAll('.t-chip').forEach((item) => item.classList.remove('sel'));
+                this.classList.add('sel');
+                document.getElementById('addrType').value = this.dataset.type;
             });
         });
 
-        // Mobile/Pincode validation
-        document.getElementById('addrMobile').addEventListener('input', function() {
+        document.getElementById('addrMobile').addEventListener('input', function onMobileInput() {
             this.value = this.value.replace(/\D/g, '').substring(0, 10);
         });
 
-        document.getElementById('addrPincode').addEventListener('input', function() {
+        document.getElementById('addrPincode').addEventListener('input', function onPincodeInput() {
             this.value = this.value.replace(/\D/g, '').substring(0, 6);
         });
 
-        // Close modals on outside click
-        document.getElementById('orderDetailModal').addEventListener('click', function(e) {
-            if (e.target === this) closeOrderModal();
+        document.getElementById('orderDetailModal').addEventListener('click', function onOverlayClick(event) {
+            if (event.target === this) closeOrderModal();
         });
 
-        document.getElementById('addressModal').addEventListener('click', function(e) {
-            if (e.target === this) closeAddressModal();
+        document.getElementById('addressModal').addEventListener('click', function onOverlayClick(event) {
+            if (event.target === this) closeAddressModal();
         });
 
-        // Initialize - Load orders on page load
         loadOrders();
     </script>
 </body>

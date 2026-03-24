@@ -1432,14 +1432,12 @@
         setPayButtonState(false, 'Pay Securely');
     }
 
-    async function openRazorpayForOrder(orderData) {
+    async function openRazorpayForOrder(paymentOrderData) {
         const payButton = document.getElementById('payButton');
         const user = window.Auth?.getUser ? window.Auth.getUser() : null;
-        const orderId = orderData?.order_id || orderData?.id;
-        const orderRef = orderData?.order_number || orderId;
-        if (!orderId) throw new Error('Order creation failed: missing order id');
-
-        const paymentOrder = await window.AMZIRA.payments.createPaymentOrder(orderId);
+        const paymentOrder = paymentOrderData;
+        const orderRef = paymentOrder?.razorpay_order_id || 'Pending Payment';
+        if (!paymentOrder?.razorpay_order_id) throw new Error('Payment order creation failed');
         if (typeof window.Razorpay !== 'function') {
             throw new Error('Razorpay SDK is not loaded');
         }
@@ -1459,12 +1457,20 @@
             handler: async function(response) {
                 try {
                     setPayButtonState(true, 'Confirming payment...');
-                    await window.AMZIRA.payments.verifyPayment(
-                        response.razorpay_order_id,
-                        response.razorpay_payment_id,
-                        response.razorpay_signature
-                    );
-                    await refreshPendingOrderStatus(false);
+                    const result = await window.AMZIRA.commerce.verifyPayment({
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_signature: response.razorpay_signature,
+                        user_id: Number(user?.id || 0) || undefined,
+                        address_id: Number(paymentOrder?.addressId || 0) || undefined
+                    });
+                    const ref = result?.order_number || result?.order_id || response.razorpay_order_id;
+                    sessionStorage.setItem('last_order_number', ref);
+                    sessionStorage.setItem('order_number', ref);
+                    setPendingOrder(null);
+                    sessionStorage.removeItem('deliveryAddress');
+                    sessionStorage.removeItem('checkout_idempotency_key');
+                    window.location.href = `order-success.html?order=${encodeURIComponent(ref)}`;
                 } catch (error) {
                     showWarning(apiMessage(error, 'Payment confirmation is pending. Please retry safely.'));
                     resetPayButton();
@@ -1496,56 +1502,26 @@
 
         try {
             validatePaymentForm();
-            await refreshPendingOrderStatus(false);
-
-            const existingPending = getPendingOrder();
-            if (existingPending?.id && selectedPaymentMethod === 'cod') {
-                showWarning('A pending online payment order already exists. Complete that payment or wait for expiry before placing a COD order.');
-                resetPayButton();
-                return;
-            }
-
-            if (existingPending?.id && selectedPaymentMethod !== 'cod') {
-                if (!(await ensureStockAvailableForPayment())) {
-                    resetPayButton();
-                    return;
-                }
-                await openRazorpayForOrder({ id: existingPending.id, order_number: existingPending.ref });
-                return;
-            }
+            setPendingOrder(null);
 
             const address = checkoutContext.deliveryAddress;
             if (!address) throw new Error('No delivery address found. Please return to checkout.');
 
             const addressId = await resolveBackendAddressId(address);
             if (!addressId) throw new Error('Unable to resolve delivery address');
-
-            const paymentMethod = mapPaymentMethod(selectedPaymentMethod);
-            const createdOrder = await window.AMZIRA.orders.createOrder({
-                shipping_address_id: addressId,
-                billing_address_id: addressId,
-                payment_method: paymentMethod
-            });
-
-            setPendingOrder(createdOrder);
-            startExpiryCountdown(createdOrder?.expires_at || createdOrder?.expiresAt);
-
-            if (paymentMethod === 'cod') {
-                const ref = createdOrder?.order_number || createdOrder?.order_id || createdOrder?.id;
-                setPendingOrder(null);
-                sessionStorage.removeItem('deliveryAddress');
-                // Soft-launch idempotency_key fix
-                sessionStorage.removeItem('checkout_idempotency_key');
-                window.location.href = `order-success.html?order=${encodeURIComponent(ref)}`;
-                return;
-            }
+            const user = window.Auth?.getUser ? window.Auth.getUser() : null;
 
             if (!(await ensureStockAvailableForPayment())) {
                 resetPayButton();
                 return;
             }
-            showSuccess('Order created. Complete payment to confirm stock.');
-            await openRazorpayForOrder(createdOrder);
+            const paymentOrder = await window.AMZIRA.commerce.createPaymentOrder({
+                user_id: Number(user?.id || checkoutContext.cart?.user_id || 0),
+                address_id: addressId
+            });
+            paymentOrder.addressId = addressId;
+            showSuccess('Payment session created. Complete payment to confirm your order.');
+            await openRazorpayForOrder(paymentOrder);
         } catch (error) {
             if (error?.status === 429) {
                 lockPayButton(RATE_LIMIT_LOCK_MS, 'Too many requests. Please slow down.');

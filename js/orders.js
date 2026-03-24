@@ -281,31 +281,34 @@ function bindCheckoutButtons() {
 // Minimal read-only order facade for pages that still reference OrderManager.
 const OrderManager = {
     cache: [],
+    lastError: null,
 
     normalizeOrder(order) {
         if (!order || typeof order !== 'object') return null;
 
         const items = order.items || order.order_items || [];
         const subtotal = Number(order?.subtotal || 0);
-        const shipping = Number(order?.shipping_amount || 0);
-        const discount = Number(order?.discount || 0);
-        const tax = Number(order?.tax || 0);
-        const total = Number(order?.total || order?.grand_total || 0);
+        const shipping = Number(order?.shipping_amount || order?.shipping_charge || 0);
+        const discount = Number(order?.discount || order?.discount_amount || 0);
+        const tax = Number(order?.tax || order?.tax_amount || 0);
+        const total = Number(order?.total || order?.grand_total || order?.total_amount || 0);
 
         return {
             orderId: order.order_number || order.order_id || order.id,
-            orderStatus: String(order.status || order.order_status || 'processing').toLowerCase(),
+            orderStatus: String(order.status || order.order_status || 'placed').toLowerCase(),
+            paymentStatus: String(order.payment_status || 'pending').toLowerCase(),
             paymentMethod: String(order.payment_method || 'razorpay').toLowerCase(),
             orderDate: order.created_at || order.order_date || new Date().toISOString(),
-            expectedDelivery: order.estimated_delivery || order.expected_delivery || new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)).toISOString(),
-            deliveryAddress: order.shipping_address || order.deliveryAddress || {},
+            expectedDelivery: order.estimated_delivery || order.estimated_delivery_date || order.expected_delivery || new Date(Date.now() + (7 * 24 * 60 * 60 * 1000)).toISOString(),
+            deliveryAddress: order.shipping_address || order.address || order.deliveryAddress || {},
             pricing: { subtotal, shipping, discount, tax, total },
             items: items.map((item) => ({
                 name: item.product_name || item.name || item?.product?.name || 'Product',
                 image: item.image || item?.product?.image || '',
-                size: item.size || item?.variant?.size || '-',
+                size: item.size || item?.variant?.size || item.variant_details || '-',
                 quantity: Number(item.quantity || 0),
-                price: Number(item.unit_price || item.price || 0)
+                price: Number(item.unit_price || item.price || 0),
+                totalPrice: Number(item.total_price || 0)
             }))
         };
     },
@@ -314,12 +317,16 @@ const OrderManager = {
         try {
             await ensureOrdersApiLayer();
             const payload = await window.AMZIRA.orders.getOrders();
-            const source = payload?.orders || payload?.results || (Array.isArray(payload) ? payload : []);
+            const source = Array.isArray(payload)
+                ? payload
+                : (Array.isArray(payload?.orders) ? payload.orders : []);
             this.cache = source
                 .map((order) => this.normalizeOrder(order))
                 .filter(Boolean);
-        } catch (_) {
+            this.lastError = null;
+        } catch (error) {
             this.cache = [];
+            this.lastError = error;
         }
 
         return this.cache;
@@ -333,12 +340,19 @@ const OrderManager = {
         return this.cache;
     },
 
+    getLastError() {
+        return this.lastError;
+    },
+
     getOrderById(orderId) {
         return this.cache.find((order) => String(order.orderId || order.id || order.order_number) === String(orderId));
     },
 
     getStatusDisplay(status) {
         const value = String(status || '').toLowerCase();
+        if (value === 'pending' || value === 'placed') return { label: 'Placed', color: '#6366F1', icon: 'receipt' };
+        if (value === 'confirmed') return { label: 'Confirmed', color: '#0F766E', icon: 'check-circle' };
+        if (value === 'processing' || value === 'out_for_delivery') return { label: 'Out for Delivery', color: '#F59E0B', icon: 'truck-fast' };
         if (value === 'delivered') return { label: 'Delivered', color: '#10B981', icon: 'check-circle' };
         if (value === 'cancelled') return { label: 'Cancelled', color: '#EF4444', icon: 'times-circle' };
         if (value === 'shipped') return { label: 'Shipped', color: '#3B82F6', icon: 'truck' };

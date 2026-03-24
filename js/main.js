@@ -355,6 +355,8 @@ function generateStars(rating) {
 function loadProducts(containerId, products) {
     const container = document.getElementById(containerId);
     if (!container) return;
+
+    registerProductsForCart(products);
     
     container.innerHTML = products.map(product => `
         <div class="swiper-slide">
@@ -364,6 +366,18 @@ function loadProducts(containerId, products) {
     
     // Attach event listeners
     attachProductEventListeners(container);
+}
+
+function registerProductsForCart(products) {
+    if (!Array.isArray(products) || products.length === 0) return;
+    if (!window.__AMZIRA_PRODUCTS_BY_ID__) {
+        window.__AMZIRA_PRODUCTS_BY_ID__ = {};
+    }
+    products.forEach((product) => {
+        if (product && product.id != null) {
+            window.__AMZIRA_PRODUCTS_BY_ID__[String(product.id)] = product;
+        }
+    });
 }
 
 // Safe fetch wrapper with better error handling
@@ -386,8 +400,9 @@ async function safeFetchProducts() {
             throw new Error('API client is unavailable');
         }
 
-        const data = await window.AMZIRA.products.getProducts({ limit: 1000 });
+        const data = await window.AMZIRA.products.getProducts({ limit: 20 });
         const products = data?.products || data?.results || (Array.isArray(data) ? data : []);
+        registerProductsForCart(products);
 
         sessionStorage.setItem(cacheKey, JSON.stringify({
             timestamp: Date.now(),
@@ -433,9 +448,10 @@ async function loadHomepageMerchandising() {
         const categoryPayloads = await Promise.all(
             HOMEPAGE_CATEGORIES.map(async (category) => {
                 try {
-                    const response = await window.AMZIRA.products.getProducts({ category, limit: 24 });
+                    const response = await window.AMZIRA.products.getProducts({ category, limit: 8 });
                     const items = response?.products || response?.results || [];
                     const valid = Array.isArray(items) ? items.filter(isValidCatalogProduct) : [];
+                    registerProductsForCart(valid);
                     return { category, reachable: true, items: Array.isArray(items) ? items : [], valid };
                 } catch (error) {
                     return { category, reachable: false, items: [], valid: [], error };
@@ -600,7 +616,8 @@ function setActionButtonLoading(button, isLoading, loadingText = null) {
 // Add to Cart Function
 async function addToCart(productId, variantIdRaw = null) {
     const products = Array.isArray(window.allProducts) ? window.allProducts : [];
-    const product = products.find((p) => String(p.id) === String(productId));
+    const product = products.find((p) => String(p.id) === String(productId))
+        || (window.__AMZIRA_PRODUCTS_BY_ID__ ? window.__AMZIRA_PRODUCTS_BY_ID__[String(productId)] : null);
     if (!product) return;
     const variantId = Number(variantIdRaw || getDefaultVariantId(product));
     if (!Number.isInteger(variantId) || variantId <= 0) {
@@ -755,6 +772,7 @@ class AppInitializer {
 
         // Load API products for global actions (add-to-cart, wishlist, quick-view).
         const products = await safeFetchProducts();
+        registerProductsForCart(products);
 
         // Store globally for other scripts
         window.allProducts = products.length > 0 ? products : getStaticNewArrivalsProducts();

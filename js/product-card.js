@@ -13,6 +13,52 @@
         return Number.isFinite(Number(fallback)) ? Number(fallback) : 0;
     }
 
+    function splitUrlParts(url) {
+        let base = String(url || '');
+        let hash = '';
+        let query = '';
+        const hashIndex = base.indexOf('#');
+        if (hashIndex >= 0) {
+            hash = base.slice(hashIndex);
+            base = base.slice(0, hashIndex);
+        }
+        const queryIndex = base.indexOf('?');
+        if (queryIndex >= 0) {
+            query = base.slice(queryIndex);
+            base = base.slice(0, queryIndex);
+        }
+        return { base, query, hash };
+    }
+
+    function buildWebpVariant(url, suffix) {
+        const parts = splitUrlParts(url);
+        if (!/\\.(jpe?g|png)$/i.test(parts.base)) return null;
+        const variant = parts.base.replace(/\\.(jpe?g|png)$/i, `-${suffix}.webp`);
+        return `${variant}${parts.query}${parts.hash}`;
+    }
+
+    function createResponsivePicture(imageUrl, altText) {
+        const webp400 = buildWebpVariant(imageUrl, '400');
+        const webp800 = buildWebpVariant(imageUrl, '800');
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.alt = altText;
+        img.loading = 'lazy';
+        img.decoding = 'async';
+        img.width = 600;
+        img.height = 800;
+
+        if (!webp400 || !webp800) return img;
+
+        const picture = document.createElement('picture');
+        const source = document.createElement('source');
+        source.type = 'image/webp';
+        source.srcset = `${webp400} 400w, ${webp800} 800w`;
+        picture.appendChild(source);
+        picture.appendChild(img);
+        return picture;
+    }
+
     function getProductId(product) {
         return toText(product?.slug || product?.handle || product?.url_slug || product?.seo_slug || product?.permalink);
     }
@@ -158,13 +204,13 @@
         productLink.href = buildProductDetailUrl(product);
         productLink.setAttribute('aria-label', `${name} details`);
 
-        const image = document.createElement('img');
-        image.src = imageUrl;
-        image.alt = name;
-        image.loading = 'lazy';
-        image.decoding = 'async';
+        const picture = createResponsivePicture(imageUrl, name);
+        const image = picture.tagName === 'IMG' ? picture : picture.querySelector('img');
+        if (image) {
+            image.decoding = 'async';
+        }
 
-        productLink.appendChild(image);
+        productLink.appendChild(picture);
         imageWrap.appendChild(productLink);
         imageWrap.appendChild(createStockBadge(stockQuantity));
 

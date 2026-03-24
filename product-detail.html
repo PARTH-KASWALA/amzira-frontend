@@ -20,562 +20,14 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/product.css">
+    <link rel="stylesheet" href="css/pdp.css">
     <link rel="stylesheet" href="css/footer.css">
     <link rel="stylesheet" href="css/responsive.css">
-    
-    <style>
-        /* Product Detail Page Specific Styles */
-        .pdp-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 40px 20px 80px;
-        }
-
-        .breadcrumb-section {
-            background: var(--bg-light);
-            padding: 16px 0;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 40px;
-        }
-
-        .breadcrumb {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-size: 14px;
-            flex-wrap: wrap;
-        }
-
-        .breadcrumb a {
-            color: var(--text-gray);
-            transition: color 0.2s;
-        }
-
-        .breadcrumb a:hover {
-            color: var(--primary-color);
-        }
-
-        .breadcrumb i {
-            font-size: 10px;
-            color: var(--text-light);
-        }
-
-        .breadcrumb span {
-            color: var(--text-dark);
-            font-weight: 600;
-        }
-
-        .pdp-grid {
-            display: grid;
-            /* PDP layout alignment (Manyavar-style) */
-            grid-template-columns: minmax(520px, 560px) minmax(360px, 1fr);
-            gap: 56px;
-            align-items: start;
-            margin-bottom: 60px;
-        }
-
-        /* Image Gallery */
-        .pdp-gallery {
-            display: flex;
-            /* PDP layout alignment (Manyavar-style) */
-            gap: 16px;
-            max-width: 560px;
-            align-items: flex-start;
-        }
-
-        .gallery-thumbnails {
-            width: 80px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .thumb-item {
-            width: 80px;
-            height: 100px;
-            border: 2px solid transparent;
-            border-radius: 6px;
-            overflow: hidden;
-            cursor: pointer;
-            transition: all 0.2s;
-            opacity: 0.6;
-        }
-
-        .thumb-item:hover,
-        .thumb-item.active {
-            border-color: var(--primary-color);
-            opacity: 1;
-        }
-
-        .thumb-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .gallery-main-image {
-            /* PDP layout alignment (Manyavar-style) */
-            flex: 1;
-            max-width: 480px;
-            position: relative;
-            background: var(--bg-light);
-            border-radius: 8px;
-            overflow: hidden;
-            aspect-ratio: 3/4;
-        }
-
-        .gallery-main-image img {
-            /* PDP layout alignment (Manyavar-style) */
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-
-        .image-badge {
-            position: absolute;
-            top: 16px;
-            left: 16px;
-            background: var(--primary-color);
-            color: white;
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            z-index: 2;
-        }
-
-        .image-badge.new {
-            background: var(--accent-color);
-        }
-
-        .image-badge.sale {
-            background: var(--error);
-        }
-
-        /* Product Info */
-        .pdp-info {
-            position: sticky;
-            top: 100px;
-        }
-
-        .product-category-tag {
-            font-size: 12px;
-            color: var(--text-light);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 8px;
-        }
-
-        .product-title-pdp {
-            font-family: 'Playfair Display', serif;
-            font-size: 36px;
-            font-weight: 500;
-            margin-bottom: 16px;
-            color: var(--text-dark);
-            line-height: 1.3;
-        }
-
-        .product-rating-pdp {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-            padding-bottom: 24px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .stars-pdp {
-            color: var(--accent-color);
-            font-size: 16px;
-        }
-
-        .rating-text {
-            font-size: 14px;
-            color: var(--text-gray);
-        }
-
-        .product-price-pdp {
-            margin-bottom: 32px;
-        }
-
-        .price-row {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 8px;
-        }
-
-        .price-current-pdp {
-            font-size: 36px;
-            font-weight: 700;
-            color: var(--accent-color);
-        }
-
-        .price-original-pdp {
-            font-size: 24px;
-            color: var(--text-light);
-            text-decoration: line-through;
-        }
-
-        .price-discount-pdp {
-            font-size: 16px;
-            color: var(--success);
-            font-weight: 600;
-        }
-
-        .price-note {
-            font-size: 13px;
-            color: var(--text-light);
-        }
-
-        /* Color Selection */
-        .pdp-section {
-            margin-bottom: 32px;
-        }
-
-        .pdp-section-title {
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 16px;
-            color: var(--text-dark);
-        }
-
-        .color-selector {
-            display: flex;
-            gap: 12px;
-        }
-
-        .color-swatch {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            border: 2px solid var(--border-color);
-            cursor: pointer;
-            transition: all 0.2s;
-            position: relative;
-        }
-
-        .color-swatch:hover {
-            transform: scale(1.1);
-        }
-
-        .color-swatch.selected {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 2px white, 0 0 0 4px var(--primary-color);
-        }
-
-        .color-swatch.selected::after {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-weight: bold;
-            font-size: 18px;
-            text-shadow: 0 0 3px rgba(0,0,0,0.5);
-        }
-
-        /* Size Selection */
-        .size-selector {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-
-        .size-option {
-            min-width: 60px;
-            height: 50px;
-            padding: 0 16px;
-            border: 2px solid var(--border-color);
-            background: white;
-            border-radius: 4px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .size-option:hover {
-            border-color: var(--primary-color);
-        }
-
-        .size-option.selected {
-            background: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        .size-option.out-of-stock {
-            opacity: 0.3;
-            cursor: not-allowed;
-            position: relative;
-        }
-
-        .size-option.out-of-stock::after {
-            content: '';
-            position: absolute;
-            width: 100%;
-            height: 2px;
-            background: var(--error);
-            transform: rotate(-45deg);
-        }
-
-        .size-guide-link {
-            font-size: 13px;
-            color: var(--primary-color);
-            text-decoration: underline;
-            margin-top: 12px;
-            display: inline-block;
-        }
-
-        /* Quantity Selector */
-        .quantity-selector {
-            display: flex;
-            align-items: center;
-            border: 2px solid var(--border-color);
-            border-radius: 4px;
-            width: fit-content;
-        }
-
-        .qty-btn {
-            width: 44px;
-            height: 44px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            cursor: pointer;
-            transition: background 0.2s;
-            color: var(--text-dark);
-        }
-
-        .qty-btn:hover {
-            background: var(--bg-light);
-        }
-
-        .qty-btn:disabled {
-            opacity: 0.3;
-            cursor: not-allowed;
-        }
-
-        .qty-input {
-            width: 60px;
-            height: 44px;
-            border: none;
-            text-align: center;
-            font-weight: 600;
-            font-size: 16px;
-        }
-
-        /* Action Buttons */
-        .pdp-actions {
-            display: flex;
-            gap: 16px;
-            margin-top: 32px;
-            margin-bottom: 32px;
-        }
-
-        .pdp-actions .btn {
-            flex: 1;
-            padding: 16px;
-            font-size: 16px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .wishlist-btn-pdp {
-            flex: 0 0 56px;
-            width: 56px;
-            height: 56px;
-            padding: 0;
-        }
-
-        .wishlist-btn-pdp i {
-            font-size: 22px;
-        }
-
-        /* Product Features */
-        .product-features {
-            border-top: 1px solid var(--border-color);
-            padding-top: 24px;
-        }
-
-        .feature-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-            font-size: 14px;
-        }
-
-        .feature-item i {
-            color: var(--success);
-            font-size: 18px;
-        }
-
-        /* Product Tabs */
-        .product-tabs {
-            margin-top: 60px;
-            background: white;
-            border-radius: 8px;
-            padding: 32px;
-        }
-
-        .tab-nav {
-            display: flex;
-            gap: 40px;
-            border-bottom: 2px solid var(--border-color);
-            margin-bottom: 32px;
-        }
-
-        .tab-btn {
-            padding: 16px 0;
-            font-size: 16px;
-            font-weight: 600;
-            color: var(--text-gray);
-            border-bottom: 2px solid transparent;
-            margin-bottom: -2px;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .tab-btn:hover {
-            color: var(--primary-color);
-        }
-
-        .tab-btn.active {
-            color: var(--primary-color);
-            border-bottom-color: var(--primary-color);
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .tab-content h3 {
-            margin-bottom: 16px;
-            font-size: 18px;
-        }
-
-        .tab-content ul {
-            list-style: disc;
-            padding-left: 24px;
-        }
-
-        .tab-content li {
-            margin-bottom: 12px;
-            line-height: 1.6;
-        }
-
-        /* Related Products */
-        .related-products {
-            margin-top: 80px;
-        }
-
-        .related-products h2 {
-            text-align: center;
-            margin-bottom: 40px;
-        }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .pdp-grid {
-                grid-template-columns: 1fr;
-                gap: 40px;
-            }
-
-            .pdp-info {
-                position: static;
-            }
-        }
-
-        @media (max-width: 768px) {
-            .product-title-pdp {
-                font-size: 24px;
-            }
-
-            .price-current-pdp {
-                font-size: 28px;
-            }
-
-            .pdp-gallery {
-                flex-direction: column-reverse;
-            }
-
-            .gallery-thumbnails {
-                flex-direction: row;
-                width: 100%;
-                overflow-x: auto;
-            }
-
-            .thumb-item {
-                flex-shrink: 0;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .pdp-actions {
-                flex-direction: column;
-            }
-
-            .wishlist-btn-pdp {
-                width: 100%;
-                flex: 1;
-            }
-
-            .size-selector {
-                justify-content: space-between;
-            }
-
-            .size-option {
-                flex: 1;
-            }
-        }
-    </style>
     <!-- Fallback styles for JavaScript-disabled browsers -->
     <noscript>
-        <style>
-            .mobile-menu {
-                display: block !important;
-                position: relative !important;
-                transform: none !important;
-                box-shadow: none;
-                border-bottom: 1px solid var(--border-color);
-            }
-
-            .mobile-menu-toggle {
-                display: none !important;
-            }
-
-            .nav-desktop {
-                display: none !important;
-            }
-
-            @media (min-width: 1024px) {
-                .mobile-menu {
-                    display: none !important;
-                }
-                .nav-desktop {
-                    display: flex !important;
-                }
-            }
-        </style>
     </noscript>
 </head>
-<body>
+<body class="pdp-page">
     <!-- Top Banner -->
     <div class="top-banner">
         <div class="marquee">
@@ -661,76 +113,75 @@
 
     <!-- Product Detail -->
     <div class="pdp-container">
-        <div class="pdp-grid">
+        <div class="pdp-wrapper">
             <!-- Image Gallery -->
-            <div class="pdp-gallery">
-                <div class="gallery-thumbnails" id="thumbnails">
-                    <!-- Thumbnails loaded dynamically -->
+            <section class="pdp-left" id="image-gallery">
+                <span class="image-badge" id="productBadge" style="display: none;"></span>
+                <div class="thumbnail-column" id="thumbnailColumn" aria-label="Product thumbnails"></div>
+                <div class="main-image-container" id="mainImageContainer">
+                    <div class="main-image-stack" id="mainImageStack" aria-label="Product images"></div>
                 </div>
-                <div class="gallery-main-image">
-                    <span class="image-badge" id="productBadge" style="display: none;"></span>
-                    <img id="mainImage" src="https://via.placeholder.com/800x1000" alt="Product Image">
-                </div>
-            </div>
+            </section>
 
             <!-- Product Info -->
-            <div class="pdp-info">
+            <section class="pdp-right" id="product-info">
                 <p class="product-category-tag" id="productCategory">KURTA JACKET</p>
                 <h1 class="product-title-pdp" id="productTitle">Loading Product...</h1>
+                <div class="product-meta-row">
+                    <span class="product-sku" id="productSku">SKU: --</span>
+                    <span class="stock-pill info" id="stockPill">Checking stock...</span>
+                </div>
                 
                 <!-- Product Share -->
                 <div class="product-share">
                     <span class="share-label">Share:</span>
-                    <button class="share-btn" onclick="shareOnWhatsApp()" aria-label="Share on WhatsApp">
+                    <button class="share-btn" data-share="whatsapp" aria-label="Share on WhatsApp">
                         <i class="fab fa-whatsapp"></i>
                     </button>
-                    <button class="share-btn" onclick="shareOnFacebook()" aria-label="Share on Facebook">
+                    <button class="share-btn" data-share="facebook" aria-label="Share on Facebook">
                         <i class="fab fa-facebook-f"></i>
                     </button>
-                    <button class="share-btn" onclick="shareOnTwitter()" aria-label="Share on Twitter">
+                    <button class="share-btn" data-share="twitter" aria-label="Share on Twitter">
                         <i class="fab fa-twitter"></i>
                     </button>
-                    <button class="share-btn" onclick="copyProductLink()" aria-label="Copy link">
+                    <button class="share-btn" data-share="copy" aria-label="Copy link">
                         <i class="fas fa-link"></i>
                     </button>
                 </div>
                 
-                <div class="product-rating-pdp">
-                    <span class="stars-pdp" id="productStars">
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star"></i>
-                        <i class="fas fa-star-half-alt"></i>
-                    </span>
-                    <span class="rating-text" id="ratingText">4.5 (234 reviews)</span>
-                </div>
+                <p class="viewed-count" id="viewedCountLine">
+                    <span class="viewed-count-number" id="viewedCountNumber">0</span>
+                </p>
 
-                <div class="product-price-pdp">
+                <section class="product-price-pdp" id="price-section">
                     <div class="price-row">
-                        <span class="price-current-pdp" id="priceDisplay">₹6,299</span>
+                        <div class="price-meta">
+                            <span class="price-current-pdp" id="priceDisplay">₹6,299</span>
+                            <span class="price-mrp">MRP (Exclusive of all taxes)</span>
+                        </div>
                         <span class="price-original-pdp" id="originalPrice">₹8,999</span>
                         <span class="price-discount-pdp" id="discountPercent">30% OFF</span>
                     </div>
-                    <p class="price-note">Inclusive of all taxes</p>
-                </div>
+                </section>
 
                 <!-- Color Selection -->
                 <div class="pdp-section" id="colorSection" style="display: none;">
-                    <h3 class="pdp-section-title">Select Color: <span id="selectedColorName">Burgundy</span></h3>
+                    <h3 class="pdp-section-title">Select Color: <span id="selectedColorName">Select</span></h3>
                     <div class="color-selector" id="colorSelector">
                         <!-- Colors loaded dynamically -->
                     </div>
                 </div>
 
                 <!-- Size Selection -->
-                <div class="pdp-section">
+                <section class="pdp-section pdp-section-size" id="size-selector">
                     <h3 class="pdp-section-title">Select Size: <span id="selectedSizeName">Select</span></h3>
                     <div class="size-selector" id="sizeSelector">
                         <!-- Sizes loaded dynamically -->
                     </div>
-                    <button type="button" class="size-guide-link">Size Guide</button>
-                </div>
+                    <div class="size-guide-wrap">
+                        <button type="button" class="size-guide-link">Size Guide</button>
+                    </div>
+                </section>
 
                 <!-- Quantity -->
                 <div class="pdp-section">
@@ -743,25 +194,24 @@
                 </div>
 
                 <!-- Delivery Check Section -->
-                <div class="pdp-section">
+                <section class="pdp-section" id="delivery-checker">
                     <h3 class="pdp-section-title">Delivery Availability</h3>
                     <div class="delivery-checker">
                         <input 
                             type="text" 
                             id="pincodeInput" 
-                            placeholder="Pincode lookup coming soon" 
+                            placeholder="Enter 6-digit pincode" 
                             maxlength="6"
                             pattern="[0-9]{6}"
                             class="pincode-input"
-                            disabled
                         >
-                        <button class="btn-check" type="button" disabled>Coming Soon</button>
+                        <button class="btn-check" type="button" id="checkDeliveryBtn">Check</button>
                     </div>
                     <div id="deliveryResult" class="delivery-result info">
                         <i class="fas fa-info-circle"></i>
-                        Delivery pincode checker is coming soon. Please contact support for delivery estimates.
+                        Enter pincode to check delivery estimate and COD availability.
                     </div>
-                </div>
+                </section>
 
                 <!-- Action Buttons -->
                 <div class="pdp-actions">
@@ -774,96 +224,53 @@
                     </button>
                 </div>
 
-                <!-- Features -->
-                <div class="product-features">
-                    <div class="feature-item">
-                        <i class="fas fa-truck"></i>
-                        <span>Free shipping on orders above ₹2,000</span>
+                <section class="pdp-section" id="trust-badges">
+                    <h3 class="pdp-section-title">Why Shop With Us</h3>
+                    <div class="pdp-trust-badges">
+                        <div class="pdp-trust-badge"><i class="fas fa-lock"></i> Secure Payments</div>
+                        <div class="pdp-trust-badge"><i class="fas fa-undo"></i> 7 Day Easy Returns</div>
+                        <div class="pdp-trust-badge"><i class="fas fa-truck"></i> Free Shipping Above ₹2000</div>
+                        <div class="pdp-trust-badge"><i class="fas fa-hand-holding-usd"></i> COD Available</div>
                     </div>
-                    <div class="feature-item">
-                        <i class="fas fa-undo-alt"></i>
-                        <span>Easy 7 days return & exchange</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>100% Secure Payments</span>
-                    </div>
-                    <div class="feature-item">
-                        <i class="fas fa-certificate"></i>
-                        <span>100% Authentic Products</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Product Tabs -->
-        <div class="product-tabs">
-            <div class="tab-nav">
-                <button class="tab-btn active" data-tab="description">Description</button>
-                <button class="tab-btn" data-tab="fabric">Fabric & Care</button>
-                <button class="tab-btn" data-tab="reviews">Reviews</button>
-                <button class="tab-btn" data-tab="qa">Questions & Answers</button>
-            </div>
-
-            <div class="tab-content active" id="description">
-                <h3>Product Description</h3>
-                <p id="productDescription">Loading description...</p>
-                <h3 style="margin-top: 24px;">Features</h3>
-                <ul id="productFeatures">
-                    <li>Loading features...</li>
-                </ul>
-            </div>
-
-            <div class="tab-content" id="fabric">
-                <h3>Fabric Details</h3>
-                <p id="fabricInfo">Premium Silk Blend fabric with intricate embroidery work.</p>
-                <h3 style="margin-top: 24px;">Care Instructions</h3>
-                <ul>
-                    <li>Dry clean only</li>
-                    <li>Do not bleach</li>
-                    <li>Iron on low heat</li>
-                    <li>Store in a cool, dry place</li>
-                </ul>
-            </div>
-
-            <div class="tab-content" id="reviews">
-                <h3>Customer Reviews</h3>
-                <p>Customer reviews coming soon. Be the first to review this product!</p>
-            </div>
-
-            <div class="tab-content" id="qa">
-                <div class="qa-header">
-                    <h3>Questions & Answers</h3>
-                    <button class="ask-question-btn" type="button" disabled>
-                        <i class="fas fa-plus"></i>
-                        Q&A Coming Soon
-                    </button>
-                </div>
-
-                <div class="qa-list" id="qaList">
-                    <div class="qa-empty-content">
-                        <i class="fas fa-comments"></i>
-                        <h4>Q&A Coming Soon</h4>
-                        <p>Questions and answers are not active yet. Please contact support for product-specific help.</p>
-                    </div>
-                </div>
-
-                <div class="qa-empty" id="qaEmpty" style="display: none;">
-                    <div class="qa-empty-content">
-                        <i class="fas fa-comments"></i>
-                        <h4>Q&A Coming Soon</h4>
-                        <p>Questions and answers are not active yet. Please contact support for product-specific help.</p>
-                    </div>
-                </div>
-            </div>
+                </section>
+                <div id="pdpTabsHost" class="features-section"></div>
+            </section>
         </div>
 
         <!-- Related Products -->
-        <div class="related-products">
+        <section class="related-products" id="related-products">
             <h2 class="section-title">You May Also Like</h2>
             <div class="products-grid" id="relatedProducts">
                 <!-- Related products loaded dynamically -->
             </div>
+        </section>
+    </div>
+
+    <div class="sticky-buy-bar" id="stickyBuyBar" aria-live="polite">
+        <div class="sticky-left">
+            <img src="images/products/product-1-front.jpg" alt="Product" class="sticky-thumb" id="stickyThumb">
+            <p class="sticky-name" id="stickyName">Product</p>
+        </div>
+        <div class="sticky-meta">
+            <span class="sticky-price" id="stickyPrice">₹0</span>
+            <span class="sticky-size-label">Size</span>
+            <select class="sticky-size-select" id="stickySizeSelect" aria-label="Select size">
+                <option value="">Select</option>
+            </select>
+            <span class="sticky-size-label">Qty</span>
+            <div class="sticky-qty-selector" aria-label="Select quantity">
+                <button class="sticky-qty-btn" id="stickyQtyMinus" type="button" aria-label="Decrease quantity">
+                    <i class="fas fa-minus"></i>
+                </button>
+                <input class="sticky-qty-input" id="stickyQtyInput" type="number" value="1" min="1" max="10" readonly aria-label="Quantity">
+                <button class="sticky-qty-btn" id="stickyQtyPlus" type="button" aria-label="Increase quantity">
+                    <i class="fas fa-plus"></i>
+                </button>
+            </div>
+        </div>
+        <div class="sticky-actions">
+            <button class="btn btn-primary sticky-cart-btn" id="stickyAddToCartBtn">Add to Cart</button>
+            <button class="sticky-buy-btn" id="stickyBuyNowBtn" type="button">Buy Now</button>
         </div>
     </div>
 
@@ -1043,726 +450,19 @@
 
     <!-- 2. Data layer -->
     <script src="js/product-normalizer.js"></script>
+    <script type="module" src="js/cart-utils.js"></script>
     <script src="js/cart.js"></script>
 
     <!-- 3. UI Components -->
     <script src="js/menu.js"></script>
-    
-    <script>
-        // Product Detail Page Logic
-        let currentProduct = null;
-        let activeVariants = [];
-        let selectedColor = null;
-        let selectedSize = null;
-        let selectedVariantId = null;
-        let quantity = 1;
-        let addToCartInFlight = false;
-
-        // High-impact UX hardening (pre-launch)
-        function ensurePdpInlineMessage() {
-            let messageEl = document.getElementById('pdpInlineMessage');
-            if (messageEl) return messageEl;
-
-            const actionContainer = document.querySelector('.pdp-actions');
-            if (!actionContainer) return null;
-
-            messageEl = document.createElement('div');
-            messageEl.id = 'pdpInlineMessage';
-            messageEl.setAttribute('aria-live', 'polite');
-            messageEl.style.cssText = 'min-height:20px;font-size:13px;line-height:1.4;color:var(--text-gray);margin-top:10px;';
-            actionContainer.insertAdjacentElement('afterend', messageEl);
-            return messageEl;
-        }
-
-        // High-impact UX hardening (pre-launch)
-        function setPdpInlineMessage(message, type = 'info') {
-            const messageEl = ensurePdpInlineMessage();
-            if (!messageEl) return;
-            messageEl.textContent = message || '';
-            messageEl.style.color = type === 'error'
-                ? '#b91c1c'
-                : type === 'success'
-                    ? '#047857'
-                    : 'var(--text-gray)';
-        }
-
-        // High-impact UX hardening (pre-launch)
-        function hasSinglePurchasableVariant() {
-            return activeVariants.filter((variant) => Number(variant?.stock_quantity || 0) > 0).length === 1;
-        }
-
-        // High-impact UX hardening (pre-launch)
-        function updateAddToCartState() {
-            const addToCartBtn = document.getElementById('addToCartBtn');
-            if (!addToCartBtn) return;
-
-            const hasValidVariant = Number.isInteger(Number(selectedVariantId)) && Number(selectedVariantId) > 0;
-            const canAdd = hasValidVariant && !addToCartInFlight;
-            addToCartBtn.disabled = !canAdd;
-
-            if (!addToCartInFlight) {
-                addToCartBtn.innerHTML = '<i class="fas fa-shopping-bag"></i> Add to Cart';
-            }
-
-            if (!hasValidVariant) {
-                setPdpInlineMessage(
-                    hasSinglePurchasableVariant()
-                        ? 'Only one size is available and selected for you.'
-                        : 'Please choose color and size to continue.',
-                    'info'
-                );
-            }
-        }
-
-        function esc(value) {
-            if (window.AMZIRA?.utils?.escapeHtml) return window.AMZIRA.utils.escapeHtml(value);
-            const div = document.createElement('div');
-            div.textContent = value == null ? '' : String(value);
-            return div.innerHTML;
-        }
-
-        function safeHexColor(value, fallback = '#8B1538') {
-            const raw = String(value || '').trim();
-            return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(raw) ? raw : fallback;
-        }
-
-        function normalizeForDisplayProduct(product) {
-            if (window.ProductNormalizer && typeof window.ProductNormalizer.normalize === 'function') {
-                const normalized = window.ProductNormalizer.normalize(product);
-                if (normalized) return { ...product, ...normalized };
-            }
-            return product;
-        }
-
-        function normalizeVariantColor(value) {
-            if (!value) return '';
-            if (typeof value === 'string') return value.trim();
-            if (typeof value === 'object') return String(value.name || value.title || '').trim();
-            return '';
-        }
-
-        function normalizeVariantSize(value) {
-            if (!value) return '';
-            if (typeof value === 'string') return value.trim();
-            if (typeof value === 'object') return String(value.name || value.label || value.value || '').trim();
-            return '';
-        }
-
-        function flattenVariants(rawVariants) {
-            const flat = [];
-            if (!Array.isArray(rawVariants)) return flat;
-
-            rawVariants.forEach((variant) => {
-                if (!variant) return;
-                if (Array.isArray(variant.variants)) {
-                    variant.variants.forEach((child) => flat.push({ ...variant, ...child }));
-                    return;
-                }
-                if (Array.isArray(variant.sizes)) {
-                    variant.sizes.forEach((sizeEntry) => {
-                        flat.push({ ...variant, ...sizeEntry });
-                    });
-                    return;
-                }
-                flat.push(variant);
-            });
-
-            return flat;
-        }
-
-        function extractVariants(product) {
-            if (!product) return [];
-            let raw = product.variants || product.variant_options || product.variant_groups || product.options || [];
-
-            if (!Array.isArray(raw)) {
-                if (Array.isArray(raw.items)) {
-                    raw = raw.items;
-                } else if (Array.isArray(raw.colors) && Array.isArray(raw.sizes)) {
-                    const combined = [];
-                    raw.colors.forEach((colorEntry) => {
-                        raw.sizes.forEach((sizeEntry) => {
-                            combined.push({
-                                color: normalizeVariantColor(colorEntry?.name || colorEntry),
-                                size: normalizeVariantSize(sizeEntry?.name || sizeEntry),
-                                id: sizeEntry?.id || colorEntry?.id || null,
-                                stock_quantity: sizeEntry?.stock_quantity || sizeEntry?.stock || colorEntry?.stock || 0
-                            });
-                        });
-                    });
-                    return combined;
-                }
-            }
-
-            const flat = flattenVariants(raw);
-            return flat.map((variant) => ({
-                ...variant,
-                id: variant?.id || variant?.variant_id || variant?.sku || null,
-                color: normalizeVariantColor(variant?.color || variant?.colour || variant?.shade),
-                size: normalizeVariantSize(variant?.size || variant?.label)
-            }));
-        }
-
-        async function ensureApiReady() {
-            if (window.AMZIRA && window.AMZIRA.apiRequest) return;
-            await new Promise((resolve, reject) => {
-                const existing = document.querySelector('script[data-amzira-api=\"true\"]');
-                if (existing) {
-                    existing.addEventListener('load', () => resolve(), { once: true });
-                    existing.addEventListener('error', () => reject(new Error('Failed to load API layer')), { once: true });
-                    return;
-                }
-
-                const script = document.createElement('script');
-                script.src = 'js/api.js';
-                script.async = false;
-                script.dataset.amziraApi = 'true';
-                script.onload = () => resolve();
-                script.onerror = () => reject(new Error('Failed to load API layer'));
-                document.head.appendChild(script);
-            });
-        }
-
-        // Get product ID from URL
-        function getProductSlug() {
-            const urlParams = new URLSearchParams(window.location.search);
-            return urlParams.get('slug');
-        }
-
-        function renderPdpMessage({ title, message, iconClass, actionsHtml }) {
-            const container = document.querySelector('.pdp-container');
-            if (!container) return;
-            container.innerHTML = `
-                <div style="text-align:center; padding:100px 20px;">
-                    <i class="${iconClass}" style="font-size:64px; color:var(--text-light); margin-bottom:24px;"></i>
-                    <h1 style="font-size:32px; margin-bottom:16px;">${esc(title)}</h1>
-                    <p style="color:var(--text-gray); margin-bottom:32px; font-size:18px;">${esc(message)}</p>
-                    ${actionsHtml || ''}
-                </div>
-            `;
-        }
-
-        function getPdpEl(id, context) {
-            const el = document.getElementById(id);
-            if (!el) {
-                console.warn(`PDP missing element: ${id}${context ? ` (${context})` : ''}`);
-            }
-            return el;
-        }
-
-        function setPdpStatus({ title, message, tone = 'info' }) {
-            const titleEl = getPdpEl('productTitle', 'status');
-            if (titleEl && title) {
-                titleEl.textContent = title;
-            }
-            if (message) {
-                setPdpInlineMessage(message, tone);
-            }
-        }
-
-        // Load product data
-        async function loadProduct() {
-            const productSlug = getProductSlug();
-            if (!productSlug) {
-                setPdpStatus({
-                    title: 'Product Not Found',
-                    message: 'No product slug provided.',
-                    tone: 'error'
-                });
-                return;
-            }
-
-            try {
-                setPdpStatus({
-                    title: 'Loading product...',
-                    message: 'Please wait while we load this product.',
-                    tone: 'info'
-                });
-
-                let timeoutReached = false;
-                const timeoutId = setTimeout(() => {
-                    timeoutReached = true;
-                    setPdpStatus({
-                        title: 'Unable to Load Product',
-                        message: 'Request timed out. Please try again.',
-                        tone: 'error'
-                    });
-                }, 10000);
-
-                await ensureApiReady();
-                currentProduct = null;
-                if (window.AMZIRA?.products?.getProductDetail) {
-                    const safeSlug = encodeURIComponent(String(productSlug).trim());
-                    console.log('PDP fetch', {
-                        slug: productSlug,
-                        requestUrl: `/products/${safeSlug}`
-                    });
-                    currentProduct = await window.AMZIRA.products.getProductDetail(safeSlug);
-                }
-
-                clearTimeout(timeoutId);
-
-                if (timeoutReached) {
-                    return;
-                }
-
-                if (!currentProduct) {
-                    // Audit Ref: [BLOCKER] Product Detail Page Breaks on Invalid ID.
-                    if (!timeoutReached) {
-                        setPdpStatus({
-                            title: 'Product Not Found',
-                            message: 'We could not find this product.',
-                            tone: 'error'
-                        });
-                    }
-                    return;
-                }
-
-                displayProduct(currentProduct);
-            } catch (error) {
-                console.error('Error loading product:', error);
-                const debugInfo = {
-                    slug: productSlug,
-                    requestUrl: `/products/${encodeURIComponent(String(productSlug))}`,
-                    apiBaseUrl: window.AMZIRA?.API_BASE_URL || 'unknown',
-                    errorMessage: error?.message,
-                    errorStatus: error?.status,
-                    errorPayload: error?.payload
-                };
-                console.error('PDP Load Failure Debug Info:', debugInfo);
-                if (error?.status === 404) {
-                    setPdpStatus({
-                        title: 'Product Not Found',
-                        message: 'We could not find this product.',
-                        tone: 'error'
-                    });
-                    return;
-                }
-
-                setPdpStatus({
-                    title: 'Unable to Load Product',
-                    message: error?.message || 'Please try again.',
-                    tone: 'error'
-                });
-            }
-        }
-
-        // Display product
-        function displayProduct(product) {
-            const normalized = normalizeForDisplayProduct(product);
-            const categoryName = normalized?.category || product?.category?.name || product?.category || 'Category';
-            const categorySlug = product?.category?.slug || String(categoryName).toLowerCase().replace(/\\s+/g, '-');
-            const subcategoryName = product?.subcategory?.name || product?.subcategory || categoryName;
-            const salePrice = Number(normalized?.price ?? product?.sale_price ?? product?.salePrice ?? 0);
-            const basePrice = Number(normalized?.basePrice ?? product?.base_price ?? product?.price ?? salePrice);
-            const currentPrice = salePrice > 0 ? salePrice : basePrice;
-            const effectiveBasePrice = basePrice >= currentPrice ? basePrice : currentPrice;
-
-            activeVariants = extractVariants(product).filter((variant) => variant && variant.is_active !== false);
-
-            // Update page title
-            if (product?.name) {
-                document.title = `${product.name} | Amzira`;
-            }
-
-            // Breadcrumb
-            const breadcrumbCategory = getPdpEl('breadcrumbCategory', 'displayProduct');
-            const breadcrumbProduct = getPdpEl('breadcrumbProduct', 'displayProduct');
-            if (!breadcrumbCategory || !breadcrumbProduct) return;
-            breadcrumbCategory.textContent = categoryName;
-            breadcrumbCategory.href = `category.html?slug=${encodeURIComponent(categorySlug)}`;
-            breadcrumbProduct.textContent = product.name || 'Product';
-
-            // Product info
-            const productCategory = getPdpEl('productCategory', 'displayProduct');
-            const productTitle = getPdpEl('productTitle', 'displayProduct');
-            if (!productCategory || !productTitle) return;
-            productCategory.textContent = String(subcategoryName || '').toUpperCase().replace('-', ' ');
-            productTitle.textContent = normalized?.name || product.name || 'Product';
-
-            // Rating
-            const stars = generateStars(product.rating || 4.5);
-            const productStars = getPdpEl('productStars', 'displayProduct');
-            const ratingText = getPdpEl('ratingText', 'displayProduct');
-            if (productStars) productStars.innerHTML = stars;
-            if (ratingText) {
-                ratingText.textContent = `${normalized?.rating || product.rating || 4.5} (${normalized?.reviews || product.reviews || 0} reviews)`;
-            }
-
-            // Price
-            const priceDisplay = getPdpEl('priceDisplay', 'displayProduct');
-            const originalPrice = getPdpEl('originalPrice', 'displayProduct');
-            const discountPercent = getPdpEl('discountPercent', 'displayProduct');
-            if (!priceDisplay || !originalPrice || !discountPercent) return;
-            priceDisplay.textContent = `₹${Number(currentPrice).toLocaleString('en-IN')}`;
-            if (effectiveBasePrice > currentPrice) {
-                originalPrice.textContent = `₹${Number(effectiveBasePrice).toLocaleString('en-IN')}`;
-                const discount = Math.round(((effectiveBasePrice - currentPrice) / effectiveBasePrice) * 100);
-                discountPercent.textContent = `${discount}% OFF`;
-                originalPrice.style.display = '';
-                discountPercent.style.display = '';
-            } else {
-                originalPrice.style.display = 'none';
-                discountPercent.style.display = 'none';
-            }
-
-            // Badge
-            if (normalized?.badge || product.badge) {
-                const badge = getPdpEl('productBadge', 'displayProduct');
-                if (!badge) return;
-                const badgeLabel = normalized?.badge || product.badge;
-                badge.textContent = badgeLabel;
-                badge.className = `image-badge ${String(badgeLabel).toLowerCase()}`;
-                badge.style.display = 'block';
-            }
-
-            // Images
-            displayImages(normalized?.images || product.images || [product.primary_image || product.image]);
-
-            const colors = Array.isArray(normalized?.colors) && normalized.colors.length
-                ? normalized.colors
-                : Array.from(
-                    new Set(
-                        activeVariants
-                            .map((variant) => String(variant?.color || '').trim())
-                            .filter(Boolean)
-                    )
-                ).map((name) => ({ name, hex: '#8B1538' }));
-
-            if (colors.length > 0) {
-                displayColors(colors);
-                const colorSection = getPdpEl('colorSection', 'displayProduct');
-                if (colorSection) colorSection.style.display = 'block';
-            } else {
-                const colorSection = getPdpEl('colorSection', 'displayProduct');
-                if (colorSection) colorSection.style.display = 'none';
-                selectedColor = null;
-            }
-
-            // Sizes
-            displaySizes(activeVariants, selectedColor);
-
-            // Description
-            const productDescription = getPdpEl('productDescription', 'displayProduct');
-            if (!productDescription) return;
-            productDescription.textContent = product.description || 'Premium quality ethnic wear crafted with care.';
-
-            // Features
-            if (product.features && product.features.length > 0) {
-                const featuresHTML = product.features.map(f => `<li>${esc(f)}</li>`).join('');
-                const productFeatures = getPdpEl('productFeatures', 'displayProduct');
-                if (productFeatures) productFeatures.innerHTML = featuresHTML;
-            }
-
-            // Fabric
-            const fabricInfo = getPdpEl('fabricInfo', 'displayProduct');
-            if (fabricInfo) fabricInfo.textContent = `Made with ${product.fabric || 'premium fabric'}.`;
-
-            // Variant safety (Manyavar-style): render PDP, but disable cart if no variants
-            if (!Array.isArray(product?.variants) || product.variants.length === 0) {
-                const addToCartBtn = getPdpEl('addToCartBtn', 'displayProduct');
-                if (addToCartBtn) addToCartBtn.disabled = true;
-                setPdpInlineMessage('Currently unavailable', 'error');
-            }
-
-            // Related products placeholder (soft launch)
-            const relatedGrid = document.getElementById('relatedProducts');
-            if (relatedGrid && relatedGrid.children.length === 0) {
-                relatedGrid.innerHTML = `
-                    <div style="grid-column: 1/-1; text-align: center; padding: 24px 16px; color: var(--text-gray);">
-                        <i class="fas fa-store" style="font-size: 28px; color: var(--text-light); margin-bottom: 10px;"></i>
-                        <h3 style="margin-bottom: 6px;">More styles coming soon</h3>
-                        <p style="margin-bottom: 14px;">Explore Men, Women, or Kids collections while we add more looks.</p>
-                        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap;">
-                            <a class="btn btn-secondary" href="men.html">Men</a>
-                            <a class="btn btn-secondary" href="women.html">Women</a>
-                            <a class="btn btn-secondary" href="kids.html">Kids</a>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        // Display images
-        function displayImages(images) {
-            const thumbsContainer = getPdpEl('thumbnails', 'displayImages');
-            const mainImage = getPdpEl('mainImage', 'displayImages');
-            if (!thumbsContainer || !mainImage) return;
-            const normalizedImages = (Array.isArray(images) ? images : [])
-                .map((img) => {
-                    if (!img) return '';
-                    if (typeof img === 'string') return img;
-                    return String(img.image_url || img.url || '');
-                })
-                .filter(Boolean);
-
-            if (!normalizedImages.length) {
-                normalizedImages.push('images/products/product-1-front.jpg');
-            }
-
-            thumbsContainer.innerHTML = normalizedImages.map((img, index) => `
-                <div class="thumb-item ${index === 0 ? 'active' : ''}" data-image="${esc(img)}">
-                    <img src="${esc(img)}" alt="Product Image ${index + 1}" loading="lazy" onerror="this.onerror=null;this.src='images/products/product-1-front.jpg';">
-                </div>
-            `).join('');
-
-            mainImage.src = normalizedImages[0];
-            mainImage.onerror = function onMainImageError() {
-                this.onerror = null;
-                this.src = 'images/products/product-1-front.jpg';
-            };
-
-            // Thumbnail click events
-            document.querySelectorAll('.thumb-item').forEach(thumb => {
-                thumb.addEventListener('click', function() {
-                    document.querySelectorAll('.thumb-item').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    mainImage.src = this.dataset.image;
-                });
-            });
-        }
-
-        // Display colors
-        function displayColors(colors) {
-            const container = getPdpEl('colorSelector', 'displayColors');
-            if (!container) return;
-            container.innerHTML = colors.map((color) => `
-                <div class="color-swatch" 
-                     style="background: ${safeHexColor(color.hex)}"
-                     data-color="${esc(color.name)}"
-                     title="${esc(color.name)}">
-                </div>
-            `).join('');
-
-            selectedColor = null;
-            const selectedColorName = getPdpEl('selectedColorName', 'displayColors');
-            const selectedSizeName = getPdpEl('selectedSizeName', 'displayColors');
-            if (!selectedColorName || !selectedSizeName) return;
-            selectedColorName.textContent = 'Select';
-            selectedSize = null;
-            selectedVariantId = null;
-            selectedSizeName.textContent = 'Select';
-            displaySizes(activeVariants, null);
-
-            // Color selection events
-            document.querySelectorAll('.color-swatch').forEach(swatch => {
-                swatch.addEventListener('click', function() {
-                    document.querySelectorAll('.color-swatch').forEach(s => s.classList.remove('selected'));
-                    this.classList.add('selected');
-                    selectedColor = this.dataset.color;
-                    const selectedColorName = getPdpEl('selectedColorName', 'displayColors');
-                    if (selectedColorName) selectedColorName.textContent = selectedColor;
-                    selectedSize = null;
-                    selectedVariantId = null;
-                    const selectedSizeName = getPdpEl('selectedSizeName', 'displayColors');
-                    if (selectedSizeName) selectedSizeName.textContent = 'Select';
-                    displaySizes(activeVariants, selectedColor);
-                    setPdpInlineMessage('Select size to continue.', 'info');
-                });
-            });
-
-            updateAddToCartState();
-        }
-
-        // Display sizes
-        function displaySizes(variants, colorFilter = null) {
-            const container = getPdpEl('sizeSelector', 'displaySizes');
-            const selectedSizeName = getPdpEl('selectedSizeName', 'displaySizes');
-            if (!container || !selectedSizeName) return;
-            const filteredVariants = (Array.isArray(variants) ? variants : []).filter((variant) => {
-                if (!colorFilter) return true;
-                return String(variant?.color || '').toLowerCase() === String(colorFilter).toLowerCase();
-            });
-
-            container.innerHTML = filteredVariants.map((variant) => `
-                <div class="size-option ${Number(variant?.stock_quantity || 0) <= 0 ? 'out-of-stock' : ''}"
-                     data-size="${esc(variant?.size || '-')}"
-                     data-variant-id="${esc(variant?.id || '')}">
-                    ${esc(variant?.size || '-')}
-                </div>
-            `).join('');
-
-            if (!filteredVariants.length) {
-                selectedSize = null;
-                selectedVariantId = null;
-                selectedSizeName.textContent = 'Unavailable';
-                setPdpInlineMessage('Selected option is unavailable. Please choose another.', 'error');
-                updateAddToCartState();
-                return;
-            }
-
-            const firstInStock = filteredVariants.find((variant) => Number(variant?.stock_quantity || 0) > 0) || null;
-            const hasOnlyOneVariant = filteredVariants.length === 1 && firstInStock;
-            if (hasOnlyOneVariant) {
-                selectedSize = firstInStock.size;
-                selectedVariantId = Number(firstInStock.id);
-                selectedSizeName.textContent = selectedSize;
-                setPdpInlineMessage(`Selected size ${selectedSize}. Only one option is available.`, 'info');
-            } else {
-                selectedSize = null;
-                selectedVariantId = null;
-                if (firstInStock) {
-                    selectedSizeName.textContent = 'Select';
-                    setPdpInlineMessage('Please select an available size.', 'info');
-                } else {
-                    selectedSizeName.textContent = 'Out of Stock';
-                    setPdpInlineMessage('This product is currently out of stock in selected options.', 'error');
-                }
-            }
-
-            // Size selection events
-            document.querySelectorAll('.size-option').forEach(option => {
-                option.addEventListener('click', function() {
-                    if (this.classList.contains('out-of-stock')) return;
-                    
-                    document.querySelectorAll('.size-option').forEach(o => o.classList.remove('selected'));
-                    this.classList.add('selected');
-                    selectedSize = this.dataset.size;
-                    selectedVariantId = Number(this.dataset.variantId || 0) || null;
-                    selectedSizeName.textContent = selectedSize;
-                    setPdpInlineMessage('Size selected. You can add this item to cart.', 'success');
-                    updateAddToCartState();
-                });
-            });
-
-            if (hasOnlyOneVariant) {
-                const preselected = container.querySelector(`.size-option[data-variant-id="${firstInStock.id}"]`);
-                if (preselected) preselected.classList.add('selected');
-            }
-            updateAddToCartState();
-        }
-
-        // Generate stars
-        function generateStars(rating) {
-            const fullStars = Math.floor(rating);
-            const hasHalf = rating % 1 !== 0;
-            let html = '';
-
-            for (let i = 0; i < fullStars; i++) {
-                html += '<i class="fas fa-star"></i>';
-            }
-            if (hasHalf) {
-                html += '<i class="fas fa-star-half-alt"></i>';
-            }
-            const empty = 5 - Math.ceil(rating);
-            for (let i = 0; i < empty; i++) {
-                html += '<i class="far fa-star"></i>';
-            }
-            return html;
-        }
-
-        // Quantity controls
-        document.getElementById('qtyMinus').addEventListener('click', () => {
-            if (quantity > 1) {
-                quantity--;
-                document.getElementById('qtyInput').value = quantity;
-            }
-        });
-
-        document.getElementById('qtyPlus').addEventListener('click', () => {
-            if (quantity < 10) {
-                quantity++;
-                document.getElementById('qtyInput').value = quantity;
-            }
-        });
-
-        // Add to cart
-        document.getElementById('addToCartBtn').addEventListener('click', async () => {
-            const addToCartBtn = document.getElementById('addToCartBtn');
-            if (addToCartInFlight) return;
-            if (!selectedSize || !Number.isInteger(Number(selectedVariantId)) || Number(selectedVariantId) <= 0) {
-                // High-impact UX hardening (pre-launch)
-                setPdpInlineMessage('Please choose color and size before adding to cart.', 'error');
-                updateAddToCartState();
-                return;
-            }
-
-            try {
-                // High-impact UX hardening (pre-launch)
-                addToCartInFlight = true;
-                if (window.loadingManager?.setButtonLoading) {
-                    window.loadingManager.setButtonLoading(addToCartBtn, true);
-                    addToCartBtn.textContent = 'Adding...';
-                } else {
-                    addToCartBtn.disabled = true;
-                    addToCartBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Adding...';
-                }
-                const added = await cart.addItem(currentProduct, quantity, selectedSize, selectedColor);
-                if (!added) {
-                    setPdpInlineMessage('Unable to add this item right now. Please retry.', 'error');
-                } else {
-                    setPdpInlineMessage('Added to cart. Secure payments and easy returns available.', 'success');
-                }
-            } catch (_) {
-                setPdpInlineMessage('Unable to add this item right now. Please retry.', 'error');
-            } finally {
-                addToCartInFlight = false;
-                if (window.loadingManager?.setButtonLoading) {
-                    window.loadingManager.setButtonLoading(addToCartBtn, false);
-                } else {
-                    addToCartBtn.disabled = false;
-                }
-                updateAddToCartState();
-            }
-        });
-
-        // Add to wishlist
-        document.getElementById('addToWishlist').addEventListener('click', function() {
-            let wishlist = JSON.parse(localStorage.getItem('amziraWishlist') || '[]');
-            const icon = this.querySelector('i');
-            const wishlistKey = currentProduct?.slug || currentProduct?.id;
-            
-            if (wishlistKey && wishlist.includes(wishlistKey)) {
-                wishlist = wishlist.filter(id => id !== wishlistKey);
-                icon.classList.remove('fas');
-                icon.classList.add('far');
-                cart.showNotification('Removed from wishlist', 'info');
-            } else {
-                if (wishlistKey) wishlist.push(wishlistKey);
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-                cart.showNotification('Added to wishlist', 'success');
-            }
-            
-            localStorage.setItem('amziraWishlist', JSON.stringify(wishlist));
-        });
-
-        // Tab navigation
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const tabName = this.dataset.tab;
-                
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
-                
-                this.classList.add('active');
-                document.getElementById(tabName).classList.add('active');
-            });
-        });
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', () => {
-            loadProduct();
-            ensurePdpInlineMessage();
-            setPdpInlineMessage('Secure payments, easy returns, and delivery clarity at checkout.', 'info');
-            updateAddToCartState();
-            
-            // Check wishlist status
-            const wishlist = JSON.parse(localStorage.getItem('amziraWishlist') || '[]');
-            const productSlug = getProductSlug();
-            if (productSlug && wishlist.includes(productSlug)) {
-                const icon = document.querySelector('#addToWishlist i');
-                icon.classList.remove('far');
-                icon.classList.add('fas');
-            }
-        });
-    </script>
+    <script type="module" src="js/pdp.js"></script>
 
     <!-- Size Chart Modal -->
 <div id="sizeChartModal" class="modal-overlay">
     <div class="modal-container">
         <div class="modal-header">
             <h2>Size Guide</h2>
-            <button class="modal-close" onclick="closeSizeChart()">
+            <button class="modal-close" type="button" data-size-chart-close="true">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -1836,363 +536,6 @@
         </div>
     </div>
 </div>
-
-<style>
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 10000;
-    display: none;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-}
-
-.modal-overlay.active {
-    display: flex;
-}
-
-.modal-container {
-    background: white;
-    border-radius: 12px;
-    max-width: 700px;
-    width: 100%;
-    max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 24px;
-    border-bottom: 1px solid #E5E5E5;
-}
-
-.modal-header h2 {
-    margin: 0;
-    font-size: 24px;
-}
-
-.modal-close {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    background: #F3F4F6;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: background 0.2s;
-}
-
-.modal-close:hover {
-    background: #E5E7EB;
-}
-
-.modal-body {
-    padding: 24px;
-}
-
-.size-chart-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-bottom: 24px;
-}
-
-.size-chart-table th,
-.size-chart-table td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #E5E5E5;
-}
-
-.size-chart-table th {
-    background: #F9FAFB;
-    font-weight: 600;
-    color: #374151;
-}
-
-.size-chart-table tbody tr:hover {
-    background: #F9FAFB;
-}
-
-.size-tips {
-    background: #FBF2DE;
-    padding: 20px;
-    border-radius: 8px;
-}
-
-.size-tips h4 {
-    margin: 0 0 12px 0;
-    font-size: 16px;
-    color: #8B1538;
-}
-
-.size-tips ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.size-tips li {
-    padding: 6px 0;
-    font-size: 14px;
-    line-height: 1.6;
-}
-
-@media (max-width: 768px) {
-    .modal-container {
-        margin: 20px;
-    }
-    
-    .size-chart-table {
-        font-size: 13px;
-    }
-    
-    .size-chart-table th,
-    .size-chart-table td {
-        padding: 8px 6px;
-    }
-}
-</style>
-
-<script>
-function openSizeChart() {
-    document.getElementById('sizeChartModal').classList.add('active');
-    document.body.style.overflow = 'hidden';
-}
-
-function closeSizeChart() {
-    document.getElementById('sizeChartModal').classList.remove('active');
-    document.body.style.overflow = '';
-}
-
-// Close on overlay click
-document.getElementById('sizeChartModal').addEventListener('click', function(e) {
-    if (e.target === this) {
-        closeSizeChart();
-    }
-});
-
-// Update size guide link to open modal
-document.addEventListener('DOMContentLoaded', function() {
-    const sizeGuideLink = document.querySelector('.size-guide-link');
-    if (sizeGuideLink) {
-        sizeGuideLink.addEventListener('click', function(e) {
-            e.preventDefault();
-            openSizeChart();
-        });
-    }
-});
-</script>
-<script>
-function checkDelivery() {
-    const resultDiv = document.getElementById('deliveryResult');
-    if (!resultDiv) return;
-    resultDiv.className = 'delivery-result info';
-    resultDiv.innerHTML = `
-        <i class="fas fa-info-circle"></i>
-        Delivery pincode checker is coming soon. Please contact support for delivery estimates.
-    `;
-}
-
-function shareOnWhatsApp() {
-    const productName = document.getElementById('productTitle').textContent;
-    const productUrl = window.location.href;
-    const message = `Check out this ${productName} on Amzira: ${productUrl}`;
-    window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank');
-}
-
-function shareOnFacebook() {
-    const productUrl = window.location.href;
-    window.open(
-        `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(productUrl)}`,
-        '_blank',
-        'width=600,height=400'
-    );
-}
-
-function shareOnTwitter() {
-    const productName = document.getElementById('productTitle').textContent;
-    const productUrl = window.location.href;
-    const text = `Check out this ${productName} on Amzira!`;
-    window.open(
-        `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(productUrl)}`,
-        '_blank',
-        'width=600,height=400'
-    );
-}
-
-function copyProductLink() {
-    const productUrl = window.location.href;
-
-    if (navigator.clipboard) {
-        navigator.clipboard.writeText(productUrl)
-            .then(() => showShareNotification('Link copied to clipboard!'))
-            .catch(() => fallbackCopyText(productUrl));
-    } else {
-        fallbackCopyText(productUrl);
-    }
-}
-
-function fallbackCopyText(text) {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.left = '-9999px';
-    document.body.appendChild(textarea);
-    textarea.select();
-
-    try {
-        document.execCommand('copy');
-        showShareNotification('Link copied to clipboard!');
-    } catch {
-        showShareNotification('Failed to copy link', 'error');
-    }
-
-    document.body.removeChild(textarea);
-}
-
-function showShareNotification(message, type = 'success') {
-    const note = document.createElement('div');
-    note.textContent = message;
-    note.style.cssText = `
-        position: fixed;
-        bottom: 80px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: ${type === 'success' ? '#10B981' : '#EF4444'};
-        color: white;
-        padding: 12px 24px;
-        border-radius: 50px;
-        font-size: 14px;
-        z-index: 9999;
-    `;
-    document.body.appendChild(note);
-    setTimeout(() => note.remove(), 2000);
-}
-
-// Image Zoom Functionality
-class ImageZoom {
-    constructor() {
-        this.zoomLevel = 2;
-        this.init();
-    }
-
-    init() {
-        const mainImage = document.querySelector('.gallery-main-image img');
-        if (!mainImage) return;
-
-        mainImage.style.cursor = 'zoom-in';
-        this.addHoverZoom(mainImage);
-        mainImage.addEventListener('click', () => this.openLightbox());
-    }
-
-    addHoverZoom(img) {
-        const container = img.parentElement;
-        container.style.position = 'relative';
-        container.style.overflow = 'hidden';
-
-        container.addEventListener('mousemove', (e) => {
-            const rect = container.getBoundingClientRect();
-            const x = ((e.clientX - rect.left) / rect.width) * 100;
-            const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-            img.style.transformOrigin = `${x}% ${y}%`;
-            img.style.transform = `scale(${this.zoomLevel})`;
-            img.style.transition = 'transform 0.1s ease';
-        });
-
-        container.addEventListener('mouseleave', () => {
-            img.style.transform = 'scale(1)';
-            img.style.transition = 'transform 0.3s ease';
-        });
-    }
-
-    openLightbox() {
-        const mainImage = document.querySelector('.gallery-main-image img');
-        const imageSrc = mainImage.src;
-
-        const lightbox = document.createElement('div');
-        lightbox.className = 'image-lightbox';
-        lightbox.innerHTML = `
-            <div class="lightbox-overlay"></div>
-            <div class="lightbox-content">
-                <button class="lightbox-close"><i class="fas fa-times"></i></button>
-                <button class="lightbox-prev"><i class="fas fa-chevron-left"></i></button>
-                <button class="lightbox-next"><i class="fas fa-chevron-right"></i></button>
-                <img src="${imageSrc}" alt="Product Image">
-            </div>
-        `;
-
-        document.body.appendChild(lightbox);
-        document.body.style.overflow = 'hidden';
-
-        setTimeout(() => lightbox.classList.add('active'), 10);
-
-        lightbox.querySelector('.lightbox-close').onclick = () => this.closeLightbox(lightbox);
-        lightbox.querySelector('.lightbox-overlay').onclick = () => this.closeLightbox(lightbox);
-
-        this.setupLightboxNavigation(lightbox);
-        this.setupKeyboardNav(lightbox);
-    }
-
-    setupLightboxNavigation(lightbox) {
-        const images = Array.from(document.querySelectorAll('.thumb-item img')).map(img => img.src);
-        let currentIndex = images.indexOf(lightbox.querySelector('img').src);
-
-        lightbox.querySelector('.lightbox-prev').onclick = () => {
-            currentIndex = (currentIndex - 1 + images.length) % images.length;
-            lightbox.querySelector('img').src = images[currentIndex];
-        };
-
-        lightbox.querySelector('.lightbox-next').onclick = () => {
-            currentIndex = (currentIndex + 1) % images.length;
-            lightbox.querySelector('img').src = images[currentIndex];
-        };
-    }
-
-    setupKeyboardNav(lightbox) {
-        const handler = (e) => {
-            if (e.key === 'Escape') this.closeLightbox(lightbox);
-            if (e.key === 'ArrowLeft') lightbox.querySelector('.lightbox-prev').click();
-            if (e.key === 'ArrowRight') lightbox.querySelector('.lightbox-next').click();
-        };
-        document.addEventListener('keydown', handler);
-    }
-
-    closeLightbox(lightbox) {
-        lightbox.classList.remove('active');
-        document.body.style.overflow = '';
-        setTimeout(() => lightbox.remove(), 300);
-    }
-}
-
-// Init after product load
-document.addEventListener('DOMContentLoaded', () => {
-    setTimeout(() => new ImageZoom(), 500);
-});
-
-document.addEventListener('DOMContentLoaded', function() {
-    const pin = document.getElementById('pincodeInput');
-    if (pin) {
-        pin.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                checkDelivery();
-            }
-        });
-    }
-});
-
-// Q&A intentionally disabled for soft launch until backend flow is live.
-</script>
 
 </body>
 </html>

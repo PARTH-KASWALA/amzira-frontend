@@ -874,7 +874,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const sale = toSafeNumber(product?.sale_price);
         const base = toSafeNumber(product?.base_price ?? product?.price);
         const hasPrice = (Number.isFinite(sale) && sale >= 0) || (Number.isFinite(base) && base >= 0);
-        return Boolean(hasId && hasName && hasPrice && hasProductImage(product) && hasSellableVariant(product));
+        return Boolean(hasId && hasName && hasPrice && hasProductImage(product));
     }
 
     function getPageAudience() {
@@ -1098,6 +1098,14 @@ document.addEventListener('DOMContentLoaded', function() {
                     ? await resolveProducts({ category: effectiveCategory, limit: 100 })
                     : await resolveProducts({ limit: 100 });
                 products = data?.products || data?.results || (Array.isArray(data) ? data : []);
+                if (!window.__AMZIRA_PRODUCTS_BY_ID__) {
+                    window.__AMZIRA_PRODUCTS_BY_ID__ = {};
+                }
+                (Array.isArray(products) ? products : []).forEach((product) => {
+                    if (product && product.id != null) {
+                        window.__AMZIRA_PRODUCTS_BY_ID__[String(product.id)] = product;
+                    }
+                });
                 sessionStorage.setItem(cacheKey, JSON.stringify({
                     timestamp: Date.now(),
                     products

@@ -287,6 +287,7 @@ async function refreshSession() {
 async function apiRequest(endpoint, options = {}) {
     const method = (options.method || 'GET').toUpperCase();
     const retryOn401 = options.retryOn401 !== false;
+    const returnEnvelope = options.returnEnvelope === true;
 
     const headers = {
         ...(options.headers || {})
@@ -384,7 +385,7 @@ async function apiRequest(endpoint, options = {}) {
         });
     }
 
-    return payload.data;
+    return returnEnvelope ? payload : payload.data;
 }
 
 async function login(email, password) {
@@ -554,13 +555,27 @@ async function createOrder(orderPayload) {
     });
 }
 
-async function getOrders() {
+async function getOrders(page = 1, limit = 10) {
     // Orders collection route is registered with a trailing slash.
-    return apiRequest('/orders/');
+    return apiRequest(`/orders/?page=${encodeURIComponent(page)}&limit=${encodeURIComponent(limit)}`);
+}
+
+async function getOrdersPage(page = 1, limit = 10) {
+    return apiRequest(`/orders/?page=${encodeURIComponent(page)}&limit=${encodeURIComponent(limit)}`, {
+        returnEnvelope: true
+    });
 }
 
 async function getOrderDetail(orderNumber) {
     return apiRequest(`/orders/${orderNumber}`);
+}
+
+async function getOrdersByUser(userId) {
+    return apiRequest(`/orders/user/${userId}`);
+}
+
+async function getOrderTracking(orderId) {
+    return apiRequest(`/orders/${orderId}/tracking`);
 }
 
 async function createPaymentOrder(orderId) {
@@ -578,6 +593,20 @@ async function verifyPayment(razorpayOrderId, razorpayPaymentId, razorpaySignatu
             razorpay_payment_id: razorpayPaymentId,
             razorpay_signature: razorpaySignature
         })
+    });
+}
+
+async function createCheckoutPaymentOrder(payload) {
+    return apiRequest('/create-payment-order', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+    });
+}
+
+async function verifyCheckoutPayment(payload) {
+    return apiRequest('/verify-payment', {
+        method: 'POST',
+        body: JSON.stringify(payload)
     });
 }
 
@@ -792,11 +821,18 @@ window.AMZIRA = {
     orders: {
         createOrder,
         getOrders,
-        getOrderDetail
+        getOrdersPage,
+        getOrderDetail,
+        getOrdersByUser,
+        getOrderTracking
     },
     payments: {
         createPaymentOrder,
         verifyPayment
+    },
+    commerce: {
+        createPaymentOrder: createCheckoutPaymentOrder,
+        verifyPayment: verifyCheckoutPayment
     },
     stock: {
         check: checkStock

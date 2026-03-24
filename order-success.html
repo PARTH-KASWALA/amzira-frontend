@@ -349,11 +349,15 @@
 
                 <!-- Action Buttons -->
                 <div class="action-buttons">
+                    <a href="order-tracking.html" class="btn-action btn-primary" id="trackOrderLink">
+                        <i class="fas fa-truck"></i>
+                        Track Order
+                    </a>
                     <a href="account.html" class="btn-action btn-secondary">
                         <i class="fas fa-user"></i>
                         View Orders
                     </a>
-                    <a href="index.html" class="btn-action btn-primary">
+                    <a href="index.html" class="btn-action btn-secondary">
                         <i class="fas fa-shopping-bag"></i>
                         Continue Shopping
                     </a>
@@ -644,7 +648,7 @@
 
         async function loadOrderDetail() {
             const params = new URLSearchParams(window.location.search);
-            const orderRef = params.get('order');
+            const orderRef = params.get('order') || params.get('order_id') || sessionStorage.getItem('last_order_number') || sessionStorage.getItem('order_number');
             if (!orderRef) {
                 window.location.href = 'index.html';
                 return;
@@ -658,7 +662,13 @@
             if (handleTerminalOrderStatus(order)) return;
 
             const orderId = order?.order_number || order?.order_id || order?.id || orderRef;
+            sessionStorage.setItem('last_order_number', orderId);
+            sessionStorage.setItem('order_number', orderId);
             document.getElementById('orderId').textContent = orderId;
+            const trackOrderLink = document.getElementById('trackOrderLink');
+            if (trackOrderLink) {
+                trackOrderLink.href = `order-tracking.html?order=${encodeURIComponent(orderId)}`;
+            }
 
             const createdAt = order?.created_at || order?.order_date || new Date().toISOString();
             document.getElementById('orderDate').textContent = new Date(createdAt).toLocaleDateString('en-IN', {
@@ -667,7 +677,7 @@
                 day: 'numeric'
             });
 
-            const total = Number(order?.total || order?.grand_total || 0);
+            const total = Number(order?.total || order?.grand_total || order?.total_amount || 0);
             document.getElementById('orderTotal').textContent = `₹${total.toLocaleString('en-IN')}`;
 
             const paymentMethod = String(order?.payment_method || '').toLowerCase();

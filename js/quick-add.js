@@ -133,13 +133,17 @@ class QuickAdd {
                 product = window.allProducts.find(p => p.id === productId);
             }
 
+            if (!product && window.__AMZIRA_PRODUCTS_BY_ID__) {
+                product = window.__AMZIRA_PRODUCTS_BY_ID__[String(productId)];
+            }
+
             // If not found, try to fetch from products.json
             if (!product) {
                 await this.ensureApiReady();
                 if (!window.AMZIRA?.products?.getProducts) {
                     throw new Error('API client unavailable');
                 }
-                const data = await window.AMZIRA.products.getProducts({ limit: 1000 });
+                const data = await window.AMZIRA.products.getProducts({ limit: 20 });
                 const products = data?.products || data?.results || (Array.isArray(data) ? data : []);
                 product = products.find((p) => String(p.id) === String(productId));
             }
