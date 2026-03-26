@@ -537,24 +537,6 @@ async function clearCart() {
     });
 }
 
-async function createOrder(orderPayload) {
-    const sanitizedPayload = {
-        ...orderPayload,
-        // Soft-launch idempotency_key fix
-        idempotency_key: orderPayload?.idempotency_key || getCheckoutIdempotencyKey()
-    };
-
-    if (typeof sanitizedPayload.customer_notes === 'string') {
-        sanitizedPayload.customer_notes = sanitizedPayload.customer_notes.trim().slice(0, 500);
-    }
-
-    // Orders collection route is registered with a trailing slash.
-    return apiRequest('/orders/', {
-        method: 'POST',
-        body: JSON.stringify(sanitizedPayload)
-    });
-}
-
 async function getOrders(page = 1, limit = 10) {
     // Orders collection route is registered with a trailing slash.
     return apiRequest(`/orders/?page=${encodeURIComponent(page)}&limit=${encodeURIComponent(limit)}`);
@@ -578,35 +560,61 @@ async function getOrderTracking(orderId) {
     return apiRequest(`/orders/${orderId}/tracking`);
 }
 
-async function createPaymentOrder(orderId) {
-    return apiRequest('/payments/create-order', {
-        method: 'POST',
-        body: JSON.stringify({ order_id: orderId })
-    });
-}
-
-async function verifyPayment(razorpayOrderId, razorpayPaymentId, razorpaySignature) {
-    return apiRequest('/payments/verify', {
-        method: 'POST',
-        body: JSON.stringify({
-            razorpay_order_id: razorpayOrderId,
-            razorpay_payment_id: razorpayPaymentId,
-            razorpay_signature: razorpaySignature
-        })
-    });
-}
-
 async function createCheckoutPaymentOrder(payload) {
-    return apiRequest('/create-payment-order', {
-        method: 'POST',
-        body: JSON.stringify(payload)
-    });
+    try {
+        return await apiRequest('/create-payment-order', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    } catch (error) {
+        if (error?.status !== 404 || !/\/api\/v1\/?$/i.test(API_BASE_URL)) {
+            throw error;
+        }
+
+        const fallbackBaseUrl = API_BASE_URL.replace(/\/api\/v1\/?$/i, '');
+        console.warn('[api] checkout payment order fallback', {
+            primaryUrl: `${API_BASE_URL}/create-payment-order`,
+            fallbackUrl: `${fallbackBaseUrl}/create-payment-order`,
+            error
+        });
+
+        return apiRequestAbsolute(`${fallbackBaseUrl}/create-payment-order`, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    }
 }
 
 async function verifyCheckoutPayment(payload) {
-    return apiRequest('/verify-payment', {
-        method: 'POST',
-        body: JSON.stringify(payload)
+    try {
+        return await apiRequest('/verify-payment', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    } catch (error) {
+        if (error?.status !== 404 || !/\/api\/v1\/?$/i.test(API_BASE_URL)) {
+            throw error;
+        }
+
+        const fallbackBaseUrl = API_BASE_URL.replace(/\/api\/v1\/?$/i, '');
+        console.warn('[api] checkout verify payment fallback', {
+            primaryUrl: `${API_BASE_URL}/verify-payment`,
+            fallbackUrl: `${fallbackBaseUrl}/verify-payment`,
+            error
+        });
+
+        return apiRequestAbsolute(`${fallbackBaseUrl}/verify-payment`, {
+            method: 'POST',
+            body: JSON.stringify(payload)
+        });
+    }
+}
+
+async function apiRequestAbsolute(url, options = {}) {
+    const finalOptions = buildRequestOptions(options);
+    const response = await fetch(url, finalOptions);
+    return parseApiResponse(response, {
+        returnEnvelope: Boolean(options.returnEnvelope)
     });
 }
 
@@ -819,16 +827,11 @@ window.AMZIRA = {
         clearCart
     },
     orders: {
-        createOrder,
         getOrders,
         getOrdersPage,
         getOrderDetail,
         getOrdersByUser,
         getOrderTracking
-    },
-    payments: {
-        createPaymentOrder,
-        verifyPayment
     },
     commerce: {
         createPaymentOrder: createCheckoutPaymentOrder,

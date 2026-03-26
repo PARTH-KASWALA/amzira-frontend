@@ -16,6 +16,7 @@
     <link rel="stylesheet" href="css/main.css">
     <link rel="stylesheet" href="css/header.css">
     <link rel="stylesheet" href="css/footer.css">
+    <link rel="stylesheet" href="css/responsive.css">
     
     <style>
         .success-page {
@@ -286,8 +287,36 @@
 </head>
 <body>
     <!-- Header -->
-    <header class="header">
-        <!-- Include your existing header -->
+    <header class="header" id="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <a href="index.html">
+                        <img src="images/logo/Amzira_logo.png" alt="Amzira Logo" class="logo-icon">
+                        <img src="images/logo/Amzira_name.png" alt="Amzira" class="logo-name">
+                    </a>
+                </div>
+                <nav class="nav-desktop" id="mainNav">
+                    <ul class="nav-menu" role="menubar">
+                        <li class="nav-item"><a href="men.html" class="nav-link">Men</a></li>
+                        <li class="nav-item"><a href="women.html" class="nav-link">Women</a></li>
+                        <li class="nav-item"><a href="kids.html" class="nav-link">Kids</a></li>
+                        <li class="nav-item"><a href="appointments.html" class="nav-link">Appointments</a></li>
+                        <li class="nav-item"><a href="stores.html" class="nav-link">Stores</a></li>
+                    </ul>
+                </nav>
+                <div class="header-actions">
+                    <button class="header-icon" id="searchBtn"><i class="fas fa-search"></i></button>
+                    <button class="header-icon"><i class="far fa-heart"></i></button>
+                    <a href="account.html" class="header-icon" id="accountBtn" title="My Account"><i class="far fa-user"></i></a>
+                    <button class="header-icon cart-icon" id="cartBtn">
+                        <i class="fas fa-shopping-bag"></i>
+                        <span class="cart-count">0</span>
+                    </button>
+                    <button class="mobile-menu-toggle" id="mobileMenuToggle"><i class="fas fa-bars"></i></button>
+                </div>
+            </div>
+        </div>
     </header>
 
     <!-- Success Page -->
@@ -403,7 +432,7 @@
 </section>
 
 <!-- MAIN FOOTER -->
-<footer class="main-footer">
+<section class="main-footer">
   <div class="footer-content">
     
     <!-- Brand Section -->
@@ -519,7 +548,7 @@
   </div>
 
   
-<footer class="footer-bar">
+<section class="footer-bar">
   <div class="footer-left">
     <span class="brand">amzira</span>
     <span class="country">🌐 India</span>
@@ -532,12 +561,14 @@
   <div class="footer-right">
     <span class="secure-text">100% Secure Payments</span>
     <div class="payments">
-      <img src="payment-visa.png" alt="Visa">
-      <img src="mastercard.png" alt="Mastercard">
-      <img src="rupay.png" alt="RuPay">
-      <img src="upi.png" alt="UPI">
+      <img src="images/payments/payment-visa.png" alt="Visa">
+      <img src="images/payments/mastercard.png" alt="Mastercard">
+      <img src="images/payments/rupay.png" alt="RuPay">
+      <img src="images/payments/upi.png" alt="UPI">
     </div>
   </div>
+</section>
+</section>
 </footer>
  
 
@@ -546,6 +577,9 @@
     <script src="js/auth.js"></script>
     <script src="js/address.js"></script>
     <script src="js/order.js"></script>
+    <script src="js/menu.js"></script>
+    <script src="js/search.js"></script>
+    <script src="js/cart.js"></script>
     
     <script>
         // Require login

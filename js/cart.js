@@ -1,4 +1,9 @@
 let productsCache = null;
+const CART_PRICE_CONFIG = {
+    shippingThreshold: 2000,
+    shippingFee: 99,
+    taxRate: 0.05
+};
 
 function getApiBaseUrl() {
     if (window.AMZIRA && typeof window.AMZIRA.API_BASE_URL === 'string') {
@@ -15,6 +20,16 @@ function getApiBaseUrl() {
 
 function getBackendOrigin() {
     return getApiBaseUrl().replace(/\/api\/v1$/, '');
+}
+
+function redirectToLogin() {
+    const returnUrl = `${window.location.pathname}${window.location.search || ''}`;
+    try {
+        sessionStorage.setItem('returnUrl', returnUrl);
+    } catch (_) {
+        // Ignore storage failures and continue redirecting.
+    }
+    window.location.href = 'login.html';
 }
 
 async function ensureCsrfToken() {
@@ -64,19 +79,21 @@ async function apiFetch(path, options = {}) {
 function getUserId() {
     const params = new URLSearchParams(window.location.search);
     const fromQuery = params.get('user_id');
-    if (fromQuery) return Number(fromQuery);
+    if (fromQuery && Number(fromQuery) > 0) return Number(fromQuery);
 
     try {
         const user = JSON.parse(localStorage.getItem('user') || 'null');
-        if (user?.id) return Number(user.id);
+        if (user?.id && Number(user.id) > 0) return Number(user.id);
     } catch (_) {
         // Ignore invalid stored user.
     }
 
     const stored = localStorage.getItem('checkout_user_id');
-    if (stored) return Number(stored);
+    if (stored && Number(stored) > 0) return Number(stored);
 
-    return 1;
+    console.warn('[cart] user session missing, redirecting to login');
+    redirectToLogin();
+    return null;
 }
 
 function formatMoney(value) {
@@ -136,23 +153,43 @@ async function getProductById(productId) {
 class ShoppingCart {
     constructor() {
         this.items = [];
-        this.summary = { subtotal: 0, tax: 0, total: 0 };
+        this.summary = { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0 };
         this.userId = getUserId();
+        if (!this.userId) return;
         localStorage.setItem('checkout_user_id', String(this.userId));
         this.init();
     }
 
+    deriveSummary(rawSummary = {}) {
+        const computedSubtotal = this.items.reduce((sum, item) => sum + Number(item.total_price || 0), 0);
+        const subtotal = Number.isFinite(Number(rawSummary?.subtotal)) && Number(rawSummary.subtotal) > 0
+            ? Number(rawSummary.subtotal)
+            : computedSubtotal;
+        const discount = Number(rawSummary?.discount || rawSummary?.discount_amount || 0) || 0;
+        const shipping = Number.isFinite(Number(rawSummary?.shipping_amount))
+            ? Number(rawSummary.shipping_amount)
+            : (subtotal >= CART_PRICE_CONFIG.shippingThreshold ? 0 : CART_PRICE_CONFIG.shippingFee);
+        const taxableAmount = Math.max(0, subtotal - discount + shipping);
+        const tax = taxableAmount * CART_PRICE_CONFIG.taxRate;
+        const total = subtotal - discount + shipping + tax;
+
+        return { subtotal, discount, shipping, tax, total };
+    }
+
     async init() {
+        if (!this.userId) return;
         await this.loadCart();
 
         window.addEventListener('auth:login', async () => {
             this.userId = getUserId();
+            if (!this.userId) return;
             localStorage.setItem('checkout_user_id', String(this.userId));
             await this.loadCart();
         });
 
         window.addEventListener('auth:logout', async () => {
             this.userId = getUserId();
+            if (!this.userId) return;
             await this.loadCart();
         });
     }
@@ -171,16 +208,22 @@ class ShoppingCart {
     }
 
     async loadCart() {
-        const data = await apiFetch(`/cart/${this.userId}`);
+        if (!this.userId) return null;
+        await ensureApiLayer();
+        const data = await window.AMZIRA.cart.getCart();
         console.log('Cart API:', data);
         this.items = Array.isArray(data.items) ? data.items : [];
-        this.summary = data;
+        this.summary = this.deriveSummary(data);
         this.renderCart();
         this.updateCartCount();
         return data;
     }
 
     async addItem(productIdOrObject, quantity = 1, size = null, color = null) {
+        if (!this.userId) {
+            redirectToLogin();
+            return false;
+        }
         let product = productIdOrObject;
         if (typeof productIdOrObject !== 'object') {
             product = await getProductById(productIdOrObject);
@@ -207,16 +250,8 @@ class ShoppingCart {
             variantId = Number(product.default_variant.variant_id);
         }
 
-        await apiFetch('/cart/add', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                user_id: this.userId,
-                product_id: product.id,
-                variant_id: variantId || undefined,
-                quantity: Number(quantity) || 1
-            })
-        });
+        await ensureApiLayer();
+        await window.AMZIRA.cart.addToCart(product.id, variantId || undefined, Number(quantity) || 1);
 
         this.showNotification('Product added to cart!', 'success');
         await this.loadCart();
@@ -224,22 +259,23 @@ class ShoppingCart {
     }
 
     async updateQuantity(cartItemId, quantity) {
-        await apiFetch(`/cart/items/${cartItemId}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                user_id: this.userId,
-                quantity: Number(quantity)
-            })
-        });
+        if (!this.userId) {
+            redirectToLogin();
+            return;
+        }
+        await ensureApiLayer();
+        await window.AMZIRA.cart.updateCartItem(cartItemId, Number(quantity));
 
         await this.loadCart();
     }
 
     async removeItem(cartItemId) {
-        await apiFetch(`/cart/items/${cartItemId}?user_id=${encodeURIComponent(this.userId)}`, {
-            method: 'DELETE'
-        });
+        if (!this.userId) {
+            redirectToLogin();
+            return;
+        }
+        await ensureApiLayer();
+        await window.AMZIRA.cart.removeFromCart(cartItemId);
 
         this.showNotification('Item removed from cart', 'info');
         await this.loadCart();
@@ -266,9 +302,9 @@ class ShoppingCart {
         }
 
         cartContainer.innerHTML = `
-            <div class="cart-items-list">
+                <div class="cart-items-list">
                 ${this.items.map((item) => `
-                    <div class="cart-item" data-id="${item.cart_item_id}">
+                    <div class="cart-item" data-id="${item.id || item.cart_item_id}">
                         <div class="cart-item-image">
                             <img src="${escapeHtml(item.product_image || 'images/products/product-1-front.jpg')}" alt="${escapeHtml(item.product_name)}" loading="lazy">
                         </div>
@@ -283,13 +319,13 @@ class ShoppingCart {
                         </div>
                         <div class="cart-item-actions">
                             <div class="quantity-control">
-                                <button class="qty-btn qty-minus" data-id="${item.cart_item_id}"><i class="fas fa-minus"></i></button>
-                                <input type="number" class="qty-input" value="${item.quantity}" min="1" max="10" data-id="${item.cart_item_id}">
-                                <button class="qty-btn qty-plus" data-id="${item.cart_item_id}"><i class="fas fa-plus"></i></button>
+                                <button class="qty-btn qty-minus" data-id="${item.id || item.cart_item_id}"><i class="fas fa-minus"></i></button>
+                                <input type="number" class="qty-input" value="${item.quantity}" min="1" max="10" data-id="${item.id || item.cart_item_id}">
+                                <button class="qty-btn qty-plus" data-id="${item.id || item.cart_item_id}"><i class="fas fa-plus"></i></button>
                             </div>
                             <div class="item-total">${formatMoney(item.total_price)}</div>
                             <div class="cart-item-buttons">
-                                <button class="btn-text remove-item" data-id="${item.cart_item_id}"><i class="far fa-trash-alt"></i> Remove</button>
+                                <button class="btn-text remove-item" data-id="${item.id || item.cart_item_id}"><i class="far fa-trash-alt"></i> Remove</button>
                             </div>
                         </div>
                     </div>
@@ -298,10 +334,16 @@ class ShoppingCart {
         `;
 
         if (cartSummary) {
+            const shippingNoticeClass = this.summary.shipping === 0 ? 'shipping-notice success' : 'shipping-notice';
+            const shippingNoticeText = this.summary.shipping === 0
+                ? 'You have unlocked free shipping on this order.'
+                : `Add ${formatMoney(Math.max(0, CART_PRICE_CONFIG.shippingThreshold - this.summary.subtotal))} more to unlock free shipping.`;
             cartSummary.innerHTML = `
                 <h3>Order Summary</h3>
                 <div class="summary-row"><span>Subtotal (${this.getItemCount()} items)</span><span>${formatMoney(this.summary.subtotal)}</span></div>
-                <div class="summary-row"><span>Tax</span><span>${formatMoney(this.summary.tax)}</span></div>
+                <div class="summary-row"><span>Shipping</span><span>${this.summary.shipping === 0 ? 'FREE' : formatMoney(this.summary.shipping)}</span></div>
+                <div class="${shippingNoticeClass}"><i class="fas fa-truck"></i><span>${shippingNoticeText}</span></div>
+                <div class="summary-row"><span>Tax (GST 5%)</span><span>${formatMoney(this.summary.tax)}</span></div>
                 <div class="summary-row total"><strong>Total</strong><strong>${formatMoney(this.summary.total)}</strong></div>
                 <button class="btn btn-primary btn-block checkout-btn" id="checkout-btn">Proceed to Checkout</button>
                 <a href="index.html" class="btn btn-secondary btn-block">Continue Shopping</a>
@@ -359,7 +401,7 @@ class ShoppingCart {
                     this.showNotification('Cart is empty', 'error');
                     return;
                 }
-                window.location.href = `checkout.html?user_id=${encodeURIComponent(this.userId)}`;
+                window.location.href = 'checkout.html';
             });
         }
     }

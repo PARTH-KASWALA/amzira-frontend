@@ -2,7 +2,7 @@
 // The real implementation now lives in js/orders.js.
 
 (function loadOrdersModule() {
-    if (window.initiateCheckout || window.OrderManager) {
+    if (window.OrderManager) {
         return;
     }
 
