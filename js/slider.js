@@ -500,5 +500,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    console.log('Sliders initialized successfully!');
+    if (window.__DEV__) console.log('Sliders initialized successfully!');
 });

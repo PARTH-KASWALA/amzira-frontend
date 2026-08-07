@@ -1283,7 +1283,7 @@
                                 <div class="pf"><label>Mobile Number</label><div class="val" id="profilePhone">-</div></div>
                                 <div class="pf"><label>Member Since</label><div class="val" id="profileDate">-</div></div>
                             </div>
-                            <button class="btn-primary" onclick="alert('Edit profile feature coming soon!')">
+                            <button class="btn-primary" onclick="notifyUser('Edit profile feature coming soon!', 'warning')">
                                 <i class="fas fa-pen"></i> Edit Profile
                             </button>
                         </div>
@@ -1456,7 +1456,7 @@
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/address.js"></script>
-    <script src="js/order.js"></script>
+    <script src="js/orders.js"></script>
     <script src="js/loading-states.js"></script>
     <script src="js/error-handler.js"></script>
     <script src="js/product-normalizer.js"></script>
@@ -1501,7 +1501,7 @@
                     return;
                 }
             }
-            alert(msg);
+            console.error('[account]', msg);
         }
 
         function esc(v) {
@@ -1823,7 +1823,6 @@
         }
 
         async function deleteAddress(id) {
-            if (!confirm('Delete this address?')) return;
             const mgr = ensureAddressManager();
             if (!mgr) {
                 notifyUser('Address manager unavailable.');

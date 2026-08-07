@@ -46,6 +46,47 @@ function esc(value) {
     return div.innerHTML;
 }
 
+function toDisplayText(value, fallback = '') {
+    const text = String(value || '').trim();
+    return text || fallback;
+}
+
+function buildCategoryLink(slug) {
+    const safeSlug = String(slug || '').trim();
+    return safeSlug ? `category.html?slug=${encodeURIComponent(safeSlug)}` : 'category.html';
+}
+
+function renderBreadcrumb(product) {
+    const container = getPdpEl('breadcrumb');
+    if (!container) return;
+
+    const categoryName = toDisplayText(product?.category?.name, 'Category');
+    const categorySlug = toDisplayText(product?.category?.slug);
+    const subcategoryName = toDisplayText(product?.subcategory?.name);
+    const subcategorySlug = toDisplayText(product?.subcategory?.slug);
+    const productName = toDisplayText(product?.name, 'Product');
+
+    let html = `
+        <a href="index.html">Home</a>
+        <span class="separator">/</span>
+        <a href="${esc(buildCategoryLink(categorySlug))}">${esc(categoryName)}</a>
+    `;
+
+    if (subcategoryName && subcategorySlug) {
+        html += `
+        <span class="separator">/</span>
+        <a href="${esc(buildCategoryLink(subcategorySlug))}">${esc(subcategoryName)}</a>
+        `;
+    }
+
+    html += `
+        <span class="separator">/</span>
+        <span class="current">${esc(productName)}</span>
+    `;
+
+    container.innerHTML = html;
+}
+
 function splitUrlParts(url) {
     let base = String(url || '');
     let hash = '';
@@ -358,14 +399,14 @@ const deliveryChecker = createDeliveryChecker({ getPdpEl, getProductSlug, ensure
 async function displayProduct(product) {
     const normalized = normalizeForDisplayProduct(product);
     const categoryName = normalized?.category || product?.category?.name || product?.category || 'Category';
-    const categorySlug = product?.category?.slug || String(categoryName).toLowerCase().replace(/\s+/g, '-');
-    const subcategoryName = product?.subcategory?.name || product?.subcategory || categoryName;
+    const subcategoryName =
+        product?.subcategory?.name ||
+        product?.subcategory ||
+        categoryName;
 
     state.activeVariants = extractVariants(product).filter((variant) => variant && variant.is_active !== false);
     document.title = `${product?.name || 'Product'} | Amzira`;
-    getPdpEl('breadcrumbCategory').textContent = categoryName;
-    getPdpEl('breadcrumbCategory').href = `category.html?slug=${encodeURIComponent(categorySlug)}`;
-    getPdpEl('breadcrumbProduct').textContent = product?.name || 'Product';
+    renderBreadcrumb(product);
     getPdpEl('productCategory').textContent = String(subcategoryName || '').toUpperCase().replace('-', ' ');
     getPdpEl('productTitle').textContent = normalized?.name || product?.name || 'Product';
     updateSku(product);

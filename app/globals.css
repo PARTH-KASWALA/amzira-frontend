@@ -1,0 +1,97 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --surface: #fdf8ed;
+  --surface-strong: #fffaf0;
+  --ink: #171412;
+  --muted: #6e625b;
+  --maroon: #8f1438;
+  --maroon-deep: #5c071c;
+  --gold: #a16207;
+  --peacock: #0b4f6c;
+  --emerald: #1b4d3e;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at top left, rgba(212, 175, 55, 0.16), transparent 34rem),
+    linear-gradient(180deg, #fffaf0 0%, var(--surface) 36%, #ffffff 100%);
+  font-family: var(--font-montserrat), system-ui, sans-serif;
+}
+
+a,
+button,
+input,
+select,
+textarea {
+  outline-color: var(--maroon);
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+::selection {
+  background: rgba(143, 20, 56, 0.18);
+}
+
+.temple-rule {
+  position: relative;
+}
+
+.temple-rule::before {
+  content: "";
+  display: block;
+  height: 10px;
+  width: min(360px, 100%);
+  margin-bottom: 18px;
+  background:
+    linear-gradient(135deg, transparent 30%, rgba(161, 98, 7, 0.9) 30% 42%, transparent 42%),
+    linear-gradient(225deg, transparent 30%, rgba(143, 20, 56, 0.9) 30% 42%, transparent 42%);
+  background-size: 18px 10px;
+  border-radius: 999px;
+}
+
+.focus-ring {
+  @apply focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-maroon;
+}
+
+.container-page {
+  @apply mx-auto w-full max-w-[1480px] px-4 sm:px-6 lg:px-8;
+}
+
+.btn-primary {
+  @apply focus-ring inline-flex min-h-11 items-center justify-center rounded-md bg-maroon px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-white transition hover:bg-maroon-deep;
+}
+
+.btn-secondary {
+  @apply focus-ring inline-flex min-h-11 items-center justify-center rounded-md border border-charcoal/20 bg-white/80 px-6 py-3 text-sm font-semibold uppercase tracking-[0.12em] text-charcoal transition hover:border-maroon hover:text-maroon;
+}
+
+.section-kicker {
+  @apply text-xs font-semibold uppercase tracking-[0.28em] text-gold;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}

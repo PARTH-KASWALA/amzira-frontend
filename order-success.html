@@ -182,7 +182,7 @@
 
         .action-buttons {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
+            grid-template-columns: repeat(3, 1fr);
             gap: 16px;
             margin-bottom: 24px;
         }
@@ -378,17 +378,17 @@
 
                 <!-- Action Buttons -->
                 <div class="action-buttons">
-                    <a href="order-tracking.html" class="btn-action btn-primary" id="trackOrderLink">
+                    <a href="index.html" class="btn-action btn-primary">
+                        <i class="fas fa-shopping-bag"></i>
+                        Continue Shopping
+                    </a>
+                    <a href="order-tracking.html" class="btn-action btn-secondary" id="trackOrderLink">
                         <i class="fas fa-truck"></i>
                         Track Order
                     </a>
                     <a href="account.html" class="btn-action btn-secondary">
                         <i class="fas fa-user"></i>
                         View Orders
-                    </a>
-                    <a href="index.html" class="btn-action btn-secondary">
-                        <i class="fas fa-shopping-bag"></i>
-                        Continue Shopping
                     </a>
                 </div>
 
@@ -576,7 +576,7 @@
     <script src="js/api.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/address.js"></script>
-    <script src="js/order.js"></script>
+    <script src="js/orders.js"></script>
     <script src="js/menu.js"></script>
     <script src="js/search.js"></script>
     <script src="js/cart.js"></script>
@@ -651,6 +651,56 @@
                     <div class="item-price">₹${(Number(item?.price || item?.unit_price || 0) * Number(item?.quantity || 0)).toLocaleString('en-IN')}</div>
                 </div>
             `).join('');
+        }
+
+        function launchConfetti() {
+            const burst = document.createElement('div');
+            burst.setAttribute('aria-hidden', 'true');
+            burst.style.cssText = `
+                position: fixed;
+                inset: 0;
+                pointer-events: none;
+                overflow: hidden;
+                z-index: 9999;
+            `;
+
+            for (let index = 0; index < 36; index += 1) {
+                const piece = document.createElement('span');
+                const left = Math.random() * 100;
+                const delay = Math.random() * 0.35;
+                const duration = 1.8 + Math.random() * 1.2;
+                const rotate = (Math.random() * 360) - 180;
+                const colors = ['#C6A664', '#0F0F0F', '#D4AF37', '#f3e6c1'];
+                piece.style.cssText = `
+                    position: absolute;
+                    top: -10px;
+                    left: ${left}%;
+                    width: 10px;
+                    height: 16px;
+                    border-radius: 2px;
+                    background: ${colors[index % colors.length]};
+                    opacity: 0.9;
+                    transform: rotate(${rotate}deg);
+                    animation: confettiFall ${duration}s ease-in ${delay}s forwards;
+                `;
+                burst.appendChild(piece);
+            }
+
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes confettiFall {
+                    0% { transform: translate3d(0, 0, 0) rotate(0deg); opacity: 0; }
+                    10% { opacity: 1; }
+                    100% { transform: translate3d(${Math.random() * 120 - 60}px, 105vh, 0) rotate(540deg); opacity: 0; }
+                }
+            `;
+
+            document.head.appendChild(style);
+            document.body.appendChild(burst);
+            window.setTimeout(() => {
+                burst.remove();
+                style.remove();
+            }, 3500);
         }
 
         function handleTerminalOrderStatus(order) {
@@ -733,6 +783,11 @@
             renderDeliveryAddress(order?.shipping_address || order?.deliveryAddress || {});
             renderItems(order?.items || order?.order_items || []);
             renderEmailStatus(order);
+
+            const normalizedStatus = String(order?.status || order?.order_status || '').toLowerCase();
+            if (normalizedStatus === 'confirmed' || normalizedStatus === 'processing') {
+                launchConfetti();
+            }
         }
 
         document.addEventListener('DOMContentLoaded', async function() {
@@ -742,8 +797,6 @@
                 const message = getApiMessage(error, 'Unable to load order details.');
                 if (window.errorHandler?.showError) {
                     window.errorHandler.showError(message);
-                } else {
-                    alert(message);
                 }
                 window.location.href = 'account.html';
             }

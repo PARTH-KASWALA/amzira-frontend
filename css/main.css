@@ -5,29 +5,33 @@
 
 /* CSS Variables */
 :root {
-    --bg-ivory: #F8F6F2;
-    --text-charcoal: #0F0F0F;
-    --accent-gold: #C6A664;
-    --section-bg: #E7E1D6;
-    --border-light: #EDEDED;
+    --bg-ivory: #FDFBF7;
+    --text-charcoal: #1A1A1A;
+    --accent-gold: #D4AF37;
+    --accent-gold-dark: #B8860B;
+    --section-bg: #F4EFE6;
+    --border-light: #EBE5D8;
     --white: #FFFFFF;
-    --black: #0F0F0F;
-    --brand-maroon: #8B1538;
-    --brand-maroon-deep: #6E0F2A;
-    --brand-maroon-soft: #F7E9EC;
+    --black: #1A1A1A;
+    --brand-maroon: #9A1750;
+    --brand-maroon-deep: #700018;
+    --brand-maroon-soft: #FBF0F4;
+    --south-peacock-blue: #0B4F6C;
+    --south-emerald-green: #1B4D3E;
+    --south-kanjivaram-pink: #E91E63;
 
     /* Legacy aliases kept for existing selectors */
-    --primary-color: var(--text-charcoal);
-    --primary-dark: var(--text-charcoal);
+    --primary-color: var(--brand-maroon);
+    --primary-dark: var(--brand-maroon-deep);
     --accent-color: var(--accent-gold);
-    --accent-dark: var(--accent-gold);
+    --accent-dark: var(--accent-gold-dark);
     --text-dark: var(--text-charcoal);
-    --text-gray: rgba(15, 15, 15, 0.72);
-    --text-light: rgba(15, 15, 15, 0.56);
+    --text-gray: rgba(26, 26, 26, 0.76);
+    --text-light: rgba(26, 26, 26, 0.58);
     --bg-light: var(--bg-ivory);
     --border-color: var(--border-light);
-    --success: var(--accent-gold);
-    --error: var(--text-charcoal);
+    --success: var(--south-emerald-green);
+    --error: var(--brand-maroon-deep);
     
     /* Spacing */
     --spacing-xs: 8px;

@@ -1,3 +1,7 @@
+const isLocalDevHost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+const devLog = isLocalDevHost ? console.log.bind(console, '[cart]') : () => {};
+const devWarn = isLocalDevHost ? console.warn.bind(console, '[cart]') : () => {};
+
 let productsCache = null;
 const CART_PRICE_CONFIG = {
     shippingThreshold: 2000,
@@ -91,8 +95,6 @@ function getUserId() {
     const stored = localStorage.getItem('checkout_user_id');
     if (stored && Number(stored) > 0) return Number(stored);
 
-    console.warn('[cart] user session missing, redirecting to login');
-    redirectToLogin();
     return null;
 }
 
@@ -108,6 +110,19 @@ function escapeHtml(value) {
     const div = document.createElement('div');
     div.textContent = value == null ? '' : String(value);
     return div.innerHTML;
+}
+
+function getStoredWishlist() {
+    try {
+        const wishlist = JSON.parse(localStorage.getItem('amziraWishlist') || '[]');
+        return Array.isArray(wishlist) ? wishlist : [];
+    } catch (_) {
+        return [];
+    }
+}
+
+function updateStoredWishlist(items) {
+    localStorage.setItem('amziraWishlist', JSON.stringify(items));
 }
 
 async function ensureApiLayer() {
@@ -154,10 +169,35 @@ class ShoppingCart {
     constructor() {
         this.items = [];
         this.summary = { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0 };
+        this.pendingRemovalId = null;
         this.userId = getUserId();
-        if (!this.userId) return;
-        localStorage.setItem('checkout_user_id', String(this.userId));
+        if (this.userId) {
+            localStorage.setItem('checkout_user_id', String(this.userId));
+        }
         this.init();
+    }
+
+    clearStoredAuthHints() {
+        try {
+            localStorage.removeItem('user');
+            localStorage.removeItem('access_token');
+            localStorage.removeItem('refresh_token');
+            localStorage.removeItem('checkout_user_id');
+        } catch (_) {
+            // Ignore storage cleanup failures and fall back to guest UI.
+        }
+    }
+
+    resetToGuestState({ clearStoredAuth = false } = {}) {
+        if (clearStoredAuth) {
+            this.clearStoredAuthHints();
+        }
+        this.userId = null;
+        this.items = [];
+        this.summary = { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0 };
+        this.pendingRemovalId = null;
+        this.renderCart();
+        this.updateCartCount();
     }
 
     deriveSummary(rawSummary = {}) {
@@ -177,20 +217,38 @@ class ShoppingCart {
     }
 
     async init() {
-        if (!this.userId) return;
-        await this.loadCart();
+        if (this.userId) {
+            this.renderLoadingState();
+            try {
+                await this.loadCart();
+            } catch (error) {
+                if (error?.status === 401) {
+                    devWarn('Falling back to guest cart after unauthorized bootstrap.', error);
+                    this.resetToGuestState({ clearStoredAuth: true });
+                } else {
+                    throw error;
+                }
+            }
+        } else {
+            this.renderCart();
+            this.updateCartCount();
+        }
 
         window.addEventListener('auth:login', async () => {
             this.userId = getUserId();
-            if (!this.userId) return;
-            localStorage.setItem('checkout_user_id', String(this.userId));
-            await this.loadCart();
+            if (this.userId) {
+                localStorage.setItem('checkout_user_id', String(this.userId));
+                await this.loadCart();
+                return;
+            }
+            this.items = [];
+            this.summary = { subtotal: 0, discount: 0, shipping: 0, tax: 0, total: 0 };
+            this.renderCart();
+            this.updateCartCount();
         });
 
         window.addEventListener('auth:logout', async () => {
-            this.userId = getUserId();
-            if (!this.userId) return;
-            await this.loadCart();
+            this.resetToGuestState({ clearStoredAuth: true });
         });
     }
 
@@ -208,15 +266,67 @@ class ShoppingCart {
     }
 
     async loadCart() {
-        if (!this.userId) return null;
-        await ensureApiLayer();
-        const data = await window.AMZIRA.cart.getCart();
-        console.log('Cart API:', data);
-        this.items = Array.isArray(data.items) ? data.items : [];
-        this.summary = this.deriveSummary(data);
-        this.renderCart();
-        this.updateCartCount();
-        return data;
+        if (!this.userId) {
+            this.resetToGuestState();
+            return null;
+        }
+        try {
+            await ensureApiLayer();
+            const data = await window.AMZIRA.cart.getCart();
+            devLog('api', data);
+            this.items = Array.isArray(data.items) ? data.items : [];
+            this.summary = this.deriveSummary(data);
+            this.pendingRemovalId = null;
+            this.renderCart();
+            this.updateCartCount();
+            return data;
+        } catch (error) {
+            if (error?.status === 401) {
+                devWarn('Cart request unauthorized. Clearing stale client auth state.', error);
+                this.resetToGuestState({ clearStoredAuth: true });
+                return null;
+            }
+            throw error;
+        }
+    }
+
+    renderLoadingState() {
+        const cartContainer = document.getElementById('cartItems');
+        const cartSummary = document.getElementById('cartSummary');
+        if (cartContainer) {
+            cartContainer.innerHTML = `
+                <div class="cart-skeleton" aria-hidden="true">
+                    <div class="skeleton-row">
+                        <div class="skeleton-block skeleton-thumb"></div>
+                        <div>
+                            <div class="skeleton-block skeleton-title"></div>
+                            <div class="skeleton-block skeleton-meta"></div>
+                            <div class="skeleton-block skeleton-price"></div>
+                        </div>
+                        <div class="skeleton-block skeleton-actions"></div>
+                    </div>
+                    <div class="skeleton-row">
+                        <div class="skeleton-block skeleton-thumb"></div>
+                        <div>
+                            <div class="skeleton-block skeleton-title"></div>
+                            <div class="skeleton-block skeleton-meta"></div>
+                            <div class="skeleton-block skeleton-price"></div>
+                        </div>
+                        <div class="skeleton-block skeleton-actions"></div>
+                    </div>
+                </div>
+            `;
+        }
+        if (cartSummary) {
+            cartSummary.style.display = 'block';
+            cartSummary.innerHTML = `
+                <h3>Order Summary</h3>
+                <div class="summary-row"><span>Subtotal</span><span>...</span></div>
+                <div class="summary-row"><span>Shipping</span><span>...</span></div>
+                <div class="summary-row"><span>Tax</span><span>...</span></div>
+                <div class="summary-row total"><strong>Total</strong><strong>...</strong></div>
+            `;
+        }
     }
 
     async addItem(productIdOrObject, quantity = 1, size = null, color = null) {
@@ -260,7 +370,6 @@ class ShoppingCart {
 
     async updateQuantity(cartItemId, quantity) {
         if (!this.userId) {
-            redirectToLogin();
             return;
         }
         await ensureApiLayer();
@@ -271,7 +380,6 @@ class ShoppingCart {
 
     async removeItem(cartItemId) {
         if (!this.userId) {
-            redirectToLogin();
             return;
         }
         await ensureApiLayer();
@@ -281,19 +389,100 @@ class ShoppingCart {
         await this.loadCart();
     }
 
+    async moveToWishlist(item) {
+        const wishlist = getStoredWishlist();
+        const wishlistKey = item?.product_slug || item?.slug || item?.product_id || item?.id;
+        if (wishlistKey == null) {
+            this.showNotification('Unable to save this item for later', 'error');
+            return;
+        }
+
+        const normalizedKey = String(wishlistKey);
+        if (!wishlist.includes(normalizedKey)) {
+            wishlist.push(normalizedKey);
+            updateStoredWishlist(wishlist);
+        }
+
+        await this.removeItem(item.id || item.cart_item_id);
+        this.showNotification('Moved to wishlist', 'success');
+    }
+
+    buildRecommendationsMarkup() {
+        const recommendations = (productsCache || [])
+            .filter((product) => product?.slug && product?.name)
+            .slice(0, 4);
+
+        if (!recommendations.length) return '';
+
+        return `
+            <section class="cart-recommendations">
+                <div class="recommendations-header">
+                    <h3>You Might Also Like</h3>
+                    <p>Fresh arrivals worth a second look while your cart is empty.</p>
+                </div>
+                <div class="recommendations-grid">
+                    ${recommendations.map((product) => `
+                        <a class="recommendation-card" href="product-detail.html?slug=${encodeURIComponent(product.slug)}">
+                            <div class="recommendation-image-wrap">
+                                <img
+                                    class="recommendation-image"
+                                    src="${escapeHtml(product.image || product.primary_image || product.images?.[0] || 'images/products/product-1-front.jpg')}"
+                                    alt="${escapeHtml(product.name)}"
+                                    loading="lazy"
+                                >
+                            </div>
+                            <div class="recommendation-copy">
+                                <div class="recommendation-name">${escapeHtml(product.name)}</div>
+                                <div class="recommendation-price">${formatMoney(product.sale_price || product.base_price || product.price || 0)}</div>
+                            </div>
+                        </a>
+                    `).join('')}
+                </div>
+            </section>
+        `;
+    }
+
     renderCart() {
         const cartContainer = document.getElementById('cartItems');
         const cartSummary = document.getElementById('cartSummary');
         if (!cartContainer) return;
 
+        if (!this.userId) {
+            cartContainer.innerHTML = `
+                <div class="empty-cart">
+                    <i class="fas fa-shopping-bag"></i>
+                    <h2>Your cart awaits</h2>
+                    <p>Please login to view and manage your cart.</p>
+                    <div class="empty-cart-actions">
+                        <a href="login.html" class="btn btn-primary">Login to Continue</a>
+                        <a href="men.html" class="btn btn-secondary">Shop Men's</a>
+                        <a href="women.html" class="btn btn-secondary">Shop Women's</a>
+                    </div>
+                </div>
+            `;
+            if (cartSummary) cartSummary.style.display = 'none';
+            const cartCountText = document.getElementById('cartCountText');
+            if (cartCountText) cartCountText.textContent = 'Guest session';
+            return;
+        }
+
         if (!this.items.length) {
+            if (!productsCache) {
+                loadProductsData()
+                    .then(() => this.renderCart())
+                    .catch(() => {});
+            }
             cartContainer.innerHTML = `
                 <div class="empty-cart">
                     <i class="fas fa-shopping-bag"></i>
                     <h2>Your cart is empty</h2>
                     <p>Looks like you have not added anything to your cart yet.</p>
-                    <a href="index.html" class="btn btn-primary">Continue Shopping</a>
+                    <div class="empty-cart-actions">
+                        <a href="men.html" class="btn btn-primary">Shop Men's</a>
+                        <a href="women.html" class="btn btn-secondary">Shop Women's</a>
+                    </div>
                 </div>
+                ${this.buildRecommendationsMarkup()}
             `;
             if (cartSummary) cartSummary.style.display = 'none';
             const cartCountText = document.getElementById('cartCountText');
@@ -301,6 +490,8 @@ class ShoppingCart {
             return;
         }
 
+        const shippingProgress = Math.min(100, Math.max(0, (this.summary.subtotal / CART_PRICE_CONFIG.shippingThreshold) * 100));
+        const shippingDelta = Math.max(0, CART_PRICE_CONFIG.shippingThreshold - this.summary.subtotal);
         cartContainer.innerHTML = `
                 <div class="cart-items-list">
                 ${this.items.map((item) => `
@@ -320,12 +511,20 @@ class ShoppingCart {
                         <div class="cart-item-actions">
                             <div class="quantity-control">
                                 <button class="qty-btn qty-minus" data-id="${item.id || item.cart_item_id}"><i class="fas fa-minus"></i></button>
-                                <input type="number" class="qty-input" value="${item.quantity}" min="1" max="10" data-id="${item.id || item.cart_item_id}">
+                                <input type="number" class="qty-input" value="${item.quantity}" min="1" max="${Math.max(1, Number(item.stock_available || item.quantity || 1))}" data-id="${item.id || item.cart_item_id}">
                                 <button class="qty-btn qty-plus" data-id="${item.id || item.cart_item_id}"><i class="fas fa-plus"></i></button>
                             </div>
                             <div class="item-total">${formatMoney(item.total_price)}</div>
                             <div class="cart-item-buttons">
+                                <button class="btn-text move-to-wishlist" data-id="${item.id || item.cart_item_id}"><i class="far fa-heart"></i> Move to Wishlist</button>
                                 <button class="btn-text remove-item" data-id="${item.id || item.cart_item_id}"><i class="far fa-trash-alt"></i> Remove</button>
+                                ${String(this.pendingRemovalId) === String(item.id || item.cart_item_id) ? `
+                                    <div class="remove-confirm">
+                                        <span>Remove item?</span>
+                                        <button class="confirm-yes" data-id="${item.id || item.cart_item_id}">Yes</button>
+                                        <button class="confirm-no" data-id="${item.id || item.cart_item_id}">Cancel</button>
+                                    </div>
+                                ` : ''}
                             </div>
                         </div>
                     </div>
@@ -342,9 +541,23 @@ class ShoppingCart {
                 <h3>Order Summary</h3>
                 <div class="summary-row"><span>Subtotal (${this.getItemCount()} items)</span><span>${formatMoney(this.summary.subtotal)}</span></div>
                 <div class="summary-row"><span>Shipping</span><span>${this.summary.shipping === 0 ? 'FREE' : formatMoney(this.summary.shipping)}</span></div>
+                <div class="shipping-progress">
+                    <div class="shipping-progress-label">
+                        <span>${this.summary.shipping === 0 ? 'Free shipping unlocked' : 'Free shipping progress'}</span>
+                        <span>${shippingDelta === 0 ? '100%' : formatMoney(shippingDelta)} away</span>
+                    </div>
+                    <div class="shipping-progress-bar">
+                        <div class="shipping-progress-fill" style="width:${shippingProgress}%"></div>
+                    </div>
+                </div>
                 <div class="${shippingNoticeClass}"><i class="fas fa-truck"></i><span>${shippingNoticeText}</span></div>
                 <div class="summary-row"><span>Tax (GST 5%)</span><span>${formatMoney(this.summary.tax)}</span></div>
                 <div class="summary-row total"><strong>Total</strong><strong>${formatMoney(this.summary.total)}</strong></div>
+                <div class="summary-trust">
+                    <div class="summary-trust-item"><i class="fas fa-lock"></i><span>Secure checkout with protected payments</span></div>
+                    <div class="summary-trust-item"><i class="fas fa-truck-fast"></i><span>Fast dispatch for ready-to-ship styles</span></div>
+                    <div class="summary-trust-item"><i class="fas fa-rotate-left"></i><span>Easy return support after delivery</span></div>
+                </div>
                 <button class="btn btn-primary btn-block checkout-btn" id="checkout-btn">Proceed to Checkout</button>
                 <a href="index.html" class="btn btn-secondary btn-block">Continue Shopping</a>
             `;
@@ -374,7 +587,8 @@ class ShoppingCart {
             button.addEventListener('click', async (event) => {
                 const id = event.currentTarget.getAttribute('data-id');
                 const input = document.querySelector(`.qty-input[data-id="${id}"]`);
-                const next = Math.min(10, Number(input?.value || 1) + 1);
+                const max = Math.max(1, Number(input?.getAttribute('max') || input?.value || 1));
+                const next = Math.min(max, Number(input?.value || 1) + 1);
                 await this.updateQuantity(id, next);
             });
         });
@@ -382,7 +596,8 @@ class ShoppingCart {
         document.querySelectorAll('.qty-input').forEach((input) => {
             input.addEventListener('change', async (event) => {
                 const id = event.currentTarget.getAttribute('data-id');
-                const next = Math.min(10, Math.max(1, Number(event.currentTarget.value || 1)));
+                const max = Math.max(1, Number(event.currentTarget.getAttribute('max') || event.currentTarget.value || 1));
+                const next = Math.min(max, Math.max(1, Number(event.currentTarget.value || 1)));
                 await this.updateQuantity(id, next);
             });
         });
@@ -390,7 +605,37 @@ class ShoppingCart {
         document.querySelectorAll('.remove-item').forEach((button) => {
             button.addEventListener('click', async (event) => {
                 const id = event.currentTarget.getAttribute('data-id');
+                this.pendingRemovalId = id;
+                this.renderCart();
+            });
+        });
+
+        document.querySelectorAll('.move-to-wishlist').forEach((button) => {
+            button.addEventListener('click', async (event) => {
+                const id = event.currentTarget.getAttribute('data-id');
+                const item = this.items.find((entry) => String(entry.id || entry.cart_item_id) === String(id));
+                if (!item) {
+                    this.showNotification('Item no longer available in cart', 'warning');
+                    return;
+                }
+                await this.moveToWishlist(item);
+            });
+        });
+
+        document.querySelectorAll('.confirm-yes').forEach((button) => {
+            button.addEventListener('click', async (event) => {
+                const id = event.currentTarget.getAttribute('data-id');
                 await this.removeItem(id);
+            });
+        });
+
+        document.querySelectorAll('.confirm-no').forEach((button) => {
+            button.addEventListener('click', (event) => {
+                const id = event.currentTarget.getAttribute('data-id');
+                if (String(this.pendingRemovalId) === String(id)) {
+                    this.pendingRemovalId = null;
+                    this.renderCart();
+                }
             });
         });
 

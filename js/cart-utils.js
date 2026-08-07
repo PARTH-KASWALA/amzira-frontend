@@ -20,7 +20,6 @@ export function getCart() {
 
 export function saveCart(cart) {
     localStorage.setItem(CART_KEY, JSON.stringify(Array.isArray(cart) ? cart : []));
-    console.log(localStorage.getItem(CART_KEY));
 }
 
 export function addToCart(product) {

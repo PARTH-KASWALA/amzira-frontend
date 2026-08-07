@@ -54,6 +54,42 @@
             align-items: start;
         }
 
+        .cart-skeleton {
+            display: grid;
+            gap: 24px;
+        }
+
+        .skeleton-row {
+            display: grid;
+            grid-template-columns: 120px 1fr auto;
+            gap: 20px;
+            align-items: start;
+            padding: 24px 0;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .skeleton-row:last-child {
+            border-bottom: none;
+        }
+
+        .skeleton-block {
+            border-radius: 8px;
+            background: linear-gradient(90deg, #f4efe6 25%, #ece4d6 50%, #f4efe6 75%);
+            background-size: 200% 100%;
+            animation: cartShimmer 1.4s linear infinite;
+        }
+
+        @keyframes cartShimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .skeleton-thumb { width: 120px; height: 150px; }
+        .skeleton-title { width: 58%; height: 18px; margin-bottom: 12px; }
+        .skeleton-meta { width: 42%; height: 12px; margin-bottom: 14px; }
+        .skeleton-price { width: 25%; height: 20px; }
+        .skeleton-actions { width: 110px; height: 92px; }
+
         /* Cart Items */
         .cart-items-section {
             background: white;
@@ -122,7 +158,7 @@
         .price-current {
             font-size: 20px;
             font-weight: 700;
-            color: var(--accent-color);
+            color: var(--text-charcoal, #0F0F0F);
         }
 
         .price-original {
@@ -222,6 +258,88 @@
             margin-bottom: 32px;
         }
 
+        .empty-cart-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .cart-recommendations {
+            margin-top: 24px;
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+        }
+
+        .recommendations-header {
+            margin-bottom: 18px;
+        }
+
+        .recommendations-header h3 {
+            font-family: var(--font-heading, 'Playfair Display', serif);
+            font-size: 22px;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+        }
+
+        .recommendations-header p {
+            font-size: 14px;
+            color: var(--text-gray);
+        }
+
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .recommendation-card {
+            display: block;
+            text-decoration: none;
+            color: inherit;
+            background: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .recommendation-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 24px rgba(15, 15, 15, 0.08);
+        }
+
+        .recommendation-image-wrap {
+            aspect-ratio: 0.82;
+            background: var(--bg-light);
+            overflow: hidden;
+        }
+
+        .recommendation-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .recommendation-copy {
+            padding: 14px;
+        }
+
+        .recommendation-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 6px;
+            line-height: 1.45;
+        }
+
+        .recommendation-price {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--text-charcoal, #0F0F0F);
+        }
+
         /* Cart Summary */
         .cart-summary {
             background: white;
@@ -232,6 +350,7 @@
         }
 
         .cart-summary h3 {
+            font-family: var(--font-heading, 'Playfair Display', serif);
             font-size: 20px;
             margin-bottom: 20px;
             padding-bottom: 16px;
@@ -256,6 +375,59 @@
             padding-top: 16px;
             border-top: 2px solid var(--border-color);
             margin-top: 8px;
+        }
+
+        .shipping-progress {
+            margin: 18px 0 12px;
+            padding: 14px;
+            background: #fcfaf6;
+            border: 1px solid #efe5d2;
+            border-radius: 8px;
+        }
+
+        .shipping-progress-label {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 12px;
+            color: var(--text-gray);
+            margin-bottom: 10px;
+        }
+
+        .shipping-progress-bar {
+            height: 8px;
+            border-radius: 999px;
+            background: #ece5d8;
+            overflow: hidden;
+        }
+
+        .shipping-progress-fill {
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            background: linear-gradient(135deg, #C6A664 0%, #a88843 100%);
+            transition: width 0.3s ease;
+        }
+
+        .summary-trust {
+            display: grid;
+            gap: 8px;
+            margin: 16px 0 18px;
+        }
+
+        .summary-trust-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            background: var(--bg-light);
+            font-size: 13px;
+            color: var(--text-gray);
+        }
+
+        .summary-trust-item i {
+            color: #a88843;
         }
 
         .shipping-notice {
@@ -283,6 +455,57 @@
             margin-bottom: 12px;
         }
 
+        .checkout-btn {
+            background: linear-gradient(135deg, #C6A664 0%, #a88843 100%);
+            color: #fff;
+            border: none;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 4px 18px rgba(198,166,100,0.32);
+            transition: all 0.25s ease;
+        }
+
+        .checkout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(198,166,100,0.42);
+        }
+
+        .remove-confirm {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 8px 10px;
+            border-radius: 8px;
+            background: #fff7f7;
+            border: 1px solid #fecaca;
+            font-size: 12px;
+            color: #991b1b;
+        }
+
+        .remove-confirm button {
+            border: 1px solid transparent;
+            background: #fff;
+            border-radius: 6px;
+            padding: 5px 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .remove-confirm .confirm-yes {
+            border-color: #fca5a5;
+            color: #b91c1c;
+        }
+
+        .remove-confirm .confirm-no {
+            border-color: var(--border-color);
+            color: var(--text-dark);
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .cart-layout {
@@ -291,6 +514,10 @@
 
             .cart-summary {
                 position: static;
+            }
+
+            .recommendations-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
             }
         }
 
@@ -340,6 +567,10 @@
             .cart-item-image {
                 width: 80px;
                 height: 100px;
+            }
+
+            .recommendations-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -455,10 +686,25 @@
             <div class="cart-layout">
                 <!-- Cart Items -->
                 <div class="cart-items-section" id="cartItems">
-                    <!-- Cart items will be loaded dynamically by cart.js -->
-                    <div style="text-align: center; padding: 60px 20px;">
-                        <div class="spinner"></div>
-                        <p>Loading cart...</p>
+                    <div class="cart-skeleton" aria-hidden="true">
+                        <div class="skeleton-row">
+                            <div class="skeleton-block skeleton-thumb"></div>
+                            <div>
+                                <div class="skeleton-block skeleton-title"></div>
+                                <div class="skeleton-block skeleton-meta"></div>
+                                <div class="skeleton-block skeleton-price"></div>
+                            </div>
+                            <div class="skeleton-block skeleton-actions"></div>
+                        </div>
+                        <div class="skeleton-row">
+                            <div class="skeleton-block skeleton-thumb"></div>
+                            <div>
+                                <div class="skeleton-block skeleton-title"></div>
+                                <div class="skeleton-block skeleton-meta"></div>
+                                <div class="skeleton-block skeleton-price"></div>
+                            </div>
+                            <div class="skeleton-block skeleton-actions"></div>
+                        </div>
                     </div>
                 </div>
 

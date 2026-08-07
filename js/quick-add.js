@@ -24,6 +24,22 @@ class QuickAdd {
         return div.innerHTML;
     }
 
+    notify(message, type = 'error', title = '') {
+        if (type === 'success' && window.errorHandler?.showSuccess) {
+            window.errorHandler.showSuccess(message, title || 'Success');
+            return;
+        }
+        if (type === 'warning' && window.errorHandler?.showWarning) {
+            window.errorHandler.showWarning(message, title || 'Attention');
+            return;
+        }
+        if (window.errorHandler?.showError) {
+            window.errorHandler.showError(message, title || 'Unable to Continue');
+            return;
+        }
+        console.error('[quick-add]', message);
+    }
+
     async ensureApiReady() {
         if (window.AMZIRA && window.AMZIRA.apiRequest) return;
         await new Promise((resolve, reject) => {
@@ -89,7 +105,7 @@ class QuickAdd {
         if (window.errorHandler?.showWarning) {
             window.errorHandler.showWarning('Please select size/color');
         } else {
-            alert('Please select size/color');
+            this.notify('Please select size/color', 'warning');
         }
     }
 
@@ -98,7 +114,7 @@ class QuickAdd {
             if (window.errorHandler?.showError) {
                 window.errorHandler.showError('Cart service unavailable. Please refresh and try again.');
             } else {
-                alert('Cart service unavailable. Please refresh and try again.');
+                this.notify('Cart service unavailable. Please refresh and try again.');
             }
             return;
         }
@@ -137,7 +153,7 @@ class QuickAdd {
                 product = window.__AMZIRA_PRODUCTS_BY_ID__[String(productId)];
             }
 
-            // If not found, try to fetch from products.json
+            // Fall back to the products API if the listing cache is empty.
             if (!product) {
                 await this.ensureApiReady();
                 if (!window.AMZIRA?.products?.getProducts) {
@@ -274,7 +290,7 @@ class QuickAdd {
     async addToCart() {
         if (!this.currentProduct || !this.selectedSize) return;
         if (!Number.isInteger(this.selectedVariantId) || this.selectedVariantId <= 0) {
-            alert('Please select size/color');
+            this.notify('Please select size/color', 'warning');
             return;
         }
 
@@ -287,11 +303,11 @@ class QuickAdd {
                 }
             } else {
                 console.error('Cart system not available');
-                alert('Cart system not available. Please try again.');
+                this.notify('Cart system not available. Please try again.');
             }
         } catch (error) {
             console.error('Error adding to cart:', error);
-            alert('Error adding item to cart. Please try again.');
+            this.notify('Error adding item to cart. Please try again.');
         }
     }
 

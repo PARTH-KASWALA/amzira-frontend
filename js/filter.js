@@ -3,12 +3,20 @@
    For category pages
    =================================== */
 
+const isFilterDev = Boolean(window.__DEV__);
+const filterDevLog = isFilterDev ? console.log.bind(console, '[filter]') : () => {};
+const filterDevWarn = isFilterDev ? console.warn.bind(console, '[filter]') : () => {};
+const filterDevError = isFilterDev ? console.error.bind(console, '[filter]') : () => {};
+
 class ProductFilter {
     constructor(products, options = {}) {
         this.allProducts = products;
         this.filteredProducts = [...products];
         this.categorySlug = String(options.categorySlug || '').toLowerCase();
         this.isComingSoon = Boolean(options.isComingSoon);
+        this.fetchProducts = typeof options.fetchProducts === 'function' ? options.fetchProducts : null;
+        this.totalCount = Number(options.totalCount || products.length || 0);
+        this.totalPages = Number(options.totalPages || (this.totalCount ? Math.ceil(this.totalCount / 24) : 0));
         this.activeFilters = {
             categories: [],
             colors: [],
@@ -22,6 +30,7 @@ class ProductFilter {
         this.itemsPerPage = 24;
         this._listeners = [];
         this.renderTimeout = null;
+        this.requestVersion = 0;
         
         // Parse URL parameters and apply filters
         this.parseURLFilters();
@@ -89,7 +98,7 @@ class ProductFilter {
             setTimeout(() => this.updateCheckboxesFromFilters(), 100);
         } catch (e) {
             // If URL parsing fails (e.g., non-browser env), ignore silently
-            console.warn('parseURLFilters skipped:', e);
+            filterDevWarn('parseURLFilters skipped:', e);
         }
     }
 
@@ -116,7 +125,9 @@ class ProductFilter {
     init() {
         this.setupEventListeners();
         this.renderFilters();
-        this.applyFilters({ resetPage: false });
+        this.renderProducts();
+        this.updateProductCount();
+        this.renderActiveFilters();
     }
     
     setupEventListeners() {
@@ -234,11 +245,110 @@ class ProductFilter {
         this.renderActiveFilters();
     }
     
-    applyFilters(options = {}) {
+    getApiSortValue() {
+        switch (this.sortBy) {
+            case 'price-low-high':
+                return 'price_asc';
+            case 'price-high-low':
+                return 'price_desc';
+            case 'newest':
+                return 'newest';
+            case 'rating':
+                return 'popular';
+            default:
+                return null;
+        }
+    }
+
+    buildApiParams() {
+        const params = {
+            page: this.currentPage,
+            limit: this.itemsPerPage,
+            in_stock_only: true
+        };
+
+        if (this.categorySlug && this.categorySlug !== 'all') {
+            params.category = this.categorySlug;
+        }
+        if (this.activeFilters.categories.length) {
+            params.subcategory = this.activeFilters.categories.map((value) => String(value).trim().toLowerCase()).join(',');
+        }
+
+        if (this.activeFilters.occasions.length) {
+            params.occasion = this.activeFilters.occasions.map((value) => String(value).trim().toLowerCase()).join(',');
+        }
+        if (this.activeFilters.fabrics.length) {
+            params.fabric = this.activeFilters.fabrics.join(',');
+        }
+        if (this.activeFilters.colors.length) {
+            params.color = this.activeFilters.colors.join(',');
+        }
+        if (this.activeFilters.sizes.length) {
+            params.size = this.activeFilters.sizes.join(',');
+        }
+        if (this.activeFilters.priceRange.min > 0) {
+            params.min_price = this.activeFilters.priceRange.min;
+        }
+        if (this.activeFilters.priceRange.max < 50000) {
+            params.max_price = this.activeFilters.priceRange.max;
+        }
+
+        const sortValue = this.getApiSortValue();
+        if (sortValue) {
+            params.sort_by = sortValue;
+        }
+
+        return params;
+    }
+
+    showLoadingState() {
+        const container = document.getElementById('productsGrid');
+        if (!container) return;
+        const skeletonCards = Array.from({ length: 8 }).map(() => `
+            <div class="product-card product-card-skeleton" aria-hidden="true">
+                <div class="product-image" style="background:#f2eee6; min-height:340px;"></div>
+                <div class="product-info">
+                    <div style="height:12px; width:34%; background:#f2eee6; border-radius:999px; margin-bottom:12px;"></div>
+                    <div style="height:18px; width:78%; background:#ece6dc; border-radius:999px; margin-bottom:10px;"></div>
+                    <div style="height:16px; width:42%; background:#f2eee6; border-radius:999px; margin-bottom:14px;"></div>
+                    <div style="height:40px; width:100%; background:#ece6dc; border-radius:8px;"></div>
+                </div>
+            </div>
+        `).join('');
+        container.innerHTML = skeletonCards;
+    }
+
+    async applyFilters(options = {}) {
         const { resetPage = true } = options;
         if (resetPage) {
             this.currentPage = 1;
             this.updatePageParam(1, true);
+        }
+        if (this.fetchProducts) {
+            const requestVersion = ++this.requestVersion;
+            this.showLoadingState();
+            try {
+                const response = await this.fetchProducts(this.buildApiParams());
+                if (requestVersion !== this.requestVersion) return;
+
+                this.allProducts = Array.isArray(response?.products) ? response.products : [];
+                this.filteredProducts = [...this.allProducts];
+                this.totalCount = Number(response?.total || this.filteredProducts.length || 0);
+                this.totalPages = Number(response?.total_pages || Math.ceil(this.totalCount / this.itemsPerPage) || 0);
+                this.isComingSoon = this.totalCount === 0;
+                this.renderProducts();
+                this.updateProductCount();
+                this.renderFilters();
+                return;
+            } catch (error) {
+                filterDevError('Error loading products:', error);
+                this.filteredProducts = [];
+                this.totalCount = 0;
+                this.totalPages = 0;
+                this.renderProducts();
+                this.updateProductCount();
+                return;
+            }
         }
         // Start with all products
         let filtered = [...this.allProducts];
@@ -363,11 +473,9 @@ class ProductFilter {
     renderProducts() {
         const container = document.getElementById('productsGrid');
         if (!container) return;
-        
-        // Calculate pagination
-        const startIndex = (this.currentPage - 1) * this.itemsPerPage;
-        const endIndex = startIndex + this.itemsPerPage;
-        const paginatedProducts = this.filteredProducts.slice(startIndex, endIndex);
+        const paginatedProducts = this.fetchProducts
+            ? this.filteredProducts
+            : this.filteredProducts.slice((this.currentPage - 1) * this.itemsPerPage, this.currentPage * this.itemsPerPage);
         
         if (paginatedProducts.length === 0) {
             container.innerHTML = this.getNoResultsHTML();
@@ -691,8 +799,7 @@ class ProductFilter {
     updateProductCount() {
         const countElement = document.querySelector('.products-count');
         if (countElement) {
-            // High-impact UX hardening (pre-launch)
-            const count = this.filteredProducts.length;
+            const count = this.fetchProducts ? this.totalCount : this.filteredProducts.length;
             const noun = count === 1 ? 'Product' : 'Products';
             countElement.textContent = `${count} ${noun}`;
         }
@@ -701,8 +808,9 @@ class ProductFilter {
     renderPagination() {
         const container = document.getElementById('pagination');
         if (!container) return;
-        
-        const totalPages = Math.ceil(this.filteredProducts.length / this.itemsPerPage);
+        const totalPages = this.fetchProducts
+            ? this.totalPages
+            : Math.ceil(this.filteredProducts.length / this.itemsPerPage);
         
         if (totalPages <= 1) {
             container.innerHTML = '';
@@ -742,12 +850,18 @@ class ProductFilter {
     }
     
     goToPage(page) {
-        const totalPages = Math.ceil(this.filteredProducts.length / this.itemsPerPage);
+        const totalPages = this.fetchProducts
+            ? this.totalPages
+            : Math.ceil(this.filteredProducts.length / this.itemsPerPage);
         if (page < 1 || page > totalPages) return;
         
         this.currentPage = page;
         this.updatePageParam(page);
-        this.renderProducts();
+        if (this.fetchProducts) {
+            this.applyFilters({ resetPage: false });
+        } else {
+            this.renderProducts();
+        }
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -798,7 +912,7 @@ class ProductFilter {
                 if (!e.target.closest('button')) {
                     const slug = card.getAttribute('data-slug') || '';
                     if (!slug) {
-                        console.warn('Product slug missing for PDP navigation.');
+                        filterDevWarn('Product slug missing for PDP navigation.');
                         return;
                     }
                     window.location.href = `product-detail.html?slug=${encodeURIComponent(String(slug).trim())}`;
@@ -834,7 +948,6 @@ class ProductFilter {
 
 // Initialize filter when page loads and dependencies ready
 document.addEventListener('DOMContentLoaded', function() {
-    // Audit Ref: [BLOCKER] Infinite Spinner on API Failure.
     const PRODUCTS_FETCH_TIMEOUT_MS = 10000;
 
     function getCurrentCategorySlug() {
@@ -844,172 +957,6 @@ document.addEventListener('DOMContentLoaded', function() {
         if (fileName === 'women.html') return 'women';
         if (fileName === 'kids.html') return 'kids';
         return '';
-    }
-
-    function toSafeNumber(value) {
-        const parsed = Number(value);
-        return Number.isFinite(parsed) ? parsed : NaN;
-    }
-
-    function hasSellableVariant(product) {
-        const defaultQty = toSafeNumber(product?.default_variant?.stock_quantity);
-        if (Number.isFinite(defaultQty) && defaultQty > 0) return true;
-        if (Array.isArray(product?.variants)) {
-            return product.variants.some((variant) => toSafeNumber(variant?.stock_quantity) > 0);
-        }
-        const stockQty = toSafeNumber(product?.stock_quantity);
-        return (Number.isFinite(stockQty) && stockQty > 0) || product?.in_stock === true;
-    }
-
-    function hasProductImage(product) {
-        if (typeof product?.primary_image === 'string' && product.primary_image.trim()) return true;
-        if (Array.isArray(product?.images) && product.images.length > 0) return true;
-        return Boolean(product?.image || product?.image_front);
-    }
-
-    function isRenderableProduct(product) {
-        if (!product || typeof product !== 'object') return false;
-        const hasId = product?.id != null && String(product.id).trim() !== '';
-        const hasName = typeof product?.name === 'string' && product.name.trim() !== '';
-        const sale = toSafeNumber(product?.sale_price);
-        const base = toSafeNumber(product?.base_price ?? product?.price);
-        const hasPrice = (Number.isFinite(sale) && sale >= 0) || (Number.isFinite(base) && base >= 0);
-        return Boolean(hasId && hasName && hasPrice && hasProductImage(product));
-    }
-
-    function getPageAudience() {
-        const path = String(window.location?.pathname || '').toLowerCase();
-        if (path.includes('women')) return 'women';
-        if (path.includes('kids')) return 'kids';
-        if (path.includes('men')) return 'men';
-        return null;
-    }
-
-    function normalizeCategory(value) {
-        return String(value || '')
-            .trim()
-            .toLowerCase()
-            .replace(/['"]/g, '')
-            .replace(/[_\s]+/g, '-');
-    }
-
-    function buildCategoryAliases(categories) {
-        const aliases = {};
-        if (!Array.isArray(categories)) return aliases;
-
-        const register = (raw, target) => {
-            const key = normalizeCategory(raw);
-            if (key) aliases[key] = target;
-        };
-
-        const hasChildren = categories.some((entry) => Array.isArray(entry?.children));
-        if (hasChildren) {
-            categories.forEach((l1) => {
-                const l1Slug = normalizeCategory(l1?.slug || l1?.name || '');
-                if (!l1Slug) return;
-                register(l1?.slug, l1Slug);
-                register(l1?.name, l1Slug);
-                (l1?.children || []).forEach((l2) => {
-                    register(l2?.slug, l1Slug);
-                    register(l2?.name, l1Slug);
-                    (l2?.children || []).forEach((l3) => {
-                        register(l3?.slug, l1Slug);
-                        register(l3?.name, l1Slug);
-                    });
-                });
-            });
-            return aliases;
-        }
-
-        const byId = new Map();
-        categories.forEach((category) => {
-            if (category?.id != null) byId.set(category.id, category);
-        });
-
-        categories.forEach((category) => {
-            const slug = normalizeCategory(category?.slug || '');
-            const name = normalizeCategory(category?.name || '');
-            const parent = category?.parent_id ? byId.get(category.parent_id) : null;
-            const parentSlug = normalizeCategory(parent?.slug || parent?.name || '');
-            const target = parentSlug || slug;
-            if (slug) aliases[slug] = target || slug;
-            if (name) aliases[name] = target || name;
-        });
-
-        return aliases;
-    }
-
-    async function getCategoryAliases() {
-        const cacheKey = 'amzira_category_aliases_v1';
-        const cacheTtlMs = 10 * 60 * 1000;
-        try {
-            const cachedRaw = sessionStorage.getItem(cacheKey);
-            if (cachedRaw) {
-                const cached = JSON.parse(cachedRaw);
-                if (cached?.timestamp && cached?.aliases && (Date.now() - cached.timestamp) < cacheTtlMs) {
-                    return cached.aliases;
-                }
-            }
-        } catch (_) {
-            sessionStorage.removeItem(cacheKey);
-        }
-
-        try {
-            if (!window.AMZIRA?.categories?.getCategories && !window.AMZIRA?.apiRequest) {
-                return {};
-            }
-            const response = window.AMZIRA?.apiRequest
-                ? await window.AMZIRA.apiRequest('/categories?include_children=true')
-                : await window.AMZIRA.categories.getCategories();
-            const list = response?.data
-                || response?.categories
-                || response?.results
-                || (Array.isArray(response) ? response : []);
-            const aliases = buildCategoryAliases(list);
-            sessionStorage.setItem(cacheKey, JSON.stringify({ timestamp: Date.now(), aliases }));
-            return aliases;
-        } catch (_) {
-            return {};
-        }
-    }
-
-    function resolveCategorySlug(product, aliases) {
-        const candidates = [
-            product?.category?.slug,
-            product?.category,
-            product?.category?.name,
-            product?.subcategory,
-            product?.sub_category
-        ].filter(Boolean);
-
-        for (const candidate of candidates) {
-            const normalized = normalizeCategory(candidate);
-            if (!normalized) continue;
-            if (aliases && aliases[normalized]) return aliases[normalized];
-            return normalized;
-        }
-        return '';
-    }
-
-    function resolvePageAudience(rawAudience, aliases) {
-        const normalized = normalizeCategory(rawAudience);
-        if (aliases && aliases[normalized]) return aliases[normalized];
-        return normalized;
-    }
-
-    function filterProductsForPage(products, pageAudience, aliases) {
-        if (!pageAudience) return Array.isArray(products) ? products : [];
-        return (Array.isArray(products) ? products : []).filter((product) => {
-            const category = resolveCategorySlug(product, aliases);
-            const productId = product?.id ?? product?._id ?? product?.product_id ?? '';
-
-            console.log('Audience resolution', {
-                productId,
-                category,
-                page: pageAudience
-            });
-            return category === pageAudience;
-        });
     }
 
     async function ensureApiLayer() {
@@ -1032,7 +979,8 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    async function getProductsWithTimeout(params) {
+    async function fetchProducts(params = {}) {
+        await ensureApiLayer();
         if (!window.AMZIRA?.products?.getProducts) {
             throw new Error('API client unavailable');
         }
@@ -1047,100 +995,59 @@ document.addEventListener('DOMContentLoaded', function() {
         ]);
     }
 
-    async function resolveProducts(params) {
-        const attempts = [
-            params,
-            { category: params?.category, page: 1, limit: 20 },
-            { category_slug: params?.category, page: 1, limit: 20 },
-            { page: 1, limit: 20 }
-        ];
-
-        for (const attempt of attempts) {
-            try {
-                console.warn('Trying product fetch with:', attempt);
-                return await getProductsWithTimeout(attempt);
-            } catch (err) {
-                if (err?.status !== 422) {
-                    throw err;
-                }
-                console.warn('422 rejected params:', attempt, err?.payload || err);
-            }
+    function cacheProducts(products) {
+        if (!window.__AMZIRA_PRODUCTS_BY_ID__) {
+            window.__AMZIRA_PRODUCTS_BY_ID__ = {};
         }
-
-        throw new Error('All product query strategies failed');
+        (Array.isArray(products) ? products : []).forEach((product) => {
+            if (product && product.id != null) {
+                window.__AMZIRA_PRODUCTS_BY_ID__[String(product.id)] = product;
+            }
+        });
     }
 
-    // Function to initialize filter
     async function initFilter() {
         const currentCategory = getCurrentCategorySlug() || 'all';
-        const cacheKey = `amziraProductsCacheV1_${currentCategory}`;
-        const cacheTtlMs = 5 * 60 * 1000;
+        const grid = document.getElementById('productsGrid');
+        if (grid) {
+            grid.innerHTML = Array.from({ length: 8 }).map(() => `
+                <div class="product-card product-card-skeleton" aria-hidden="true">
+                    <div class="product-image" style="background:#f2eee6; min-height:340px;"></div>
+                    <div class="product-info">
+                        <div style="height:12px; width:34%; background:#f2eee6; border-radius:999px; margin-bottom:12px;"></div>
+                        <div style="height:18px; width:78%; background:#ece6dc; border-radius:999px; margin-bottom:10px;"></div>
+                        <div style="height:16px; width:42%; background:#f2eee6; border-radius:999px; margin-bottom:14px;"></div>
+                        <div style="height:40px; width:100%; background:#ece6dc; border-radius:8px;"></div>
+                    </div>
+                </div>
+            `).join('');
+        }
 
         try {
-            await ensureApiLayer();
-            let products = [];
-            const aliases = await getCategoryAliases();
-            const effectiveCategory = (currentCategory && currentCategory !== 'all')
-                ? (aliases[currentCategory] || currentCategory)
-                : currentCategory;
-            const pageAudience = resolvePageAudience(getPageAudience(), aliases);
-            const shouldFetchAll = ['women', 'men', 'kids'].includes(pageAudience);
-            const cachedRaw = sessionStorage.getItem(cacheKey);
-            if (cachedRaw) {
-                const cached = JSON.parse(cachedRaw);
-                if (cached?.timestamp && Array.isArray(cached?.products) && (Date.now() - cached.timestamp) < cacheTtlMs) {
-                    products = cached.products;
-                }
+            const initialParams = { page: 1, limit: 24, in_stock_only: true };
+            if (currentCategory && currentCategory !== 'all') {
+                initialParams.category = currentCategory;
             }
 
-            if (!products.length) {
-                const data = !shouldFetchAll && effectiveCategory
-                    ? await resolveProducts({ category: effectiveCategory, limit: 100 })
-                    : await resolveProducts({ limit: 100 });
-                products = data?.products || data?.results || (Array.isArray(data) ? data : []);
-                if (!window.__AMZIRA_PRODUCTS_BY_ID__) {
-                    window.__AMZIRA_PRODUCTS_BY_ID__ = {};
-                }
-                (Array.isArray(products) ? products : []).forEach((product) => {
-                    if (product && product.id != null) {
-                        window.__AMZIRA_PRODUCTS_BY_ID__[String(product.id)] = product;
-                    }
-                });
-                sessionStorage.setItem(cacheKey, JSON.stringify({
-                    timestamp: Date.now(),
-                    products
-                }));
-            }
+            const data = await fetchProducts(initialParams);
+            const products = data?.products || data?.results || (Array.isArray(data) ? data : []);
+            cacheProducts(products);
 
-            const audience = pageAudience;
-            const audienceFiltered = filterProductsForPage(products, audience, aliases);
-            console.log('Filter result', {
-                page: audience,
-                total: products.length,
-                visible: audienceFiltered.length,
-                categories: (Array.isArray(products) ? products : []).map((p) => p?.category?.slug || p?.category || p?.category?.name || '')
-            });
-            const validProducts = Array.isArray(audienceFiltered) ? audienceFiltered.filter(isRenderableProduct) : [];
-            const isComingSoon = validProducts.length === 0;
-            window.productFilter = new ProductFilter(validProducts, {
+            window.productFilter = new ProductFilter(products, {
                 categorySlug: currentCategory,
-                isComingSoon
+                isComingSoon: Number(data?.total || products.length || 0) === 0,
+                totalCount: Number(data?.total || products.length || 0),
+                totalPages: Number(data?.total_pages || Math.ceil((Number(data?.total || products.length || 0)) / 24) || 0),
+                fetchProducts: fetchProducts
             });
         } catch (error) {
-            console.error('Error loading products:', error);
-            const grid = document.getElementById('productsGrid');
+            filterDevError('Error loading products:', error);
             if (grid) {
                 grid.innerHTML = `
                     <div style="grid-column: 1/-1; text-align: center; padding: 60px 20px;">
                         <i class="fas fa-exclamation-triangle" style="font-size: 48px; color: #EF4444; margin-bottom: 16px;"></i>
                         <h3>Unable to Load Products</h3>
                         <p style="color: #666; margin-bottom: 14px;">The catalog is currently unavailable or timed out.</p>
-                        <p style="color: #666; margin-bottom: 20px;">You can retry now or browse another category.</p>
-                        <div style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:16px;">
-                            <a class="btn btn-secondary" href="men.html">Men</a>
-                            <a class="btn btn-secondary" href="women.html">Women</a>
-                            <a class="btn btn-secondary" href="kids.html">Kids</a>
-                        </div>
                         <button class="btn btn-primary" id="retryProductsLoadBtn">
                             <i class="fas fa-sync"></i> Retry
                         </button>
@@ -1157,19 +1064,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Wait for cart if it hasn't loaded yet
-    if (window.cart) {
-        initFilter();
-    } else {
-        window.addEventListener('cartReady', initFilter, { once: true });
-        // Fallback timeout
-        setTimeout(() => {
-            if (!window.productFilter) {
-                console.warn('Cart not ready, initializing filter anyway');
-                initFilter();
-            }
-        }, 2000);
-    }
+    initFilter();
 });
 
 /* ==================================================

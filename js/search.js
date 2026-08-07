@@ -133,16 +133,8 @@ class ProductSearch {
             return this.productsCache;
         }
 
-        try {
-            const response = await fetch('data/products.json', { cache: 'no-store' });
-            const data = await response.json();
-            this.productsCache = Array.isArray(data?.products) ? data.products : [];
-            return this.productsCache;
-        } catch (error) {
-            console.warn('Search data load failed:', error);
-            this.productsCache = [];
-            return this.productsCache;
-        }
+        this.productsCache = [];
+        return this.productsCache;
     }
 
     async searchViaApi(query) {
@@ -209,7 +201,7 @@ class ProductSearch {
 
             this.renderResults(results);
         } catch (apiError) {
-            console.warn('Search API failed, trying fallback data:', apiError);
+            if (window.__DEV__) console.warn('Search API failed, trying in-memory fallback data:', apiError);
 
             // Audit Ref: [BLOCKER] Discovery should not hard-fail when API is degraded.
             const products = await this.loadFallbackProducts();

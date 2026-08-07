@@ -1,6 +1,7 @@
 const DEV_API_BASE_URL = 'http://localhost:8000/api/v1';
 const STAGING_API_BASE_URL = 'https://api-staging.amzira.com/api/v1';
 const PROD_API_BASE_URL = 'https://api.amzira.com/api/v1';
+window.__DEV__ = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
 const PROTECTED_ROUTE_PATTERNS = ['/account', '/checkout', '/payment', '/order-success'];
 const STOCK_CHECK_ENDPOINT = '/stock/check';
 let unauthorizedHandled = false;
@@ -55,11 +56,18 @@ function resolveApiBaseUrl() {
 }
 
 const API_BASE_URL = resolveApiBaseUrl();
+const ROOT_LEVEL_ENDPOINTS = new Set([
+    '/checkout',
+    '/create-payment-order',
+    '/verify-payment'
+]);
 
 const USER_STORAGE_KEY = 'user';
 const ACCESS_TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';
 const CHECKOUT_IDEMPOTENCY_KEY = 'checkout_idempotency_key';
+const CSRF_COOKIE_NAME = 'csrf_token';
+const CSRF_HEADER_NAME = 'X-CSRF-Token';
 
 // Soft-launch idempotency_key fix
 function generateUUIDv4() {
@@ -194,6 +202,17 @@ function readCookie(name) {
     return null;
 }
 
+async function ensureCsrfToken() {
+    try {
+        await fetch(`${API_BASE_URL}/auth/csrf-token`, {
+            method: 'GET',
+            credentials: 'include'
+        });
+    } catch (_) {
+        // Let the protected request surface the real failure if token bootstrap fails.
+    }
+}
+
 function isUnsafeMethod(method) {
     const upper = (method || 'GET').toUpperCase();
     return upper === 'POST' || upper === 'PUT' || upper === 'PATCH' || upper === 'DELETE';
@@ -277,6 +296,14 @@ async function refreshSession() {
     }
 }
 
+function resolveRequestUrl(endpoint) {
+    const normalizedEndpoint = String(endpoint || '');
+    if (ROOT_LEVEL_ENDPOINTS.has(normalizedEndpoint)) {
+        return `${API_BASE_URL.replace(/\/api\/v1\/?$/, '')}${normalizedEndpoint}`;
+    }
+    return `${API_BASE_URL}${normalizedEndpoint}`;
+}
+
 /**
  * Unified API request wrapper for all backend calls.
  * Adds credentials, CSRF, response contract checks, and normalized APIError failures.
@@ -288,10 +315,19 @@ async function apiRequest(endpoint, options = {}) {
     const method = (options.method || 'GET').toUpperCase();
     const retryOn401 = options.retryOn401 !== false;
     const returnEnvelope = options.returnEnvelope === true;
+    const withoutCsrf = options.withoutCsrf === true;
 
     const headers = {
         ...(options.headers || {})
     };
+
+    if (isUnsafeMethod(method) && !withoutCsrf) {
+        await ensureCsrfToken();
+        const csrfToken = readCookie(CSRF_COOKIE_NAME);
+        if (csrfToken && !headers[CSRF_HEADER_NAME]) {
+            headers[CSRF_HEADER_NAME] = csrfToken;
+        }
+    }
 
     const storedToken = localStorage.getItem(ACCESS_TOKEN_KEY);
     if (storedToken && !headers['Authorization']) {
@@ -319,7 +355,7 @@ async function apiRequest(endpoint, options = {}) {
     let attempt = 0;
     while (attempt <= maxRetries) {
         try {
-            response = await fetch(`${API_BASE_URL}${endpoint}`, fetchOptions);
+            response = await fetch(resolveRequestUrl(endpoint), fetchOptions);
         } catch (error) {
             if (attempt >= maxRetries) {
                 throw new APIError('Unable to reach the server. Please try again.', {
@@ -455,42 +491,74 @@ async function checkAuth() {
 }
 
 async function getProducts(params = {}) {
-    const query = new URLSearchParams(params).toString();
-    const endpoint = query ? `/products?${query}` : '/products';
-    return apiRequest(endpoint);
+    try {
+        const query = new URLSearchParams(params).toString();
+        const endpoint = query ? `/products?${query}` : '/products';
+        return await apiRequest(endpoint);
+    } catch (err) {
+        console.warn('API fetch failed for getProducts, serving South Indian mock catalog.', err);
+        if (window.AMZIRA_MOCK_DATA) {
+            const cat = params.category || params.category_slug || params.slug;
+            return window.AMZIRA_MOCK_DATA.getProductsByCategory(cat);
+        }
+        throw err;
+    }
 }
 
 async function getCategories() {
-    return apiRequest('/categories');
+    try {
+        return await apiRequest('/categories');
+    } catch (err) {
+        console.warn('API fetch failed for getCategories, serving South Indian mock categories.', err);
+        if (window.AMZIRA_MOCK_DATA) {
+            return window.AMZIRA_MOCK_DATA.categories;
+        }
+        throw err;
+    }
 }
 
 async function getProductsByCategory(categorySlug, extraParams = {}) {
     const slug = String(categorySlug || '').trim();
     if (!slug) {
+        if (window.AMZIRA_MOCK_DATA) return window.AMZIRA_MOCK_DATA.products;
         throw new APIError('Category slug is required', { status: 400, errors: [] });
     }
 
     try {
-        // Preferred endpoint contract.
         return await getProducts({
             ...extraParams,
             category: slug
         });
     } catch (error) {
-        // Alternate backend route support.
-        if (error?.status === 404 || error?.status === 405) {
-            return apiRequest(`/products/category/${encodeURIComponent(slug)}`);
+        if (window.AMZIRA_MOCK_DATA) {
+            return window.AMZIRA_MOCK_DATA.getProductsByCategory(slug);
         }
         throw error;
     }
 }
 
 async function getProductDetail(slug) {
-    return apiRequest(`/products/${slug}`);
+    try {
+        return await apiRequest(`/products/${slug}`);
+    } catch (err) {
+        console.warn('API fetch failed for getProductDetail, serving mock product.', err);
+        if (window.AMZIRA_MOCK_DATA) {
+            return window.AMZIRA_MOCK_DATA.getProductBySlugOrId(slug);
+        }
+        throw err;
+    }
 }
 
 async function searchProducts(query) {
-    return apiRequest(`/products?search=${encodeURIComponent(query)}`);
+    try {
+        return await apiRequest(`/products?search=${encodeURIComponent(query)}`);
+    } catch (err) {
+        if (window.AMZIRA_MOCK_DATA) {
+            const q = String(query || '').toLowerCase();
+            return window.AMZIRA_MOCK_DATA.products.filter(p => p.name.toLowerCase().includes(q) || p.fabric.toLowerCase().includes(q));
+        }
+        throw err;
+    }
 }
 
 async function getCart() {
@@ -561,60 +629,16 @@ async function getOrderTracking(orderId) {
 }
 
 async function createCheckoutPaymentOrder(payload) {
-    try {
-        return await apiRequest('/create-payment-order', {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
-    } catch (error) {
-        if (error?.status !== 404 || !/\/api\/v1\/?$/i.test(API_BASE_URL)) {
-            throw error;
-        }
-
-        const fallbackBaseUrl = API_BASE_URL.replace(/\/api\/v1\/?$/i, '');
-        console.warn('[api] checkout payment order fallback', {
-            primaryUrl: `${API_BASE_URL}/create-payment-order`,
-            fallbackUrl: `${fallbackBaseUrl}/create-payment-order`,
-            error
-        });
-
-        return apiRequestAbsolute(`${fallbackBaseUrl}/create-payment-order`, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
-    }
+    return apiRequest('/create-payment-order', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+    });
 }
 
 async function verifyCheckoutPayment(payload) {
-    try {
-        return await apiRequest('/verify-payment', {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
-    } catch (error) {
-        if (error?.status !== 404 || !/\/api\/v1\/?$/i.test(API_BASE_URL)) {
-            throw error;
-        }
-
-        const fallbackBaseUrl = API_BASE_URL.replace(/\/api\/v1\/?$/i, '');
-        console.warn('[api] checkout verify payment fallback', {
-            primaryUrl: `${API_BASE_URL}/verify-payment`,
-            fallbackUrl: `${fallbackBaseUrl}/verify-payment`,
-            error
-        });
-
-        return apiRequestAbsolute(`${fallbackBaseUrl}/verify-payment`, {
-            method: 'POST',
-            body: JSON.stringify(payload)
-        });
-    }
-}
-
-async function apiRequestAbsolute(url, options = {}) {
-    const finalOptions = buildRequestOptions(options);
-    const response = await fetch(url, finalOptions);
-    return parseApiResponse(response, {
-        returnEnvelope: Boolean(options.returnEnvelope)
+    return apiRequest('/verify-payment', {
+        method: 'POST',
+        body: JSON.stringify(payload)
     });
 }
 

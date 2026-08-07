@@ -367,7 +367,7 @@
             </div>
 
             <!-- Login with OTP -->
-            <button class="btn-otp" onclick="alert('Login with OTP coming soon!')">
+            <button class="btn-otp" id="loginOtpBtn">
                 <i class="fas fa-mobile-alt"></i> Login with OTP
             </button>
 
@@ -445,6 +445,14 @@
                 loginBtn.disabled = false;
                 loginBtn.textContent = 'Login';
             }
+        });
+
+        document.getElementById('loginOtpBtn')?.addEventListener('click', function() {
+            if (window.errorHandler?.showWarning) {
+                window.errorHandler.showWarning('Login with OTP is coming soon.');
+                return;
+            }
+            console.warn('[login] Login with OTP is coming soon.');
         });
 
         // Check if already logged in

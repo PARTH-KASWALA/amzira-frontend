@@ -792,7 +792,7 @@ class AppInitializer {
             window.dispatchEvent(new CustomEvent('appReady', { detail: { products: window.allProducts } }));
         }
 
-        console.log('✅ Amzira website initialized successfully!');
+    if (window.__DEV__) console.log('Amzira website initialized successfully!');
     }
 }
 

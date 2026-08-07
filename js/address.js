@@ -1,13 +1,12 @@
 /* ===================================
    ADDRESS MANAGEMENT SYSTEM
-   Shared localStorage-backed address manager.
+   API-backed address manager.
    =================================== */
 
 class AddressManager {
     constructor() {
-        this.storageKey = 'addresses';
         this.selectedKey = 'selectedAddressId';
-        this.cache = this.getAddresses();
+        this.cache = [];
     }
 
     parseAddresses(value) {
@@ -84,36 +83,24 @@ class AddressManager {
     }
 
     getAddresses() {
-        const addresses = this.parseAddresses(localStorage.getItem(this.storageKey))
-            .map((addr) => this.normalizeAddress(addr))
-            .filter(Boolean);
-
-        return this.ensureDefaultAddress(addresses);
-    }
-
-    saveAddresses(addresses) {
-        const normalized = this.ensureDefaultAddress(
-            (Array.isArray(addresses) ? addresses : [])
+        return this.ensureDefaultAddress(
+            (Array.isArray(this.cache) ? this.cache : [])
                 .map((addr) => this.normalizeAddress(addr))
                 .filter(Boolean)
         );
+    }
 
-        const serialized = normalized.map((addr) => ({
-            id: addr.id,
-            name: addr.name,
-            phone: addr.phone,
-            addressLine: addr.addressLine,
-            city: addr.city,
-            state: addr.state,
-            pincode: addr.pincode,
-            isDefault: addr.isDefault,
-            locality: addr.locality,
-            addressType: addr.addressType
-        }));
-
-        localStorage.setItem(this.storageKey, JSON.stringify(serialized));
-        console.log('Saved addresses:', localStorage.getItem(this.storageKey));
-        this.cache = normalized;
+    async refresh() {
+        try {
+            const addresses = await window.AMZIRA.users.getAddresses();
+            this.cache = this.ensureDefaultAddress(
+                (Array.isArray(addresses) ? addresses : [])
+                    .map((addr) => this.normalizeAddress(addr))
+                    .filter(Boolean)
+            );
+        } catch (_) {
+            this.cache = [];
+        }
         return this.cache;
     }
 
@@ -140,14 +127,8 @@ class AddressManager {
         });
     }
 
-    async refresh() {
-        this.cache = this.getAddresses();
-        console.log('Saved addresses:', localStorage.getItem(this.storageKey));
-        return this.cache;
-    }
-
     getAddressById(addressId) {
-        return this.getAddresses().find((addr) => String(addr.id) === String(addressId)) || null;
+        return this.cache.find((addr) => String(addr.id) === String(addressId)) || null;
     }
 
     async addAddress(addressData) {
@@ -155,22 +136,22 @@ class AddressManager {
             return { success: false, message: 'Please fill all required fields' };
         }
 
-        const addresses = this.getAddresses();
-        const nextAddress = this.toStoredAddress(addressData, Date.now());
-
-        if (addresses.length === 0) {
-            nextAddress.isDefault = true;
-        }
-
-        if (nextAddress.isDefault) {
-            addresses.forEach((addr) => {
-                addr.isDefault = false;
-            });
-        }
-
-        addresses.push(nextAddress);
-        this.saveAddresses(addresses);
-        return { success: true, address: this.getAddressById(nextAddress.id) };
+        const payload = this.normalizeAddress(addressData);
+        const existingAddresses = this.getAddresses();
+        const created = await window.AMZIRA.users.createAddress({
+            full_name: payload.name,
+            phone: payload.phone,
+            address_line1: payload.addressLine,
+            address_line2: payload.locality || null,
+            city: payload.city,
+            state: payload.state,
+            pincode: payload.pincode,
+            country: 'India',
+            address_type: payload.addressType || 'home',
+            is_default: existingAddresses.length === 0 || Boolean(payload.isDefault),
+        });
+        await this.refresh();
+        return { success: true, address: this.getAddressById(created?.id) || this.getDefaultAddress() };
     }
 
     async updateAddress(addressId, addressData) {
@@ -178,28 +159,31 @@ class AddressManager {
             return { success: false, message: 'Please fill all required fields' };
         }
 
-        const addresses = this.getAddresses();
-        const index = addresses.findIndex((addr) => String(addr.id) === String(addressId));
-        if (index === -1) {
+        const existing = this.getAddressById(addressId);
+        if (!existing) {
             return { success: false, message: 'Address not found' };
         }
 
-        const updatedAddress = this.toStoredAddress(addressData, addresses[index].id);
-        if (!addresses.some((addr, idx) => idx !== index && addr.isDefault) || updatedAddress.isDefault) {
-            updatedAddress.isDefault = true;
-            addresses.forEach((addr, idx) => {
-                if (idx !== index) addr.isDefault = false;
-            });
-        }
-
-        addresses[index] = updatedAddress;
-        this.saveAddresses(addresses);
-        return { success: true, address: this.getAddressById(updatedAddress.id) };
+        const payload = this.normalizeAddress({ ...existing, ...addressData, id: existing.id });
+        await window.AMZIRA.users.updateAddress(existing.id, {
+            full_name: payload.name,
+            phone: payload.phone,
+            address_line1: payload.addressLine,
+            address_line2: payload.locality || null,
+            city: payload.city,
+            state: payload.state,
+            pincode: payload.pincode,
+            country: 'India',
+            address_type: payload.addressType || 'home',
+            is_default: Boolean(payload.isDefault),
+        });
+        await this.refresh();
+        return { success: true, address: this.getAddressById(existing.id) };
     }
 
     async deleteAddress(addressId) {
-        const addresses = this.getAddresses().filter((addr) => String(addr.id) !== String(addressId));
-        this.saveAddresses(addresses);
+        await window.AMZIRA.users.deleteAddress(addressId);
+        await this.refresh();
 
         const selectedId = this.getSelectedAddressId();
         if (selectedId && String(selectedId) === String(addressId)) {
@@ -278,7 +262,12 @@ function getAddresses() {
 }
 
 function saveAddresses(addresses) {
-    return AddressManager_Instance.saveAddresses(addresses);
+    AddressManager_Instance.cache = AddressManager_Instance.ensureDefaultAddress(
+        (Array.isArray(addresses) ? addresses : [])
+            .map((addr) => AddressManager_Instance.normalizeAddress(addr))
+            .filter(Boolean)
+    );
+    return AddressManager_Instance.cache;
 }
 
 function addAddress(newAddress) {

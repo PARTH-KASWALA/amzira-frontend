@@ -101,12 +101,10 @@
     <!-- Breadcrumb -->
     <section class="breadcrumb-section">
         <div class="container">
-            <nav class="breadcrumb" id="breadcrumb">
+            <nav class="breadcrumb" id="breadcrumb" aria-label="Breadcrumb">
                 <a href="index.html">Home</a>
-                <i class="fas fa-chevron-right"></i>
-                <a href="men.html" id="breadcrumbCategory">Men</a>
-                <i class="fas fa-chevron-right"></i>
-                <span id="breadcrumbProduct">Loading...</span>
+                <span class="separator">/</span>
+                <span class="current">Loading...</span>
             </nav>
         </div>
     </section>
@@ -431,10 +429,9 @@
   <div class="footer-right">
     <span class="secure-text">100% Secure Payments</span>
     <div class="payments">
-      <img src="payment-visa.png" alt="Visa">
-      <img src="mastercard.png" alt="Mastercard">
-      <img src="rupay.png" alt="RuPay">
-      <img src="upi.png" alt="UPI">
+      <img src="images/icons/mastercard.png" alt="Mastercard">
+      <img src="images/icons/rupay.png" alt="RuPay">
+      <img src="images/icons/upi.png" alt="UPI">
     </div>
   </div>
 </footer>
@@ -448,7 +445,8 @@
     <script src="js/loading-states.js"></script>
     <script src="js/error-handler.js"></script>
 
-    <!-- 2. Data layer -->
+    <!-- 2. Data Layer -->
+    <script src="js/mock-catalog.js"></script>
     <script src="js/product-normalizer.js"></script>
     <script type="module" src="js/cart-utils.js"></script>
     <script src="js/cart.js"></script>
