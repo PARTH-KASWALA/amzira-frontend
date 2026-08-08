@@ -9,18 +9,18 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        ivory: "#FDF8ED",
-        sandal: "#F3E7CF",
-        charcoal: "#171412",
+        ivory: "#FDFBF7",
+        sandal: "#F4EFE6",
+        charcoal: "#1A1A1A",
         maroon: {
-          DEFAULT: "#8F1438",
-          deep: "#5C071C",
-          soft: "#F9E9EF"
+          DEFAULT: "#9A1750",
+          deep: "#700018",
+          soft: "#FBF0F4"
         },
         gold: {
-          DEFAULT: "#A16207",
+          DEFAULT: "#D4AF37",
           bright: "#D4AF37",
-          pale: "#F6E3A4"
+          pale: "#F8E7A5"
         },
         peacock: "#0B4F6C",
         emerald: "#1B4D3E",

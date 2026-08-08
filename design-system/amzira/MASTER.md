@@ -1,6 +1,6 @@
 # AMZIRA Frontend Design System
 
-Primary branch: `Amzira_frontend_New`
+Primary branch: `main`
 
 ## Positioning
 
@@ -8,12 +8,12 @@ AMZIRA is a South Indian luxury ethnic wear storefront for bridal lehenga choli,
 
 ## Tokens
 
-- Ivory: `#FDF8ED`
-- Sandal: `#F3E7CF`
-- Charcoal: `#171412`
-- Deep maroon: `#5C071C`
-- Maroon: `#8F1438`
-- Antique gold: `#A16207`
+- Ivory: `#FDFBF7`
+- Sandal: `#F4EFE6`
+- Charcoal: `#1A1A1A`
+- Deep maroon: `#700018`
+- Maroon: `#9A1750`
+- Antique gold: `#D4AF37`
 - Peacock: `#0B4F6C`
 - Emerald: `#1B4D3E`
 

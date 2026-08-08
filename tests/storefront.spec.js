@@ -5,7 +5,7 @@ const productSlug = 'valli-royal-red-kanjivaram-bridal-pattu-lehenga';
 test.describe('AMZIRA Next storefront', () => {
   test('browse to PDP, select size, add to cart, and checkout success', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: /Kanjivaram richness/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /I'm the bride/i })).toBeVisible();
 
     await page.goto(`/product/${productSlug}`);
     await expect(page.getByRole('heading', { name: /Valli Royal Red/i })).toBeVisible();
@@ -39,7 +39,7 @@ test.describe('AMZIRA Next storefront', () => {
     test(`home page renders without horizontal overflow at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 1100 });
       await page.goto('/');
-      await expect(page.getByRole('heading', { name: /Kanjivaram richness/i })).toBeVisible();
+      await expect(page.getByRole('heading', { name: /I'm the bride/i })).toBeVisible();
       const hasOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
       expect(hasOverflow).toBe(false);
     });
