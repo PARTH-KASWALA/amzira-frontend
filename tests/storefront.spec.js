@@ -35,6 +35,18 @@ test.describe('AMZIRA Next storefront', () => {
     await expect(page.getByRole('heading', { name: /cart is still safe/i })).toBeVisible();
   });
 
+  test('legacy auth journeys render as Next pages', async ({ page }) => {
+    await page.goto('/login');
+    await expect(page.getByRole('heading', { name: /Sign in to AMZIRA/i })).toBeVisible();
+    await expect(page.getByRole('link', { name: /Forgot password/i })).toBeVisible();
+
+    await page.goto('/signup');
+    await expect(page.getByRole('heading', { name: /Create your account/i })).toBeVisible();
+
+    await page.goto('/forgot-password');
+    await expect(page.getByRole('heading', { name: /Reset your password/i })).toBeVisible();
+  });
+
   for (const width of [375, 768, 1024, 1440]) {
     test(`home page renders without horizontal overflow at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 1100 });

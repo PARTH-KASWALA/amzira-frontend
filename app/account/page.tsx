@@ -15,20 +15,19 @@ export default function AccountPage() {
             Sign in to view orders, saved styles, addresses, and appointment notes.
           </p>
         </div>
-        <form className="rounded-md border border-charcoal/10 bg-white p-6 shadow-sm">
-          <div className="grid gap-5">
-            <label className="grid gap-2 text-sm font-semibold">
-              Email or mobile number
-              <input className="min-h-11 rounded-md border border-charcoal/15 px-4" type="text" autoComplete="username" />
-            </label>
-            <label className="grid gap-2 text-sm font-semibold">
-              Password
-              <input className="min-h-11 rounded-md border border-charcoal/15 px-4" type="password" autoComplete="current-password" />
-            </label>
-            <button type="button" className="btn-primary">Sign in</button>
-            <Link className="focus-ring rounded-sm text-sm font-semibold text-maroon" href="/contact-support">Need help signing in?</Link>
+        <div className="rounded-md border border-charcoal/10 bg-white p-6 shadow-sm">
+          <div className="grid gap-4">
+            <Link className="btn-primary" href="/login">
+              Sign in
+            </Link>
+            <Link className="btn-secondary" href="/signup">
+              Create account
+            </Link>
+            <Link className="focus-ring rounded-sm text-sm font-semibold text-maroon" href="/forgot-password">
+              Forgot password?
+            </Link>
           </div>
-        </form>
+        </div>
       </div>
     </section>
   );
