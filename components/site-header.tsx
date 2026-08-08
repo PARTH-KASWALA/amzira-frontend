@@ -7,7 +7,7 @@ export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-charcoal/10 bg-ivory/95 backdrop-blur">
       <div className="bg-maroon-deep px-4 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-white">
-        Free shipping above Rs. 1,999 · Easy returns · Bridal styling appointments
+        Free shipping above Rs. 1,999 · 36-hour returns · Bridal styling appointments
       </div>
       <div className="container-page flex min-h-[76px] items-center justify-between gap-4">
         <Link href="/" className="focus-ring group flex min-w-0 items-center gap-3 rounded-sm" aria-label="AMZIRA home">

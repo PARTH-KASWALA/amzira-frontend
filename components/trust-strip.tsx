@@ -4,7 +4,7 @@ const items = [
   ["Made in India", BadgeCheck],
   ["Assured quality", ShieldCheck],
   ["Secure payments", ShieldCheck],
-  ["Easy returns", RotateCcw],
+  ["36-hour returns", RotateCcw],
   ["Styling support", Headphones],
   ["Fast shipping", Truck]
 ] as const;
