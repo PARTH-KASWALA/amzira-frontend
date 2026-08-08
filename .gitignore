@@ -5,3 +5,4 @@ out
 .DS_Store
 *.zip
 tsconfig.tsbuildinfo
+test-results/
