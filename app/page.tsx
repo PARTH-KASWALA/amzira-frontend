@@ -1,108 +1,62 @@
 import Image from "next/image";
 import Link from "next/link";
-import type { LucideIcon } from "lucide-react";
 import {
   ArrowRight,
-  CalendarCheck,
+  Crown,
   Gem,
-  Heart,
-  MapPin,
-  Scissors,
+  HandHeart,
+  Music2,
   Search,
-  ShieldCheck,
   Sparkles,
-  Truck
+  UsersRound
 } from "lucide-react";
 import { CategoryShowcase } from "@/components/category-showcase";
+import { CinematicSection } from "@/components/cinematic-section";
+import { HeroCarousel } from "@/components/hero-carousel";
+import { LuxuryCardGrid } from "@/components/luxury-card-grid";
+import { ParentsLoveSection } from "@/components/parents-love-section";
+import { ProcessionGifSection } from "@/components/procession-gif-section";
 import { ProductGrid } from "@/components/product-grid";
-import { TrustStrip } from "@/components/trust-strip";
 import { getCategories, getFeaturedProducts } from "@/lib/api";
-
-type Feature = {
-  icon: LucideIcon;
-  title: string;
-  body: string;
-};
-
-const heroRoles = [
-  {
-    title: "I'm the bride",
-    body: "Pattu lehengas, half sarees, and temple zari for the muhurtham moment.",
-    href: "/category/bridal-lehenga",
-    image: "/images/occasions/bride.webp"
-  },
-  {
-    title: "I'm the groom",
-    body: "Sherwani, kurta jackets, and coordinated family looks for the mandap.",
-    href: "/men",
-    image: "/images/occasions/sherwani.webp"
-  },
-  {
-    title: "I'm celebrating",
-    body: "Sangeet, mehendi, reception, and festive edits ready for every guest.",
-    href: "/category/tissue-organza",
-    image: "/images/occasions/sangeet.webp"
-  },
-  {
-    title: "I'm shopping for kids",
-    body: "Soft pattu pavadai and ceremony outfits sized for long wedding days.",
-    href: "/kids",
-    image: "/images/Bestsellers/womens/product-1-front.webp"
-  }
-];
 
 const occasionEdits = [
   {
     name: "Muhurtham bride",
     copy: "Crimson silk, antique zari, and heirloom blouse work.",
     href: "/category/bridal-lehenga",
-    image: "/images/occasions/bride_side.webp"
+    image: "/images/occasions/bride_side.webp",
+    icon: Crown
   },
   {
     name: "Haldi and mehendi",
     copy: "Turmeric, emerald, mirror accents, and easy movement.",
     href: "/category/half-saree",
-    image: "/images/occasions/haldi.webp"
+    image: "/images/occasions/haldi.webp",
+    icon: Sparkles
   },
   {
     name: "Sangeet shimmer",
     copy: "Tissue, organza, and reception-ready drape.",
     href: "/category/tissue-organza",
-    image: "/images/occasions/reception.webp"
+    image: "/images/occasions/reception.webp",
+    icon: Music2
   },
   {
     name: "Festival silk",
     copy: "Kanjeevaram-inspired color for puja and family gatherings.",
     href: "/category/kanjeevaram-lehenga",
-    image: "/images/occasions/celebrating_festivals.webp"
-  }
-];
-
-const trustDetails: Feature[] = [
-  {
-    icon: ShieldCheck,
-    title: "Assured quality",
-    body: "Every product page is structured around fabric, lining, care, stock, and occasion clarity."
-  },
-  {
-    icon: Truck,
-    title: "Delivery ready",
-    body: "Ready-to-ship discovery and pincode delivery checks are part of the commerce roadmap."
-  },
-  {
-    icon: CalendarCheck,
-    title: "Styling appointments",
-    body: "A guided bridal session can plan the bride, groom, family, and guest closet together."
+    image: "/images/occasions/celebrating_festivals.webp",
+    icon: UsersRound
   }
 ];
 
 const shoppingPaths = [
-  "Bridal lehenga choli",
-  "Kanjeevaram silk lehenga",
-  "Half saree and langa voni",
-  "Pattu pavadai for girls",
-  "Wedding guest outfits",
-  "Reception and sangeet wear"
+  { label: "Bridal lehenga choli", icon: Crown },
+  { label: "Kanjeevaram silk lehenga", icon: Gem },
+  { label: "Half saree and langa voni", icon: Sparkles },
+  { label: "Wedding guest outfits", icon: UsersRound },
+  { label: "Reception and sangeet wear", icon: Music2 },
+  { label: "Pattu pavadai for girls", icon: HandHeart }
 ];
 
 export default async function HomePage() {
@@ -110,69 +64,92 @@ export default async function HomePage() {
 
   return (
     <>
-      <section className="relative overflow-hidden bg-ivory text-charcoal">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_78%_20%,rgba(212,175,55,0.22),transparent_28rem)]" />
-        <div className="container-page relative grid min-h-[calc(100svh-118px)] gap-8 py-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:py-12">
-          <div className="max-w-3xl temple-rule">
-            <p className="section-kicker">South Indian bridal and festive wear</p>
-            <h1 className="mt-5 font-display text-5xl font-semibold leading-[0.94] tracking-wide text-maroon-deep sm:text-6xl lg:text-7xl xl:text-8xl">
-              I&apos;m the bride. Bring me silk, zari, and ceremony.
-            </h1>
-            <p className="mt-6 max-w-xl text-base leading-8 text-charcoal/72 sm:text-lg">
-              Shop premium lehenga choli, Kanjeevaram-inspired half sarees, and family wedding looks built for
-              South Indian celebrations.
-            </p>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <Link className="btn-primary" href="/category/bridal-lehenga">
-                Shop bridal lehenga
-              </Link>
-              <Link className="btn-secondary gap-2" href="/appointments">
-                Book styling <ArrowRight className="h-4 w-4" aria-hidden="true" />
-              </Link>
+      <HeroCarousel />
+
+      <LuxuryCardGrid />
+
+      <CinematicSection />
+
+      <section className="pattern-section py-16 lg:py-24">
+        <div className="container-page pattern-section__content">
+          <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+            <div className="temple-rule">
+              <p className="section-kicker">Featured collections</p>
+              <h2 className="mt-2 font-display text-5xl font-semibold text-maroon-deep">Signature ceremony edits</h2>
+            </div>
+            <Link className="btn-secondary w-fit gap-2 bg-white" href="/women">
+              View all <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
+          <CategoryShowcase categories={categories} />
+        </div>
+      </section>
+
+      <section className="craft-home-section overflow-hidden py-14 lg:py-20">
+        <div className="container-page grid gap-10 lg:grid-cols-[1fr_0.86fr] lg:items-center">
+          <div className="relative min-h-[420px] overflow-hidden rounded-xl bg-charcoal shadow-sari sm:min-h-[520px] lg:min-h-[560px]">
+            <Image
+              src="/images/occasions/team-bride.webp"
+              alt="Wedding party styled in coordinated South Indian ceremony outfits"
+              fill
+              sizes="(min-width: 1024px) 48vw, 100vw"
+              className="object-cover brightness-[1.04] saturate-[1.08]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-maroon-deep/36 via-transparent to-transparent" />
+            <div className="absolute bottom-6 left-6 right-6 max-w-sm rounded-lg border border-white/60 bg-white/88 p-5 shadow-soft backdrop-blur-md sm:bottom-8 sm:left-8">
+              <div className="flex items-center gap-4">
+                <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-white text-maroon shadow-sm">
+                  <HandHeart className="h-8 w-8" aria-hidden="true" />
+                </span>
+                <div>
+                  <p className="font-display text-2xl font-semibold leading-tight text-maroon-deep">
+                    Crafted for moments that become memories.
+                  </p>
+                  <p className="mt-2 text-xs font-medium leading-5 text-charcoal/68">
+                    Rooted in tradition. Designed for today.
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
-
-          <div className="grid gap-4 md:grid-cols-[0.62fr_0.38fr] lg:min-h-[620px]">
+          <div className="min-w-0">
+            <div className="craft-title-rule mb-6" aria-hidden="true">
+              <span />
+            </div>
+            <p className="section-kicker">Our craft</p>
+            <h2 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-[1.06] text-maroon-deep sm:text-5xl lg:text-6xl">
+              Where heritage meets a modern wedding closet.
+            </h2>
+            <div className="my-7 h-px w-56 bg-gradient-to-r from-gold via-maroon to-transparent" />
+            <p className="max-w-2xl text-base leading-8 text-charcoal/70">
+              A curated world of bridal silks, groom edits, and coordinated celebration wear for every ceremony moment.
+            </p>
             <Link
-              href="/category/bridal-lehenga"
-              className="group relative min-h-[460px] overflow-hidden rounded-md bg-charcoal shadow-sari focus-ring md:min-h-[620px]"
+              href="/search"
+              className="focus-ring mt-8 flex min-h-[64px] min-w-0 items-center gap-4 rounded-full border border-charcoal/10 bg-white px-5 text-charcoal shadow-soft transition hover:border-maroon/35 hover:shadow-sari"
             >
-              <Image
-                src="/images/occasions/bride.webp"
-                alt="South Indian bride wearing a red pattu lehenga choli with antique gold embroidery"
-                fill
-                priority
-                sizes="(min-width: 1024px) 58vw, 100vw"
-                className="object-cover transition duration-700 group-hover:scale-[1.03]"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-charcoal/76 via-charcoal/12 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-5 text-white sm:p-7">
-                <p className="text-xs font-semibold uppercase tracking-[0.24em] text-gold-pale">Bridal edit</p>
-                <h2 className="mt-3 font-display text-4xl font-semibold leading-none sm:text-5xl">
-                  Pattu lehengas that hold the whole room.
-                </h2>
-              </div>
+              <Search className="h-6 w-6 shrink-0 text-maroon" aria-hidden="true" />
+              <span className="min-w-0 flex-1 truncate text-sm text-charcoal/58 sm:text-base">
+                Search bridal lehengas, sarees, wedding outfits...
+              </span>
+              <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-maroon-deep text-white">
+                <ArrowRight className="h-5 w-5" aria-hidden="true" />
+              </span>
             </Link>
-
-            <div className="grid gap-4">
-              {heroRoles.slice(1).map((role) => (
+            <p className="mt-8 text-xs font-semibold uppercase tracking-[0.24em] text-maroon-deep">
+              Popular searches
+            </p>
+            <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+              {shoppingPaths.map((path) => (
                 <Link
-                  key={role.title}
-                  href={role.href}
-                  className="group relative min-h-[190px] overflow-hidden rounded-md bg-charcoal text-white shadow-soft focus-ring"
+                  key={path.label}
+                  href="/search"
+                  className="focus-ring flex min-h-12 items-center gap-3 rounded-full border border-charcoal/10 bg-white/78 px-4 text-sm font-semibold text-charcoal shadow-[0_12px_34px_rgba(42,7,17,0.07)] transition hover:-translate-y-0.5 hover:border-maroon/28 hover:text-maroon"
                 >
-                  <Image
-                    src={role.image}
-                    alt=""
-                    fill
-                    sizes="(min-width: 1024px) 28vw, 100vw"
-                    className="object-cover opacity-[0.82] transition duration-700 group-hover:scale-[1.04]"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-charcoal/82 via-charcoal/22 to-transparent" />
-                  <div className="absolute inset-x-0 bottom-0 p-4">
-                    <h3 className="font-display text-3xl font-semibold">{role.title}</h3>
-                    <p className="mt-1 text-xs leading-5 text-white/78">{role.body}</p>
-                  </div>
+                  <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-maroon-soft text-maroon">
+                    <path.icon className="h-4 w-4" aria-hidden="true" />
+                  </span>
+                  <span>{path.label}</span>
                 </Link>
               ))}
             </div>
@@ -180,144 +157,68 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <TrustStrip />
-
-      <section className="bg-sandal py-14">
-        <div className="container-page">
-          <div className="grid gap-4 lg:grid-cols-4">
-            {heroRoles.map((role) => (
+      <section className="occasion-section pattern-section py-16 lg:py-24">
+        <div className="container-page pattern-section__content">
+          <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
+            <div>
+              <div className="temple-rule">
+                <p className="section-kicker">Shop by occasion</p>
+                <h2 className="mt-2 font-display text-5xl font-semibold text-maroon-deep">
+                  Every event gets its own edit
+                </h2>
+              </div>
+              <p className="mt-4 max-w-2xl text-sm leading-7 text-charcoal/68 sm:text-base">
+                Handpicked looks for every celebration, tradition, and moment.
+              </p>
+            </div>
+            <Link className="btn-secondary w-fit gap-2" href="/women">
+              Explore edits <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            </Link>
+          </div>
+          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+            {occasionEdits.map((edit) => (
               <Link
-                key={role.title}
-                href={role.href}
-                className="group flex min-h-[180px] flex-col justify-between overflow-hidden rounded-md border border-maroon/10 bg-white/[0.62] p-5 shadow-soft transition hover:-translate-y-1 hover:border-maroon/30 focus-ring"
+                key={edit.name}
+                href={edit.href}
+                className="group overflow-hidden rounded-lg border border-charcoal/10 bg-white shadow-soft transition hover:-translate-y-1 hover:shadow-sari focus-ring"
               >
-                <div>
-                  <p className="font-display text-3xl font-semibold text-maroon-deep">{role.title}</p>
-                  <p className="mt-2 text-sm leading-6 text-charcoal/66">{role.body}</p>
+                <div className="relative aspect-[1.02/1] overflow-hidden bg-sandal">
+                  <Image
+                    src={edit.image}
+                    alt={`${edit.name} ethnic wear edit`}
+                    fill
+                    sizes="(min-width: 1280px) 24vw, (min-width: 768px) 48vw, 100vw"
+                    className="object-cover transition duration-700 group-hover:scale-[1.04]"
+                  />
+                  <span className="absolute left-5 top-5 grid h-12 w-12 place-items-center rounded-full border border-white bg-white text-maroon shadow-soft">
+                    <edit.icon className="h-6 w-6" aria-hidden="true" />
+                  </span>
                 </div>
-                <span className="mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-maroon">
-                  Explore <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" aria-hidden="true" />
-                </span>
+                <div className="p-6">
+                  <h3 className="font-display text-3xl font-semibold text-maroon-deep">{edit.name}</h3>
+                  <span className="mt-3 block h-px w-16 bg-gradient-to-r from-gold via-gold to-transparent" />
+                  <p className="mt-2 text-sm leading-6 text-charcoal/64">{edit.copy}</p>
+                  <span className="mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-maroon">
+                    Explore edit
+                    <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" aria-hidden="true" />
+                  </span>
+                </div>
               </Link>
             ))}
           </div>
         </div>
       </section>
 
-      <section className="container-page py-16 lg:py-24">
-        <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-          <div className="temple-rule">
-            <p className="section-kicker">Featured collections</p>
-            <h2 className="mt-2 font-display text-5xl font-semibold text-maroon-deep">Signature ceremony edits</h2>
-          </div>
-          <Link className="btn-secondary w-fit gap-2" href="/women">
-            View all <ArrowRight className="h-4 w-4" aria-hidden="true" />
-          </Link>
-        </div>
-        <CategoryShowcase categories={categories} />
-      </section>
+      <ProcessionGifSection />
 
-      <section className="bg-white py-16 lg:py-24">
-        <div className="container-page grid gap-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
-          <div className="relative min-h-[480px] overflow-hidden rounded-md bg-charcoal shadow-sari">
-            <Image
-              src="/images/occasions/team-bride.webp"
-              alt="Wedding party styled in coordinated South Indian ceremony outfits"
-              fill
-              sizes="(min-width: 1024px) 48vw, 100vw"
-              className="object-cover"
-            />
-          </div>
-          <div className="temple-rule">
-            <p className="section-kicker">Our craft</p>
-            <h2 className="mt-2 font-display text-5xl font-semibold leading-tight text-maroon-deep lg:text-6xl">
-              Where heritage meets a modern wedding closet.
-            </h2>
-            <p className="mt-5 max-w-2xl text-base leading-8 text-charcoal/70">
-              The old AMZIRA homepage carried a bigger story, so the new storefront now restores that sense of
-              ceremony: bridal silk, groom edits, family coordination, occasion shopping, and product discovery in one
-              long, crawlable page.
-            </p>
-            <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              {shoppingPaths.map((path) => (
-                <Link
-                  key={path}
-                  href="/search"
-                  className="flex min-h-11 items-center gap-3 rounded-md border border-charcoal/10 bg-ivory px-4 text-sm font-semibold text-charcoal transition hover:border-maroon hover:text-maroon focus-ring"
-                >
-                  <Search className="h-4 w-4 text-maroon" aria-hidden="true" />
-                  {path}
-                </Link>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="procession-panel py-14 lg:py-20">
-        <div className="container-page grid gap-8 lg:grid-cols-[0.82fr_1.18fr] lg:items-center">
-          <div className="procession-glow order-2 flex justify-center lg:order-1">
-            <Image
-              src="/images/animations/wedding-procession.gif"
-              alt=""
-              width={480}
-              height={270}
-              unoptimized
-              className="procession-float relative z-10 h-auto w-full max-w-[520px] opacity-95"
-              aria-hidden="true"
-            />
-          </div>
-          <div className="order-1 lg:order-2">
-            <p className="section-kicker">The wedding procession</p>
-            <h2 className="mt-3 max-w-3xl font-display text-5xl font-semibold leading-tight text-maroon-deep">
-              A small moving ritual from the old homepage, refined for the new one.
-            </h2>
-            <p className="mt-4 max-w-2xl text-base leading-8 text-charcoal/70">
-              This is the original AMZIRA procession GIF from the legacy index page. It now anchors the midpoint of the
-              homepage as an intentional ceremony pause instead of a loose decorative strip.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      <section className="container-page py-16 lg:py-24">
-        <div className="mb-8 temple-rule">
-          <p className="section-kicker">Shop by occasion</p>
-          <h2 className="mt-2 font-display text-5xl font-semibold text-maroon-deep">Every event gets its own edit</h2>
-        </div>
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-          {occasionEdits.map((edit) => (
-            <Link
-              key={edit.name}
-              href={edit.href}
-              className="group overflow-hidden rounded-md border border-charcoal/10 bg-white shadow-soft transition hover:-translate-y-1 hover:shadow-sari focus-ring"
-            >
-              <div className="relative aspect-[4/5] overflow-hidden bg-sandal">
-                <Image
-                  src={edit.image}
-                  alt={`${edit.name} ethnic wear edit`}
-                  fill
-                  sizes="(min-width: 1280px) 24vw, (min-width: 768px) 48vw, 100vw"
-                  className="object-cover transition duration-700 group-hover:scale-[1.04]"
-                />
-              </div>
-              <div className="p-5">
-                <h3 className="font-display text-3xl font-semibold text-maroon-deep">{edit.name}</h3>
-                <p className="mt-2 text-sm leading-6 text-charcoal/64">{edit.copy}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
-      </section>
-
-      <section className="bg-white py-16 lg:py-24">
-        <div className="container-page">
+      <section className="pattern-section py-16 lg:py-24">
+        <div className="container-page pattern-section__content">
           <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="section-kicker">Bestsellers</p>
               <h2 className="mt-2 font-display text-5xl font-semibold text-maroon-deep">Wedding-ready pieces</h2>
             </div>
-            <Link className="btn-secondary w-fit" href="/category/bridal-lehenga">
+            <Link className="btn-secondary w-fit bg-white" href="/category/bridal-lehenga">
               Bridal edit
             </Link>
           </div>
@@ -325,47 +226,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="container-page py-16 lg:py-24">
-        <div className="grid gap-4 lg:grid-cols-3">
-          {trustDetails.map(({ icon: Icon, title, body }) => (
-            <div key={title} className="rounded-md border border-charcoal/10 bg-white p-7 shadow-sm">
-              <Icon className="h-8 w-8 text-gold" aria-hidden="true" />
-              <h3 className="mt-5 font-display text-3xl text-maroon-deep">{title}</h3>
-              <p className="mt-3 text-sm leading-7 text-charcoal/65">{body}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <ParentsLoveSection />
 
-      <section className="bg-maroon-deep py-16 text-white lg:py-20">
-        <div className="container-page grid gap-8 lg:grid-cols-[1fr_0.9fr] lg:items-center">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.28em] text-gold-pale">AI and search visibility</p>
-            <h2 className="mt-3 font-display text-5xl font-semibold leading-tight">
-              Built around the words shoppers actually use.
-            </h2>
-            <p className="mt-4 max-w-2xl text-base leading-8 text-white/72">
-              Bridal lehenga choli, Kanjeevaram silk lehenga, South Indian half saree, pattu pavadai, muhurtham outfit,
-              mehendi lehenga, and festive family wear all appear as real crawlable content.
-            </p>
-          </div>
-          <div className="grid gap-3 sm:grid-cols-2">
-            {[
-              [Gem, "Product JSON-LD"],
-              [Heart, "Wishlist and cart paths"],
-              [MapPin, "Store and appointment routes"],
-              [Sparkles, "Occasion-rich copy"],
-              [Scissors, "Size and fit language"],
-              [Search, "Searchable category terms"]
-            ].map(([Icon, label]) => (
-              <div key={String(label)} className="rounded-md border border-white/12 bg-white/[0.08] p-4">
-                <Icon className="h-5 w-5 text-gold-pale" aria-hidden="true" />
-                <p className="mt-3 text-sm font-semibold text-white">{String(label)}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
     </>
   );
 }

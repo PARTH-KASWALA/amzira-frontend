@@ -1,13 +1,31 @@
 import Link from "next/link";
 import Image from "next/image";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Gem } from "lucide-react";
 import { navGroups, utilityLinks } from "@/lib/navigation";
+
+const announcementItems = [
+  "Free shipping above Rs. 1,999",
+  "36-hour returns",
+  "Bridal styling appointments"
+];
 
 export function SiteHeader() {
   return (
     <header className="sticky top-0 z-50 border-b border-charcoal/10 bg-ivory/95 backdrop-blur">
-      <div className="bg-maroon-deep px-4 py-2 text-center text-[11px] font-semibold uppercase tracking-[0.22em] text-white">
-        Free shipping above Rs. 1,999 · 36-hour returns · Bridal styling appointments
+      <div className="announcement-marquee bg-maroon-deep text-white" aria-label="Store announcements">
+        <div className="announcement-marquee__track">
+          {Array.from({ length: 4 }).map((_, groupIndex) => (
+            <div className="announcement-marquee__group" aria-hidden={groupIndex > 0} key={groupIndex}>
+              {announcementItems.map((item, itemIndex) => (
+                <span className="announcement-marquee__item" key={`${groupIndex}-${item}`}>
+                  {itemIndex === 0 ? <Gem className="h-3.5 w-3.5 text-gold" aria-hidden="true" /> : null}
+                  {item}
+                  <span className="announcement-marquee__dot" aria-hidden="true" />
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
       </div>
       <div className="container-page flex min-h-[76px] items-center justify-between gap-4">
         <Link href="/" className="focus-ring group flex min-w-0 items-center gap-3 rounded-sm" aria-label="AMZIRA home">
@@ -81,6 +99,12 @@ export function SiteHeader() {
               </div>
             </div>
           ))}
+          <Link
+            href="/heritage"
+            className="focus-ring flex min-h-11 items-center rounded-sm text-sm font-semibold uppercase tracking-[0.14em] text-charcoal transition hover:text-maroon"
+          >
+            Heritage
+          </Link>
         </nav>
 
         <div className="flex items-center gap-1">
@@ -118,6 +142,12 @@ export function SiteHeader() {
             {group.label}
           </Link>
         ))}
+        <Link
+          href="/heritage"
+          className="focus-ring min-h-11 shrink-0 rounded-full border border-charcoal/10 bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em]"
+        >
+          Heritage
+        </Link>
       </nav>
     </header>
   );
