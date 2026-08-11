@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { SlidersHorizontal } from "lucide-react";
 import { JsonLd } from "@/components/json-ld";
 import { ProductGrid } from "@/components/product-grid";
 import { getCategory, getProducts } from "@/lib/api";
 import { buildMetadata, breadcrumbJsonLd } from "@/lib/seo";
+import { comingSoonPath, unavailableCategoryDepartments } from "@/lib/storefront";
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | undefined>> };
 
@@ -23,6 +24,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function CategoryPage({ params, searchParams }: Props) {
   const [{ slug }, query] = await Promise.all([params, searchParams]);
+  const unavailableDepartment = unavailableCategoryDepartments[slug];
+  if (unavailableDepartment) redirect(comingSoonPath(unavailableDepartment));
+
   const [category, products] = await Promise.all([
     getCategory(slug),
     getProducts({
@@ -81,7 +85,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           <div className="mb-6 flex flex-col gap-3 rounded-md border border-charcoal/10 bg-white p-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-charcoal/70">{products.length} styles available</p>
             <div className="flex flex-wrap gap-2">
-              {["Ready to ship", "Custom stitch", "Bridal", "Bestsellers"].map((chip) => (
+            {["Ready to ship", "Silk", "Festive", "Bestsellers"].map((chip) => (
                 <Link
                   key={chip}
                   href={`/category/${category.slug}`}
@@ -97,7 +101,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
             <h2 className="font-display text-4xl text-maroon-deep">Shop {category.name} at AMZIRA</h2>
             <p className="mt-4">
               AMZIRA curates {category.name.toLowerCase()} for South Indian weddings, festive gatherings,
-              engagement functions, and family ceremonies. Each product page includes fabric notes, size options,
+              pujas, and family ceremonies. Each product page includes fabric notes, size options,
               delivery guidance, and styling support so shoppers and AI search systems can understand the catalog clearly.
             </p>
           </article>

@@ -7,6 +7,7 @@ import {
   findFallbackCategory,
   findFallbackProduct
 } from "@/lib/catalog";
+import { isLiveCategory, LIVE_CATEGORY_SLUG } from "@/lib/storefront";
 
 type Envelope<T> = { success?: boolean; data?: T; message?: string };
 type BackendRecord = Record<string, unknown>;
@@ -69,7 +70,7 @@ function toProduct(input: unknown): Product | null {
           }
         ]
       : [];
-  const categorySlug = text(category.slug || input.category_slug || input.category, "women");
+  const categorySlug = text(category.slug || input.category_slug || input.category, LIVE_CATEGORY_SLUG);
   const categoryName = text(category.name || input.category_name, categorySlug);
   const salePrice = number(input.sale_price ?? input.salePrice ?? input.price ?? input.base_price);
   const basePrice = number(input.base_price ?? input.basePrice, salePrice);
@@ -145,9 +146,10 @@ async function apiGet<T>(path: string): Promise<T | null> {
 export async function getCategories(): Promise<Category[]> {
   const data = await apiGet<unknown[]>("/categories");
   const categories = Array.isArray(data) ? data.map(toCategory).filter(Boolean) : [];
-  return categories.length
-    ? (categories as Category[]).sort((a, b) => a.displayOrder - b.displayOrder)
-    : fallbackCategories;
+  const publicCategories = (categories as Category[]).filter((category) => isLiveCategory(category.slug));
+  return publicCategories.length
+    ? publicCategories.sort((a, b) => a.displayOrder - b.displayOrder)
+    : fallbackCategories.filter((category) => isLiveCategory(category.slug));
 }
 
 export async function getProducts(params: Record<string, string | number | boolean | undefined> = {}): Promise<Product[]> {
@@ -159,20 +161,24 @@ export async function getProducts(params: Record<string, string | number | boole
   const data = await apiGet<unknown>(`/products${suffix}`);
   const dataRecord = record(data);
   const list = Array.isArray(data) ? data : Array.isArray(dataRecord.products) ? dataRecord.products : [];
-  const products = list.map(toProduct).filter(Boolean) as Product[];
+  const products = (list.map(toProduct).filter(Boolean) as Product[]).filter((product) =>
+    isLiveCategory(product.categorySlug)
+  );
   if (products.length) return products;
-  if (params.category) return fallbackProducts.filter((product) => product.categorySlug === params.category);
-  return fallbackProducts;
+  if (params.category && params.category !== LIVE_CATEGORY_SLUG) return [];
+  return fallbackProducts.filter((product) => isLiveCategory(product.categorySlug));
 }
 
 export async function getCategory(slug: string): Promise<Category | null> {
+  if (!isLiveCategory(slug)) return null;
   const categories = await getCategories();
   return categories.find((category) => category.slug === slug) || findFallbackCategory(slug);
 }
 
 export async function getProduct(slug: string): Promise<Product | null> {
   const data = await apiGet<unknown>(`/products/${encodeURIComponent(slug)}`);
-  return toProduct(data) || findFallbackProduct(slug);
+  const product = toProduct(data) || findFallbackProduct(slug);
+  return product && isLiveCategory(product.categorySlug) ? product : null;
 }
 
 export async function getFeaturedProducts() {

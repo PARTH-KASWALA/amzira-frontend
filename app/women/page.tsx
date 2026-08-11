@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
+import { comingSoonPath } from "@/lib/storefront";
 
 export default function WomenPage() {
-  redirect("/category/bridal-lehenga");
+  redirect(comingSoonPath("women"));
 }

@@ -22,13 +22,12 @@ export function CinematicSection() {
           transition={{ duration: 0.72, ease: sectionEase }}
         >
           <div className="cinematic-ornament" aria-hidden="true" />
-          <h2>A royal wedding procession in motion.</h2>
+          <h2>Tradition, seen through her eyes.</h2>
           <p>
-            A cinematic pause on the homepage: silk, jewelry, procession, and atmosphere before shoppers continue into
-            ceremony edits.
+            The music, color, and ceremony feel even more magical in a lehenga made for moving, playing, and celebrating.
           </p>
-          <Link className="cinematic-button focus-ring" href="/women">
-            Explore ceremony edits <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          <Link className="cinematic-button focus-ring" href="/category/kids-pattu-pavadai">
+            Shop girls&apos; lehenga choli <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </motion.div>
 

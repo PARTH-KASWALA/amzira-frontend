@@ -45,49 +45,13 @@ const localImage = (path: string) => `/images/${path}`;
 
 export const fallbackCategories: Category[] = [
   {
-    id: "bridal-lehenga",
-    name: "Bridal Pattu Lehengas",
-    slug: "bridal-lehenga",
-    description:
-      "South Indian bridal lehenga choli sets with Kanjivaram silk, antique zari, and heirloom ceremony detail.",
-    imageUrl: localImage("occasions/bride.webp"),
-    displayOrder: 1
-  },
-  {
-    id: "kanjeevaram-lehenga",
-    name: "Kanjeevaram Silk Lehengas",
-    slug: "kanjeevaram-lehenga",
-    description:
-      "Temple-border silk lehengas inspired by Kanchipuram weaving, festive color, and wedding-ready drape.",
-    imageUrl: localImage("occasions/lehenga.webp"),
-    displayOrder: 2
-  },
-  {
-    id: "half-saree",
-    name: "Traditional Half Sarees",
-    slug: "half-saree",
-    description:
-      "Langa voni and half saree silhouettes for ceremonies, pujas, mehendi, and family celebrations.",
-    imageUrl: localImage("occasions/team-bride.webp"),
-    displayOrder: 3
-  },
-  {
-    id: "tissue-organza",
-    name: "Tissue & Organza",
-    slug: "tissue-organza",
-    description:
-      "Lightweight shimmer, organza softness, and reception-ready lehenga choli looks.",
-    imageUrl: localImage("occasions/reception.webp"),
-    displayOrder: 4
-  },
-  {
     id: "kids-pattu-pavadai",
-    name: "Kids Pattu Pavadai",
+    name: "South Indian Kids Lehenga Choli",
     slug: "kids-pattu-pavadai",
     description:
-      "Soft silk festive sets for girls, designed for comfort through long wedding days.",
-    imageUrl: localImage("Bestsellers/womens/product-1-front.webp"),
-    displayOrder: 5
+      "Silk lehenga choli and pattu pavadai sets for girls, designed for weddings, pujas, festivals, and comfortable celebration days.",
+    imageUrl: localImage("hero-upgrade/green-kids-lehenga-front.webp"),
+    displayOrder: 1
   }
 ];
 
@@ -231,17 +195,21 @@ export const fallbackProducts: Product[] = [
   },
   {
     id: "sil-006",
-    name: "Sri Valli Girls Traditional Pattu Pavadai Set",
+    name: "Sri Valli Temple Border Girls Lehenga Choli",
     slug: "sri-valli-girls-traditional-pattu-pavadai",
     description:
-      "Kid-friendly pattu pavadai set with soft cotton-silk lining and festive zari border for weddings, pujas, and celebrations.",
+      "A girls' South Indian lehenga choli set with soft cotton-silk lining and a festive zari border for weddings, pujas, and celebrations.",
     categorySlug: "kids-pattu-pavadai",
-    categoryName: "Kids Pattu Pavadai",
+    categoryName: "South Indian Kids Lehenga Choli",
     basePrice: 7999,
     salePrice: 6499,
     discountPercentage: 18,
-    primaryImage: localImage("Bestsellers/womens/product-1-front.webp"),
-    images: [localImage("Bestsellers/womens/product-1-front.webp"), localImage("Bestsellers/womens/product-2-front.webp")],
+    primaryImage: localImage("hero-upgrade/green-kids-lehenga-front.webp"),
+    images: [
+      localImage("hero-upgrade/green-kids-lehenga-front.webp"),
+      localImage("hero-upgrade/green-kids-lehenga-side.webp"),
+      localImage("hero-upgrade/green-kids-lehenga-back.webp")
+    ],
     fabric: "Soft Cotton Silk & Zari",
     occasions: ["Festival", "Puja", "Wedding"],
     variants: ["2-3Y", "4-5Y", "6-7Y", "8-9Y", "10-12Y"].map((size, index) => ({
@@ -253,7 +221,7 @@ export const fallbackProducts: Product[] = [
     avgRating: 4.9,
     reviewCount: 142,
     inStock: true,
-    badge: "Kids Favorite"
+    badge: "Girls' Favorite"
   }
 ];
 

@@ -1,20 +1,20 @@
 const { test, expect } = require('@playwright/test');
 
-const productSlug = 'valli-royal-red-kanjivaram-bridal-pattu-lehenga';
+const productSlug = 'sri-valli-girls-traditional-pattu-pavadai';
 
 test.describe('AMZIRA Next storefront', () => {
   test('browse to PDP, select size, add to cart, and checkout success', async ({ page }) => {
     await page.goto('/');
-    await expect(page.getByRole('heading', { name: /Where tradition becomes celebration/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Royal Kanchipuram Lehenga Choli/i })).toBeVisible();
 
     await page.goto(`/product/${productSlug}`);
-    await expect(page.getByRole('heading', { name: /Valli Royal Red/i })).toBeVisible();
-    await page.getByRole('radio', { name: 'M', exact: true }).click();
+    await expect(page.getByRole('heading', { name: /Sri Valli Temple Border/i })).toBeVisible();
+    await page.getByRole('radio', { name: '6-7Y', exact: true }).click();
     await page.getByRole('button', { name: /Add to cart/i }).click();
 
     await page.goto('/cart');
-    await expect(page.getByText(/Valli Royal Red/i)).toBeVisible();
-    await expect(page.getByText('Size: M')).toBeVisible();
+    await expect(page.getByText(/Sri Valli Temple Border/i)).toBeVisible();
+    await expect(page.getByText('Size: 6-7Y')).toBeVisible();
     await page.getByRole('link', { name: /Secure checkout/i }).click();
 
     await page.getByLabel('Full name', { exact: true }).fill('Parth Kaswala');
@@ -35,6 +35,28 @@ test.describe('AMZIRA Next storefront', () => {
     await expect(page.getByRole('heading', { name: /cart is still safe/i })).toBeVisible();
   });
 
+  test('unavailable departments redirect to premium coming soon pages', async ({ page }) => {
+    await page.goto('/women');
+    await expect(page).toHaveURL(/\/coming-soon\/women$/);
+    await expect(page.getByRole('heading', { name: /new ceremony wardrobe/i })).toBeVisible();
+    const womenHeroImage = page.getByAltText(/future women's collection/i);
+    await expect(womenHeroImage).toBeVisible();
+    expect(await womenHeroImage.evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true);
+
+    await page.goto('/men');
+    await expect(page).toHaveURL(/\/coming-soon\/men$/);
+    await expect(page.getByRole('heading', { name: /men's ceremony edit/i })).toBeVisible();
+
+    await page.goto('/kids?style=boys-kurta');
+    await expect(page).toHaveURL(/\/coming-soon\/kids-boys$/);
+    await expect(page.getByRole('heading', { name: /little gentlemen/i })).toBeVisible();
+  });
+
+  test('legacy women category routes no longer expose unavailable products', async ({ page }) => {
+    await page.goto('/category/bridal-lehenga');
+    await expect(page).toHaveURL(/\/coming-soon\/women$/);
+  });
+
   test('legacy auth journeys render as Next pages', async ({ page }) => {
     await page.goto('/login');
     await expect(page.getByRole('heading', { name: /Sign in to AMZIRA/i })).toBeVisible();
@@ -51,7 +73,7 @@ test.describe('AMZIRA Next storefront', () => {
     test(`home page renders without horizontal overflow at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 1100 });
       await page.goto('/');
-      await expect(page.getByRole('heading', { name: /Where tradition becomes celebration/i })).toBeVisible();
+      await expect(page.getByRole('heading', { name: /Royal Kanchipuram Lehenga Choli/i })).toBeVisible();
       const hasOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
       expect(hasOverflow).toBe(false);
     });

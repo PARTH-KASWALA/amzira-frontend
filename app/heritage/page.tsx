@@ -4,11 +4,12 @@ import Link from "next/link";
 import type { LucideIcon } from "lucide-react";
 import { ArrowRight, Gem, HandHeart, Landmark, Palette, Sparkles, Sprout } from "lucide-react";
 import { buildMetadata } from "@/lib/seo";
+import { LIVE_CATEGORY_PATH } from "@/lib/storefront";
 
 export const metadata: Metadata = buildMetadata({
   title: "Our Heritage",
   description:
-    "Discover AMZIRA's South Indian ceremony wear heritage, artisan craft, textile archives, and atelier-led bridal styling.",
+    "Discover AMZIRA's South Indian ceremony wear heritage, artisan craft, textile archives, and kids' lehenga choli story.",
   path: "/heritage",
   image: "/images/footer/heritage-illustration-footer.webp"
 });
@@ -32,8 +33,8 @@ const pillars: Pillar[] = [
   },
   {
     icon: Sprout,
-    title: "Made for families",
-    copy: "Bride, groom, kids, and guests are styled as one celebration wardrobe."
+    title: "Made for childhood",
+    copy: "Soft linings, easy movement, and ceremony detail shape every girls' style in our first collection."
   }
 ];
 
@@ -58,21 +59,21 @@ const craftSteps = [
 
 const gallery = [
   {
-    title: "Bridal silks",
-    copy: "Deep reds, antique golds, and heirloom blouse craft for the ceremony hour.",
-    image: "/images/occasions/bride_side.webp",
+    title: "Girls' temple silks",
+    copy: "Emerald, maroon, and antique gold shaped for little ceremony moments.",
+    image: "/images/hero-upgrade/green-kids-lehenga-front.webp",
     className: "md:col-span-2 md:row-span-2"
   },
   {
     title: "Festival color",
-    copy: "Marigold, emerald, and peacock shades for puja mornings and family gatherings.",
-    image: "/images/occasions/celebrating_festivals.webp",
+    copy: "Royal blue checks and gold borders for puja mornings and family gatherings.",
+    image: "/images/hero-upgrade/blue-kids-lehenga-front.webp",
     className: ""
   },
   {
-    title: "Groom edits",
-    copy: "Sherwani and kurta jacket sets designed to sit beside bridal silk with ease.",
-    image: "/images/occasions/team-groom.webp",
+    title: "The archive ahead",
+    copy: "Future women, men, and boys' collections will grow from the same South Indian craft language.",
+    image: "/images/footer/heritage-illustration-footer.webp",
     className: ""
   }
 ];
@@ -107,8 +108,8 @@ export default function HeritagePage() {
               South Indian craft, kept in motion.
             </h1>
             <p className="mt-6 max-w-2xl text-base leading-8 text-white/82 sm:text-lg">
-              AMZIRA carries temple-border silk, family ceremony dressing, and artisan finish into a modern wedding
-              wardrobe made for brides, grooms, children, and every guest in the frame.
+              AMZIRA carries temple-border silk and artisan finish into a modern girls&apos; celebration wardrobe, beginning
+              with South Indian lehenga choli and pattu pavadai.
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
               <Link className="btn-primary gap-2 bg-gold text-charcoal hover:bg-gold-pale" href="/appointments">
@@ -125,8 +126,8 @@ export default function HeritagePage() {
             <div className="absolute right-0 top-0 h-36 w-2/5 border border-white/20 bg-peacock/20" />
             <div className="absolute left-4 top-10 aspect-[4/5] w-[48%] overflow-hidden rounded-md border border-gold/50 bg-sandal shadow-sari sm:w-[42%] lg:left-10">
               <Image
-                src="/images/occasions/bride.webp"
-                alt="Bride in South Indian ceremony wear"
+                src="/images/hero-upgrade/green-kids-lehenga-front.webp"
+                alt="Girl in an emerald South Indian lehenga choli"
                 fill
                 sizes="(min-width: 1024px) 28vw, 46vw"
                 className="object-cover"
@@ -134,8 +135,8 @@ export default function HeritagePage() {
             </div>
             <div className="absolute right-0 top-24 aspect-[3/4] w-[54%] overflow-hidden rounded-md border border-white/20 bg-charcoal shadow-sari sm:w-[48%]">
               <Image
-                src="/images/occasions/wedding.webp"
-                alt="South Indian wedding ceremony styling"
+                src="/images/hero-upgrade/blue-kids-lehenga-front.webp"
+                alt="Girl in a royal blue South Indian lehenga choli"
                 fill
                 sizes="(min-width: 1024px) 30vw, 54vw"
                 className="object-cover"
@@ -228,11 +229,11 @@ export default function HeritagePage() {
             <div className="temple-rule max-w-3xl">
               <p className="section-kicker">Atelier archive</p>
               <h2 className="mt-3 font-display text-5xl font-semibold leading-tight text-maroon-deep lg:text-6xl">
-                A living archive for wedding wardrobes.
+                A living archive for celebration wardrobes.
               </h2>
             </div>
-            <Link className="btn-secondary w-fit gap-2" href="/women">
-              Explore collections <ArrowRight className="h-4 w-4" aria-hidden="true" />
+            <Link className="btn-secondary w-fit gap-2" href={LIVE_CATEGORY_PATH}>
+              Explore the collection <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
 

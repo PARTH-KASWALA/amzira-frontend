@@ -21,7 +21,7 @@ const montserrat = Montserrat({
 });
 
 export const metadata: Metadata = buildMetadata({
-  title: "South Indian Luxury Ethnic Wear",
+  title: "South Indian Kids Lehenga Choli",
   path: "/"
 });
 

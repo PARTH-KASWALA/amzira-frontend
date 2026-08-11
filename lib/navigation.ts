@@ -1,74 +1,78 @@
 import { Heart, HelpCircle, MapPin, Search, ShoppingBag, UserRound } from "lucide-react";
+import { comingSoonPath, LIVE_CATEGORY_PATH } from "@/lib/storefront";
 
 export const navGroups = [
   {
-    label: "Women",
-    href: "/women",
+    label: "Kids",
+    href: LIVE_CATEGORY_PATH,
+    status: "live" as const,
+    intro: "South Indian lehenga choli for girls and their biggest celebration days.",
+    quickLinks: [
+      ["Shop all girls' styles", LIVE_CATEGORY_PATH],
+      ["Temple border lehenga", LIVE_CATEGORY_PATH],
+      ["Pattu pavadai", LIVE_CATEGORY_PATH],
+      ["Boys' collection", comingSoonPath("kids-boys")]
+    ],
     columns: [
       {
-        title: "Lehenga Choli",
+        title: "Girls' Lehenga Choli",
         links: [
-          ["Bridal Pattu Lehengas", "/category/bridal-lehenga"],
-          ["Kanjeevaram Silk Lehengas", "/category/kanjeevaram-lehenga"],
-          ["Tissue & Organza", "/category/tissue-organza"],
-          ["Traditional Half Sarees", "/category/half-saree"]
+          ["South Indian Lehenga Choli", LIVE_CATEGORY_PATH],
+          ["Kanjeevaram-Inspired Lehenga", LIVE_CATEGORY_PATH],
+          ["Silk Choli Sets", LIVE_CATEGORY_PATH],
+          ["Temple Border Lehenga", LIVE_CATEGORY_PATH]
         ]
       },
       {
-        title: "Shop By Occasion",
+        title: "Pattu Pavadai",
         links: [
-          ["Muhurtham", "/women?occasion=muhurtham"],
-          ["Reception", "/women?occasion=reception"],
-          ["Sangeet", "/women?occasion=sangeet"],
-          ["Festival", "/women?occasion=festival"]
+          ["Pattu Pavadai Sets", LIVE_CATEGORY_PATH],
+          ["Silk Skirt and Blouse", LIVE_CATEGORY_PATH],
+          ["Festive Dupatta Sets", LIVE_CATEGORY_PATH],
+          ["View All Girls' Styles", LIVE_CATEGORY_PATH]
+        ]
+      },
+      {
+        title: "Coming Soon",
+        links: [
+          ["Boys' Festive Wear", comingSoonPath("kids-boys")],
+          ["Women's Collection", comingSoonPath("women")],
+          ["Men's Collection", comingSoonPath("men")]
         ]
       }
+    ],
+    promos: [
+      {
+        title: "Girls' Lehenga Choli",
+        cta: "Shop the collection",
+        href: LIVE_CATEGORY_PATH,
+        image: "/images/hero-upgrade/green-kids-lehenga-front.webp"
+      },
+      {
+        title: "Temple Silk Details",
+        cta: "View the edit",
+        href: LIVE_CATEGORY_PATH,
+        image: "/images/hero-upgrade/blue-kids-lehenga-front.webp"
+      }
     ]
+  },
+  {
+    label: "Women",
+    href: comingSoonPath("women"),
+    status: "coming-soon" as const,
+    intro: "",
+    quickLinks: [],
+    columns: [],
+    promos: []
   },
   {
     label: "Men",
-    href: "/men",
-    columns: [
-      {
-        title: "Wedding Wear",
-        links: [
-          ["Sherwani", "/men?style=sherwani"],
-          ["Kurta Jacket Sets", "/men?style=kurta-jacket"],
-          ["Indo Western", "/men?style=indo-western"],
-          ["Wedding Guest", "/men?occasion=wedding-guest"]
-        ]
-      }
-    ]
-  },
-  {
-    label: "Kids",
-    href: "/kids",
-    columns: [
-      {
-        title: "Celebration Wear",
-        links: [
-          ["Pattu Pavadai", "/category/kids-pattu-pavadai"],
-          ["Girls Lehenga", "/kids?style=girls-lehenga"],
-          ["Boys Kurta Sets", "/kids?style=boys-kurta"],
-          ["Festive Ready", "/kids?occasion=festival"]
-        ]
-      }
-    ]
-  },
-  {
-    label: "Bridal",
-    href: "/category/bridal-lehenga",
-    columns: [
-      {
-        title: "Bride Edits",
-        links: [
-          ["Muhurtham Reds", "/category/bridal-lehenga"],
-          ["Temple Zari", "/category/kanjeevaram-lehenga"],
-          ["Custom Stitching", "/appointments"],
-          ["Video Styling", "/appointments"]
-        ]
-      }
-    ]
+    href: comingSoonPath("men"),
+    status: "coming-soon" as const,
+    intro: "",
+    quickLinks: [],
+    columns: [],
+    promos: []
   }
 ];
 

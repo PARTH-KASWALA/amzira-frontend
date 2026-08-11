@@ -4,7 +4,7 @@ import { absoluteUrl, formatMoney } from "@/lib/format";
 
 export const siteName = "AMZIRA";
 export const defaultDescription =
-  "Shop South Indian luxury ethnic wear, bridal lehenga choli, Kanjeevaram silk lehengas, half sarees, and festive outfits at AMZIRA.";
+  "Shop South Indian girls' lehenga choli and pattu pavadai with silk color, temple borders, and celebration-ready comfort at AMZIRA.";
 
 export function buildMetadata({
   title,

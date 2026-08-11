@@ -14,14 +14,13 @@ const footerColumns = [
   {
     title: "Top categories",
     links: [
-      ["Bridal Lehengas", "/category/bridal-lehenga"],
-      ["Kanjeevaram Lehengas", "/category/kanjeevaram-lehenga"],
-      ["Half Sarees", "/category/half-saree"],
-      ["Tissue & Organza", "/category/tissue-organza"],
-      ["Kids Pattu Pavadai", "/category/kids-pattu-pavadai"],
-      ["Men's Kurta", "/men?style=kurta"],
-      ["Sherwani", "/men?style=sherwani"],
-      ["Wedding Guest Wear", "/women?occasion=wedding-guest"]
+      ["Girls' Lehenga Choli", "/category/kids-pattu-pavadai"],
+      ["Pattu Pavadai", "/category/kids-pattu-pavadai"],
+      ["Temple Border Lehenga", "/category/kids-pattu-pavadai"],
+      ["Kanjeevaram-Inspired Kids' Silk", "/category/kids-pattu-pavadai"],
+      ["Women's Collection - Coming Soon", "/coming-soon/women"],
+      ["Men's Collection - Coming Soon", "/coming-soon/men"],
+      ["Boys' Collection - Coming Soon", "/coming-soon/kids-boys"]
     ]
   },
   {
@@ -100,7 +99,7 @@ export function SiteFooter() {
         <div>
           <h2 className="text-xs font-semibold uppercase tracking-[0.34em] text-[#df7778]">Connect with us</h2>
           <p className="mt-5 max-w-sm text-[15px] font-medium leading-7 text-[#5f5b5a]">
-            Join our mailing list for ceremony edits, bridal styling notes, and new collection updates.
+            Join our mailing list for girls&apos; ceremony edits, fit guidance, and new collection updates.
           </p>
 
           <form action="/contact-support" className="mt-8 flex max-w-md items-center border-b-2 border-[#5f5b5a]">

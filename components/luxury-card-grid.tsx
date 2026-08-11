@@ -9,25 +9,25 @@ const sectionEase = [0.16, 1, 0.3, 1] as const;
 
 const luxuryCards = [
   {
-    title: "Ceremony styling",
-    description: "Curated looks for weddings, rituals, and celebrations",
-    cta: "Explore styles",
-    href: "/appointments",
-    image: "/images/occasions/bride_side.webp"
+    title: "Temple border silks",
+    description: "Rich color and zari details made for little ceremony moments",
+    cta: "Explore the edit",
+    href: "/category/kids-pattu-pavadai",
+    image: "/images/hero-upgrade/green-kids-lehenga-front.webp"
   },
   {
-    title: "Design archives",
-    description: "Timeless weaves and intricate details",
-    cta: "Discover more",
-    href: "/heritage",
-    image: "/images/occasions/reception.webp"
+    title: "Comfort in every layer",
+    description: "Soft linings and celebration-ready movement",
+    cta: "Shop girls' styles",
+    href: "/category/kids-pattu-pavadai",
+    image: "/images/hero-upgrade/green-kids-lehenga-side.webp"
   },
   {
-    title: "Family coordination",
-    description: "Looks that bring every generation together",
-    cta: "Explore now",
-    href: "/appointments",
-    image: "/images/occasions/team-bride.webp"
+    title: "Kanchipuram-inspired color",
+    description: "A vivid blue edit with antique gold detail",
+    cta: "View the collection",
+    href: "/category/kids-pattu-pavadai",
+    image: "/images/hero-upgrade/blue-kids-lehenga-front.webp"
   }
 ];
 
@@ -44,15 +44,15 @@ export function LuxuryCardGrid() {
           viewport={{ once: true, amount: 0.28 }}
           transition={{ duration: 0.7, ease: sectionEase }}
         >
-          <p className="atelier-kicker">The Amzira atelier</p>
-          <h2>Where tradition becomes celebration.</h2>
+          <p className="atelier-kicker">Made for little celebrations</p>
+          <h2>South Indian silk, sized for her.</h2>
           <div className="atelier-divider" aria-hidden="true" />
           <p>
-            From heirloom silks to careful handwork, every edit is shaped for South Indian ceremonies and family memories.
+            Our first collection focuses on girls&apos; lehenga choli and pattu pavadai for South Indian ceremonies.
           </p>
-          <p>For little ones, bridal moments, and coordinated looks that feel considered from the first fitting.</p>
-          <Link className="atelier-button focus-ring" href="/women">
-            Explore collections <ArrowRight className="h-4 w-4" aria-hidden="true" />
+          <p>Soft linings, expressive color, and traditional details make long celebration days feel easier.</p>
+          <Link className="atelier-button focus-ring" href="/category/kids-pattu-pavadai">
+            Shop the kids edit <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </motion.div>
 

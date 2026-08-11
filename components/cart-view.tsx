@@ -6,6 +6,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Minus, Plus, Trash2 } from "lucide-react";
 import { CART_KEY } from "@/components/cart-button";
 import { formatMoney } from "@/lib/format";
+import { LIVE_CATEGORY_PATH } from "@/lib/storefront";
 
 type CartItem = {
   productId: string | number;
@@ -47,9 +48,9 @@ export function CartView({ checkout = false }: { checkout?: boolean }) {
       <div className="rounded-md border border-charcoal/10 bg-white p-10 text-center shadow-sm">
         <h2 className="font-display text-4xl text-maroon-deep">Your cart is empty</h2>
         <p className="mx-auto mt-3 max-w-md text-charcoal/65">
-          Start with bridal pattu lehengas, Kanjeevaram silk edits, or kids pattu pavadai.
+          Start with South Indian girls&apos; lehenga choli and pattu pavadai for her next celebration.
         </p>
-        <Link href="/women" className="btn-primary mt-6">
+        <Link href={LIVE_CATEGORY_PATH} className="btn-primary mt-6">
           Continue shopping
         </Link>
       </div>

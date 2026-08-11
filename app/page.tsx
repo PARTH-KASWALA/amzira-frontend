@@ -15,48 +15,48 @@ import { CinematicSection } from "@/components/cinematic-section";
 import { HeroCarousel } from "@/components/hero-carousel";
 import { LuxuryCardGrid } from "@/components/luxury-card-grid";
 import { ParentsLoveSection } from "@/components/parents-love-section";
-import { ProcessionGifSection } from "@/components/procession-gif-section";
 import { ProductGrid } from "@/components/product-grid";
 import { getCategories, getFeaturedProducts } from "@/lib/api";
+import { comingSoonPath, LIVE_CATEGORY_PATH } from "@/lib/storefront";
 
 const occasionEdits = [
   {
-    name: "Muhurtham bride",
-    copy: "Crimson silk, antique zari, and heirloom blouse work.",
-    href: "/category/bridal-lehenga",
-    image: "/images/occasions/bride_side.webp",
+    name: "Wedding day silk",
+    copy: "Temple borders and soft layers for a full day of celebration.",
+    href: LIVE_CATEGORY_PATH,
+    image: "/images/hero-upgrade/green-kids-lehenga-front.webp",
     icon: Crown
   },
   {
-    name: "Haldi and mehendi",
-    copy: "Turmeric, emerald, mirror accents, and easy movement.",
-    href: "/category/half-saree",
-    image: "/images/occasions/haldi.webp",
+    name: "Puja morning",
+    copy: "Emerald silk and maroon detail made for comfortable movement.",
+    href: LIVE_CATEGORY_PATH,
+    image: "/images/hero-upgrade/green-kids-lehenga-side.webp",
     icon: Sparkles
   },
   {
-    name: "Sangeet shimmer",
-    copy: "Tissue, organza, and reception-ready drape.",
-    href: "/category/tissue-organza",
-    image: "/images/occasions/reception.webp",
+    name: "Festival color",
+    copy: "Royal blue checks and antique gold for family festivities.",
+    href: LIVE_CATEGORY_PATH,
+    image: "/images/hero-upgrade/blue-kids-lehenga-front.webp",
     icon: Music2
   },
   {
-    name: "Festival silk",
-    copy: "Kanjeevaram-inspired color for puja and family gatherings.",
-    href: "/category/kanjeevaram-lehenga",
-    image: "/images/occasions/celebrating_festivals.webp",
+    name: "Family celebrations",
+    copy: "A graceful flare for photos, play, and every happy ritual.",
+    href: LIVE_CATEGORY_PATH,
+    image: "/images/hero-upgrade/blue-kids-lehenga-side.webp",
     icon: UsersRound
   }
 ];
 
 const shoppingPaths = [
-  { label: "Bridal lehenga choli", icon: Crown },
-  { label: "Kanjeevaram silk lehenga", icon: Gem },
-  { label: "Half saree and langa voni", icon: Sparkles },
-  { label: "Wedding guest outfits", icon: UsersRound },
-  { label: "Reception and sangeet wear", icon: Music2 },
-  { label: "Pattu pavadai for girls", icon: HandHeart }
+  { label: "South Indian girls' lehenga", icon: Crown, href: LIVE_CATEGORY_PATH },
+  { label: "Kanjeevaram-inspired kids' silk", icon: Gem, href: LIVE_CATEGORY_PATH },
+  { label: "Temple border lehenga choli", icon: Sparkles, href: LIVE_CATEGORY_PATH },
+  { label: "Wedding outfits for girls", icon: UsersRound, href: LIVE_CATEGORY_PATH },
+  { label: "Pattu pavadai sets", icon: Music2, href: LIVE_CATEGORY_PATH },
+  { label: "Boys' festive wear", icon: HandHeart, href: comingSoonPath("kids-boys") }
 ];
 
 export default async function HomePage() {
@@ -74,10 +74,10 @@ export default async function HomePage() {
         <div className="container-page pattern-section__content">
           <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div className="temple-rule">
-              <p className="section-kicker">Featured collections</p>
-              <h2 className="mt-2 font-display text-5xl font-semibold text-maroon-deep">Signature ceremony edits</h2>
+              <p className="section-kicker">Shop by collection</p>
+              <h2 className="mt-2 font-display text-5xl font-semibold text-maroon-deep">Girls&apos; ceremony wardrobe</h2>
             </div>
-            <Link className="btn-secondary w-fit gap-2 bg-white" href="/women">
+            <Link className="btn-secondary w-fit gap-2 bg-white" href={LIVE_CATEGORY_PATH}>
               View all <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
@@ -89,8 +89,8 @@ export default async function HomePage() {
         <div className="container-page grid gap-10 lg:grid-cols-[1fr_0.86fr] lg:items-center">
           <div className="relative min-h-[420px] overflow-hidden rounded-xl bg-charcoal shadow-sari sm:min-h-[520px] lg:min-h-[560px]">
             <Image
-              src="/images/occasions/team-bride.webp"
-              alt="Wedding party styled in coordinated South Indian ceremony outfits"
+              src="/images/hero-upgrade/green-kids-lehenga-front.webp"
+              alt="Girl wearing an emerald South Indian lehenga choli with a temple border"
               fill
               sizes="(min-width: 1024px) 48vw, 100vw"
               className="object-cover brightness-[1.04] saturate-[1.08]"
@@ -103,10 +103,10 @@ export default async function HomePage() {
                 </span>
                 <div>
                   <p className="font-display text-2xl font-semibold leading-tight text-maroon-deep">
-                    Crafted for moments that become memories.
+                    Crafted for her brightest memories.
                   </p>
                   <p className="mt-2 text-xs font-medium leading-5 text-charcoal/68">
-                    Rooted in tradition. Designed for today.
+                    Rooted in tradition. Comfortable all day.
                   </p>
                 </div>
               </div>
@@ -116,13 +116,13 @@ export default async function HomePage() {
             <div className="craft-title-rule mb-6" aria-hidden="true">
               <span />
             </div>
-            <p className="section-kicker">Our craft</p>
+            <p className="section-kicker">Her first Amzira</p>
             <h2 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-[1.06] text-maroon-deep sm:text-5xl lg:text-6xl">
-              Where heritage meets a modern wedding closet.
+              South Indian heritage for little celebration days.
             </h2>
             <div className="my-7 h-px w-56 bg-gradient-to-r from-gold via-maroon to-transparent" />
             <p className="max-w-2xl text-base leading-8 text-charcoal/70">
-              A curated world of bridal silks, groom edits, and coordinated celebration wear for every ceremony moment.
+              Girls&apos; lehenga choli and pattu pavadai with vivid silk color, traditional borders, and kid-friendly comfort.
             </p>
             <Link
               href="/search"
@@ -130,7 +130,7 @@ export default async function HomePage() {
             >
               <Search className="h-6 w-6 shrink-0 text-maroon" aria-hidden="true" />
               <span className="min-w-0 flex-1 truncate text-sm text-charcoal/58 sm:text-base">
-                Search bridal lehengas, sarees, wedding outfits...
+                Search girls&apos; lehenga choli, pattu pavadai...
               </span>
               <span className="grid h-11 w-11 shrink-0 place-items-center rounded-full bg-maroon-deep text-white">
                 <ArrowRight className="h-5 w-5" aria-hidden="true" />
@@ -143,7 +143,7 @@ export default async function HomePage() {
               {shoppingPaths.map((path) => (
                 <Link
                   key={path.label}
-                  href="/search"
+                  href={path.href}
                   className="focus-ring flex min-h-12 items-center gap-3 rounded-full border border-charcoal/10 bg-white/78 px-4 text-sm font-semibold text-charcoal shadow-[0_12px_34px_rgba(42,7,17,0.07)] transition hover:-translate-y-0.5 hover:border-maroon/28 hover:text-maroon"
                 >
                   <span className="grid h-8 w-8 shrink-0 place-items-center rounded-full bg-maroon-soft text-maroon">
@@ -171,7 +171,7 @@ export default async function HomePage() {
                 Handpicked looks for every celebration, tradition, and moment.
               </p>
             </div>
-            <Link className="btn-secondary w-fit gap-2" href="/women">
+            <Link className="btn-secondary w-fit gap-2" href={LIVE_CATEGORY_PATH}>
               Explore edits <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
@@ -209,17 +209,15 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <ProcessionGifSection />
-
       <section className="pattern-section py-16 lg:py-24">
         <div className="container-page pattern-section__content">
           <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="section-kicker">Bestsellers</p>
-              <h2 className="mt-2 font-display text-5xl font-semibold text-maroon-deep">Wedding-ready pieces</h2>
+              <h2 className="mt-2 font-display text-5xl font-semibold text-maroon-deep">Girls&apos; celebration favorites</h2>
             </div>
-            <Link className="btn-secondary w-fit bg-white" href="/category/bridal-lehenga">
-              Bridal edit
+            <Link className="btn-secondary w-fit bg-white" href={LIVE_CATEGORY_PATH}>
+              Girls&apos; collection
             </Link>
           </div>
           <ProductGrid products={products} />
