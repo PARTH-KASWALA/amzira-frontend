@@ -15,11 +15,18 @@ import { CinematicSection } from "@/components/cinematic-section";
 import { HeroCarousel } from "@/components/hero-carousel";
 import { LuxuryCardGrid } from "@/components/luxury-card-grid";
 import { ParentsLoveSection } from "@/components/parents-love-section";
+import { ProcessionGifSection } from "@/components/procession-gif-section";
 import { ProductGrid } from "@/components/product-grid";
-import { getCategories, getFeaturedProducts } from "@/lib/api";
+import { type HeroProduct } from "@/components/product-slide";
+import { type LuxuryCard } from "@/components/luxury-card-grid";
+import { getCategories, getFeaturedProducts, getProduct, getProducts } from "@/lib/api";
+import { type Product } from "@/lib/catalog";
+import { formatMoney } from "@/lib/format";
 import { comingSoonPath, LIVE_CATEGORY_PATH } from "@/lib/storefront";
 
-const occasionEdits = [
+export const dynamic = "force-dynamic";
+
+const defaultOccasionEdits = [
   {
     name: "Wedding day silk",
     copy: "Temple borders and soft layers for a full day of celebration.",
@@ -59,14 +66,183 @@ const shoppingPaths = [
   { label: "Boys' festive wear", icon: HandHeart, href: comingSoonPath("kids-boys") }
 ];
 
+const heroThemes: HeroProduct["theme"][] = ["peacock", "maroon", "gold", "emerald", "rose", "blue"];
+const detailTones = ["maroon", "emerald", "blue"] as const;
+const heroGradients = [
+  {
+    gradient: "linear-gradient(110deg, #24080f 0%, #7f1735 34%, #0c6c70 70%, #18080a 100%)",
+    accent: "#0c6c70"
+  },
+  {
+    gradient: "linear-gradient(110deg, #21090c 0%, #8c1b2f 38%, #b68a2e 74%, #17090a 100%)",
+    accent: "#8c1b2f"
+  },
+  {
+    gradient: "linear-gradient(110deg, #261006 0%, #95640e 38%, #182b63 74%, #130a08 100%)",
+    accent: "#b68a2e"
+  },
+  {
+    gradient: "linear-gradient(110deg, #160d07 0%, #6b2416 34%, #0f6548 72%, #120a08 100%)",
+    accent: "#0f6548"
+  }
+];
+
+function uniqueInventory(products: Product[]) {
+  const seenImages = new Set<string>();
+  return products.filter((product) => {
+    if (product.inStock === false || !product.primaryImage || seenImages.has(product.primaryImage)) {
+      return false;
+    }
+    seenImages.add(product.primaryImage);
+    return true;
+  });
+}
+
+function shuffleInventory<T>(items: T[]) {
+  const shuffled = [...items];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const randomIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+  }
+  return shuffled;
+}
+
+function diversifyInventory(products: Product[]) {
+  const groups = new Map<string, Product[]>();
+
+  shuffleInventory(products).forEach((product) => {
+    const designFamily = product.subcategorySlug || product.subcategoryName || product.categorySlug;
+    const group = groups.get(designFamily) || [];
+    group.push(product);
+    groups.set(designFamily, group);
+  });
+
+  const randomizedGroups = shuffleInventory([...groups.values()]);
+  const diversified: Product[] = [];
+  const largestGroupSize = Math.max(0, ...randomizedGroups.map((group) => group.length));
+
+  for (let productIndex = 0; productIndex < largestGroupSize; productIndex += 1) {
+    randomizedGroups.forEach((group) => {
+      const product = group[productIndex];
+      if (product) diversified.push(product);
+    });
+  }
+
+  return diversified;
+}
+
+function homeProductAt(products: Product[], index: number) {
+  return products[index % products.length];
+}
+
+function mannequinImages(product: Product) {
+  const gallery = product.images.filter((image, index, images) => image && images.indexOf(image) === index);
+  if (gallery.length < 5) return null;
+
+  const pairStart = gallery.length === 5 ? 3 : 4;
+  const choli = gallery[pairStart];
+  const lehenga = gallery[pairStart + 1];
+  return choli && lehenga ? { choli, lehenga } : null;
+}
+
+function buildHeroSlides(products: Product[]): HeroProduct[] | undefined {
+  if (!products.length) return undefined;
+  return products.slice(0, 4).map((product, index) => {
+    const visual = heroGradients[index % heroGradients.length];
+    const mannequin = mannequinImages(product);
+    const fallbackImages = [product.primaryImage, ...product.images]
+      .filter((image, imageIndex, images) => image && images.indexOf(image) === imageIndex)
+      .slice(0, 2);
+    const details = mannequin
+      ? [
+          {
+            label: "Choli",
+            image: mannequin.choli,
+            alt: `${product.name} choli invisible mannequin view`,
+            fit: "contain" as const,
+            tone: detailTones[index % detailTones.length]
+          },
+          {
+            label: "Lehenga",
+            image: mannequin.lehenga,
+            alt: `${product.name} lehenga invisible mannequin view`,
+            fit: "contain" as const,
+            tone: detailTones[index % detailTones.length]
+          }
+        ]
+      : fallbackImages.map((image, detailIndex) => ({
+          label: ["Front view", "Detail view"][detailIndex] || "Product view",
+          image,
+          alt: `${product.name} ${detailIndex + 1}`,
+          fit: detailIndex === 0 ? "cover" as const : "contain" as const,
+          tone: detailTones[index % detailTones.length]
+        }));
+    return {
+      id: String(product.id || product.slug),
+      title: product.name,
+      price: formatMoney(product.salePrice),
+      theme: heroThemes[index % heroThemes.length],
+      badge: product.badge || (product.discountPercentage ? `${product.discountPercentage}% off` : "Available now"),
+      eyebrow: product.subcategoryName || product.categoryName || "Girls' ceremony wear",
+      description: product.description,
+      href: `/product/${product.slug}`,
+      cta: "Shop this style",
+      modelImage: product.primaryImage,
+      modelAlt: product.name,
+      gradient: visual.gradient,
+      accent: visual.accent,
+      details
+    };
+  });
+}
+
+function buildLuxuryCards(products: Product[]): LuxuryCard[] | undefined {
+  if (products.length < 3) return undefined;
+  const titles = ["Best of the inventory", "Ready for celebration", "Color-rich favorites"];
+  const ctas = ["Shop this style", "View product", "Explore the look"];
+  return products.slice(0, 3).map((product, index) => ({
+    title: titles[index],
+    description: product.name,
+    cta: ctas[index],
+    href: `/product/${product.slug}`,
+    image: product.primaryImage
+  }));
+}
+
+function buildOccasionEdits(products: Product[]) {
+  if (!products.length) return defaultOccasionEdits;
+  return defaultOccasionEdits.map((edit, index) => {
+    const product = homeProductAt(products, index);
+    return {
+      ...edit,
+      copy: product.name,
+      href: `/product/${product.slug}`,
+      image: product.primaryImage
+    };
+  });
+}
+
 export default async function HomePage() {
-  const [categories, products] = await Promise.all([getCategories(), getFeaturedProducts()]);
+  const [categories, featuredProducts, allProducts] = await Promise.all([
+    getCategories(),
+    getFeaturedProducts(),
+    getProducts({ limit: 100 })
+  ]);
+  const inventoryProducts = diversifyInventory(uniqueInventory([...featuredProducts, ...allProducts]));
+  const heroProducts = await Promise.all(
+    inventoryProducts.slice(0, 4).map(async (product) => (await getProduct(product.slug)) || product)
+  );
+  const luxuryProducts = inventoryProducts.slice(4, 7);
+  const collectionProduct = inventoryProducts[7] || inventoryProducts[0];
+  const craftProduct = inventoryProducts[8] || inventoryProducts[0];
+  const occasionEdits = buildOccasionEdits(inventoryProducts.slice(9));
+  const bestsellerProducts = diversifyInventory(inventoryProducts).slice(0, 8);
 
   return (
     <>
-      <HeroCarousel />
+      <HeroCarousel products={buildHeroSlides(heroProducts.length ? heroProducts : inventoryProducts)} />
 
-      <LuxuryCardGrid />
+      <LuxuryCardGrid cards={buildLuxuryCards(luxuryProducts.length >= 3 ? luxuryProducts : inventoryProducts)} />
 
       <CinematicSection />
 
@@ -81,7 +257,7 @@ export default async function HomePage() {
               View all <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
-          <CategoryShowcase categories={categories} />
+          <CategoryShowcase categories={categories} featuredProduct={collectionProduct} />
         </div>
       </section>
 
@@ -89,8 +265,8 @@ export default async function HomePage() {
         <div className="container-page grid gap-10 lg:grid-cols-[1fr_0.86fr] lg:items-center">
           <div className="relative min-h-[420px] overflow-hidden rounded-xl bg-charcoal shadow-sari sm:min-h-[520px] lg:min-h-[560px]">
             <Image
-              src="/images/hero-upgrade/green-kids-lehenga-front.webp"
-              alt="Girl wearing an emerald South Indian lehenga choli with a temple border"
+              src={craftProduct?.primaryImage || "/images/hero-upgrade/green-kids-lehenga-front.webp"}
+              alt={craftProduct?.name || "Girl wearing an emerald South Indian lehenga choli with a temple border"}
               fill
               sizes="(min-width: 1024px) 48vw, 100vw"
               className="object-cover brightness-[1.04] saturate-[1.08]"
@@ -157,6 +333,8 @@ export default async function HomePage() {
         </div>
       </section>
 
+      <ProcessionGifSection />
+
       <section className="occasion-section pattern-section py-16 lg:py-24">
         <div className="container-page pattern-section__content">
           <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
@@ -220,7 +398,7 @@ export default async function HomePage() {
               Girls&apos; collection
             </Link>
           </div>
-          <ProductGrid products={products} />
+          <ProductGrid products={bestsellerProducts} />
         </div>
       </section>
 

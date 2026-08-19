@@ -1,7 +1,7 @@
 import { Product } from "@/lib/catalog";
 import { ProductCard } from "@/components/product-card";
 
-export function ProductGrid({ products }: { products: Product[] }) {
+export function ProductGrid({ products, className }: { products: Product[]; className?: string }) {
   if (!products.length) {
     return (
       <div className="rounded-md border border-dashed border-charcoal/20 bg-white p-10 text-center">
@@ -14,7 +14,7 @@ export function ProductGrid({ products }: { products: Product[] }) {
   }
 
   return (
-    <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+    <div className={["grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4", className].filter(Boolean).join(" ")}>
       {products.map((product, index) => (
         <ProductCard key={product.slug} product={product} priority={index < 4} />
       ))}

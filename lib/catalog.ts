@@ -24,6 +24,8 @@ export type Product = {
   description: string;
   categorySlug: string;
   categoryName: string;
+  subcategorySlug?: string | null;
+  subcategoryName?: string | null;
   basePrice: number;
   salePrice: number;
   discountPercentage: number;
@@ -39,6 +41,13 @@ export type Product = {
   badge?: string | null;
   metaTitle?: string | null;
   metaDescription?: string | null;
+};
+
+export type CatalogSubcategory = {
+  id: string | number;
+  name: string;
+  slug: string;
+  productCount: number;
 };
 
 const localImage = (path: string) => `/images/${path}`;

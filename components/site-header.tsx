@@ -1,9 +1,19 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
-import { ChevronDown, Gem } from "lucide-react";
-import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import {
+  ArrowRight,
+  CalendarDays,
+  ChevronDown,
+  Flower2,
+  Gem,
+  Grid2X2,
+  Shirt,
+  Sparkles
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { navGroups, utilityLinks } from "@/lib/navigation";
 
 const announcementItems = [
@@ -12,12 +22,44 @@ const announcementItems = [
   "Fit guidance for growing kids"
 ];
 
+const sidebarIcons = [Flower2, Sparkles, Shirt, CalendarDays, Grid2X2];
+const columnIcons = [Flower2, Gem, Sparkles];
+const linkIcons = [Shirt, Flower2, Sparkles, Gem];
+
+function isCurrentDepartment(pathname: string, label: string, href: string) {
+  if (label === "Kids") {
+    return pathname === "/kids" || pathname.startsWith("/category/");
+  }
+
+  return pathname === href || pathname.endsWith(`/${label.toLowerCase()}`);
+}
+
 export function SiteHeader() {
+  const pathname = usePathname();
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
-  const activeGroup = navGroups.find((group) => group.label === activeLabel);
+  const activeGroup = navGroups.find((group) => group.label === activeLabel && group.status === "live");
+
+  useEffect(() => {
+    setActiveLabel(null);
+  }, [pathname]);
+
+  useEffect(() => {
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") setActiveLabel(null);
+    }
+
+    window.addEventListener("keydown", handleEscape);
+    return () => window.removeEventListener("keydown", handleEscape);
+  }, []);
 
   return (
-    <header className="sticky top-0 z-50 border-b border-charcoal/10 bg-ivory/95 backdrop-blur">
+    <header
+      className="site-header sticky top-0 z-50 border-b border-charcoal/10 bg-ivory/95 backdrop-blur"
+      onMouseLeave={() => setActiveLabel(null)}
+      onBlur={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setActiveLabel(null);
+      }}
+    >
       <div className="announcement-marquee bg-maroon-deep text-white" aria-label="Store announcements">
         <div className="announcement-marquee__track">
           {Array.from({ length: 4 }).map((_, groupIndex) => (
@@ -33,20 +75,21 @@ export function SiteHeader() {
           ))}
         </div>
       </div>
-      <div className="container-page flex min-h-[76px] items-center justify-between gap-4">
+
+      <div className="container-page flex min-h-[78px] items-center justify-between gap-4">
         <Link href="/" className="focus-ring group flex min-w-0 items-center gap-3 rounded-sm" aria-label="AMZIRA home">
-          <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-gold/50 bg-white shadow-soft">
+          <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-gold/55 bg-white shadow-soft">
             <Image
               src="/images/logo/amzira_logo.webp"
               alt=""
               fill
-              sizes="44px"
+              sizes="48px"
               className="object-contain p-1.5"
               priority
             />
           </span>
           <span className="min-w-0">
-            <span className="relative block h-7 w-36 sm:w-40">
+            <span className="relative block h-7 w-32 sm:w-40">
               <Image
                 src="/images/logo/Amzira_name.webp"
                 alt="AMZIRA"
@@ -56,35 +99,51 @@ export function SiteHeader() {
                 priority
               />
             </span>
-            <span className="block text-[10px] font-semibold uppercase tracking-[0.28em] text-gold">
+            <span className="block text-[9px] font-semibold uppercase tracking-[0.28em] text-gold sm:text-[10px]">
               South Indian Luxury
             </span>
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-8 lg:flex" aria-label="Primary navigation">
-          {navGroups.map((group) => (
-            <div key={group.label} className="relative">
+        <nav className="hidden items-center gap-3 xl:flex" aria-label="Primary navigation">
+          {navGroups.map((group) => {
+            const current = isCurrentDepartment(pathname, group.label, group.href);
+            const open = activeLabel === group.label;
+
+            if (group.status === "live") {
+              return (
+                <button
+                  key={group.label}
+                  type="button"
+                  className={`nav-department focus-ring ${current || open ? "nav-department--active" : ""}`}
+                  aria-expanded={open}
+                  aria-haspopup="true"
+                  aria-controls="kids-mega-menu"
+                  onClick={() => setActiveLabel(group.label)}
+                  onMouseEnter={() => setActiveLabel(group.label)}
+                >
+                  {group.label}
+                  <ChevronDown aria-hidden="true" className={`h-4 w-4 transition ${open ? "rotate-180" : ""}`} />
+                </button>
+              );
+            }
+
+            return (
               <Link
+                key={group.label}
                 href={group.href}
-                className={`focus-ring flex min-h-11 items-center gap-1 rounded-sm text-sm font-semibold uppercase tracking-[0.14em] transition hover:text-maroon ${
-                  activeLabel === group.label ? "text-maroon" : "text-charcoal"
-                }`}
-                aria-expanded={group.status === "live" ? activeLabel === group.label : undefined}
-                onFocus={() => setActiveLabel(group.status === "live" ? group.label : null)}
-                onMouseEnter={() => setActiveLabel(group.status === "live" ? group.label : null)}
+                className={`nav-department focus-ring ${current ? "nav-department--active" : ""}`}
+                onFocus={() => setActiveLabel(null)}
+                onMouseEnter={() => setActiveLabel(null)}
               >
                 {group.label}
-                {group.status === "live" ? <ChevronDown aria-hidden="true" className="h-4 w-4" /> : null}
-                {group.status === "coming-soon" ? (
-                  <span className="text-[0.58rem] font-bold normal-case tracking-normal text-gold-dark">Soon</span>
-                ) : null}
+                <span className="nav-department__soon">Soon</span>
               </Link>
-            </div>
-          ))}
+            );
+          })}
           <Link
             href="/heritage"
-            className="focus-ring flex min-h-11 items-center rounded-sm text-sm font-semibold uppercase tracking-[0.14em] text-charcoal transition hover:text-maroon"
+            className={`nav-department focus-ring ${pathname === "/heritage" ? "nav-department--active" : ""}`}
             onFocus={() => setActiveLabel(null)}
             onMouseEnter={() => setActiveLabel(null)}
           >
@@ -92,18 +151,8 @@ export function SiteHeader() {
           </Link>
         </nav>
 
-        <div className="flex items-center gap-1" onMouseEnter={() => setActiveLabel(null)}>
-          {utilityLinks.slice(0, 1).map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="focus-ring hidden min-h-11 min-w-11 place-items-center rounded-full text-charcoal transition hover:bg-maroon-soft hover:text-maroon md:grid"
-              aria-label={item.label}
-            >
-              <item.icon className="h-5 w-5" aria-hidden="true" />
-            </Link>
-          ))}
-          {utilityLinks.slice(2).map((item) => (
+        <div className="flex items-center gap-0.5" onMouseEnter={() => setActiveLabel(null)}>
+          {utilityLinks.filter((item) => ["Search", "Wishlist", "Account", "Cart"].includes(item.label)).map((item) => (
             <Link
               key={item.label}
               href={item.href}
@@ -117,76 +166,99 @@ export function SiteHeader() {
           ))}
         </div>
       </div>
+
       {activeGroup ? (
         <div
-          className="fixed left-1/2 top-[106px] z-50 w-[calc(100vw-2rem)] max-w-[1320px] -translate-x-1/2 pt-4"
+          className="mega-menu-shell"
           onMouseEnter={() => setActiveLabel(activeGroup.label)}
-          onMouseLeave={() => setActiveLabel(null)}
         >
-          <div className="grid min-h-[430px] grid-cols-[210px_minmax(0,1fr)_300px] overflow-hidden rounded-md border border-charcoal/10 bg-[#fbf3e4] shadow-sari">
-            <div className="flex flex-col justify-between bg-[#f6ead5] p-8">
-              <div>
-                <p className="section-kicker">{activeGroup.label}</p>
-                <p className="mt-4 font-display text-[2.15rem] leading-[1.05] text-maroon-deep">
-                  {activeGroup.intro}
-                </p>
+          <span className="mega-menu-pointer" aria-hidden="true" />
+          <div id="kids-mega-menu" className="mega-menu" aria-label="Kids collections">
+            <aside className="mega-menu__side">
+              <div className="mega-menu__side-copy">
+                <p>Kids</p>
+                <Flower2 aria-hidden="true" />
+                <h2>{activeGroup.intro}</h2>
+                <Link href={activeGroup.introCta[1]} onClick={() => setActiveLabel(null)}>
+                  {activeGroup.introCta[0]} <ArrowRight aria-hidden="true" />
+                </Link>
               </div>
-              <ul className="space-y-4">
-                {activeGroup.quickLinks.map(([label, href], index) => (
-                  <li key={label}>
-                    <Link
-                      className={`focus-ring inline-flex rounded-sm text-sm font-extrabold uppercase tracking-[0.08em] transition hover:translate-x-1 ${
-                        index === 0 ? "text-lotus" : "text-charcoal"
-                      }`}
-                      href={href}
-                    >
-                      {label}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="grid content-start gap-x-8 gap-y-7 bg-[#fff8ea] p-8 lg:grid-cols-3 xl:grid-cols-4">
-              {activeGroup.columns.map((column) => (
-                <div key={column.title} className="min-w-0">
-                  <h3 className="mb-5 text-xs font-extrabold uppercase tracking-[0.24em] text-gold-dark">
-                    {column.title}
-                  </h3>
-                  <ul className="space-y-3.5">
-                    {column.links.map(([label, href]) => (
+
+              <nav aria-label="Kids collection shortcuts">
+                <ul className="mega-menu__quick-links">
+                  {activeGroup.quickLinks.map(([label, href], index) => {
+                    const Icon = sidebarIcons[index] ?? Sparkles;
+                    return (
                       <li key={label}>
                         <Link
-                          className="focus-ring block rounded-sm text-[0.95rem] font-medium leading-5 text-charcoal/80 transition hover:translate-x-1 hover:text-maroon"
+                          className={index === 0 ? "is-selected" : ""}
                           href={href}
+                          onClick={() => setActiveLabel(null)}
                         >
-                          {label}
+                          <Icon aria-hidden="true" />
+                          <span>{label}</span>
+                          <ArrowRight aria-hidden="true" />
                         </Link>
                       </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
+                    );
+                  })}
+                </ul>
+              </nav>
+            </aside>
+
+            <div className="mega-menu__columns">
+              {activeGroup.columns.map((column, columnIndex) => {
+                const ColumnIcon = columnIcons[columnIndex] ?? Sparkles;
+                return (
+                  <section className="mega-menu__column" key={column.title}>
+                    <div className="mega-menu__column-heading">
+                      <ColumnIcon aria-hidden="true" />
+                      <h2>{column.title}</h2>
+                    </div>
+                    <div className="mega-menu__column-rule" aria-hidden="true"><span /></div>
+                    <ul>
+                      {column.links.map((item, itemIndex) => {
+                        const ItemIcon = linkIcons[itemIndex] ?? Sparkles;
+                        return (
+                          <li key={item.label}>
+                            <Link href={item.href} onClick={() => setActiveLabel(null)}>
+                              <ItemIcon aria-hidden="true" />
+                              <span>
+                                <strong>{item.label}</strong>
+                                <small>{item.description}</small>
+                              </span>
+                            </Link>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                    <Link className="mega-menu__column-cta" href={column.cta[1]} onClick={() => setActiveLabel(null)}>
+                      {column.cta[0]} <ArrowRight aria-hidden="true" />
+                    </Link>
+                  </section>
+                );
+              })}
             </div>
-            <div className="grid content-center gap-5 bg-[#f3e4c7] p-7">
+
+            <div className="mega-menu__promos">
               {activeGroup.promos.map((promo) => (
                 <Link
                   key={promo.title}
                   href={promo.href}
-                  className="focus-ring group/promo relative block min-h-[170px] overflow-hidden rounded-sm bg-maroon-deep text-white shadow-soft"
+                  className="mega-menu__promo group focus-ring"
+                  onClick={() => setActiveLabel(null)}
                 >
                   <Image
                     src={promo.image}
                     alt=""
                     fill
                     sizes="300px"
-                    className="object-cover transition duration-500 group-hover/promo:scale-105"
+                    className="object-cover transition duration-700 group-hover:scale-[1.035]"
                   />
-                  <span className="absolute inset-0 bg-gradient-to-r from-maroon-deep/88 via-maroon-deep/42 to-transparent" />
-                  <span className="absolute left-5 top-5 max-w-[11rem] font-display text-3xl font-semibold leading-none">
-                    {promo.title}
-                  </span>
-                  <span className="absolute bottom-5 left-5 text-[0.68rem] font-extrabold uppercase tracking-[0.18em] text-gold-pale">
-                    {promo.cta}
+                  <span className="mega-menu__promo-shade" aria-hidden="true" />
+                  <span className="mega-menu__promo-copy">
+                    <strong>{promo.title}</strong>
+                    <small>{promo.cta} <ArrowRight aria-hidden="true" /></small>
                   </span>
                 </Link>
               ))}
@@ -194,19 +266,27 @@ export function SiteHeader() {
           </div>
         </div>
       ) : null}
-      <nav className="container-page flex gap-2 overflow-x-auto pb-3 lg:hidden" aria-label="Mobile navigation">
-        {navGroups.map((group) => (
-          <Link
-            key={group.label}
-            href={group.href}
-            className="focus-ring min-h-11 shrink-0 rounded-full border border-charcoal/10 bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em]"
-          >
-            {group.label}
-          </Link>
-        ))}
+
+      <nav className="container-page flex gap-2 overflow-x-auto pb-3 xl:hidden" aria-label="Mobile navigation">
+        {navGroups.map((group) => {
+          const current = isCurrentDepartment(pathname, group.label, group.href);
+          return (
+            <Link
+              key={group.label}
+              href={group.href}
+              className={`focus-ring min-h-11 shrink-0 rounded-sm border px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] ${
+                current ? "border-maroon bg-maroon text-white" : "border-charcoal/10 bg-white text-charcoal"
+              }`}
+            >
+              {group.label}
+            </Link>
+          );
+        })}
         <Link
           href="/heritage"
-          className="focus-ring min-h-11 shrink-0 rounded-full border border-charcoal/10 bg-white px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em]"
+          className={`focus-ring min-h-11 shrink-0 rounded-sm border px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] ${
+            pathname === "/heritage" ? "border-maroon bg-maroon text-white" : "border-charcoal/10 bg-white text-charcoal"
+          }`}
         >
           Heritage
         </Link>

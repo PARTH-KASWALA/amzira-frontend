@@ -7,7 +7,15 @@ import { motion, useReducedMotion } from "framer-motion";
 
 const sectionEase = [0.16, 1, 0.3, 1] as const;
 
-const luxuryCards = [
+export type LuxuryCard = {
+  title: string;
+  description: string;
+  cta: string;
+  href: string;
+  image: string;
+};
+
+const defaultLuxuryCards: LuxuryCard[] = [
   {
     title: "Temple border silks",
     description: "Rich color and zari details made for little ceremony moments",
@@ -31,8 +39,9 @@ const luxuryCards = [
   }
 ];
 
-export function LuxuryCardGrid() {
+export function LuxuryCardGrid({ cards = defaultLuxuryCards }: { cards?: LuxuryCard[] }) {
   const shouldReduceMotion = useReducedMotion();
+  const luxuryCards = cards.length >= 3 ? cards.slice(0, 3) : defaultLuxuryCards;
 
   return (
     <section className="atelier-section">

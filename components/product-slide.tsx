@@ -52,7 +52,7 @@ const textVariants: Variants = {
 
 export function ProductSlide({ product, activeIndex, count, dragX, parallaxX, parallaxY }: ProductSlideProps) {
   return (
-    <div className="container-page relative grid min-h-[calc(100svh-118px)] gap-8 py-10 lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:py-12">
+    <div className="container-page hero-story-layout relative grid gap-5 py-7 lg:min-h-[clamp(700px,calc(100svh-160px),790px)] lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:gap-8 lg:py-10">
       <motion.div
         key={`copy-${product.id}`}
         className="hero-story-copy"
@@ -124,7 +124,7 @@ export function ProductSlide({ product, activeIndex, count, dragX, parallaxX, pa
           <Link href={product.href} className="focus-ring">
             View details <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
-          <div aria-label="Customer rating">
+          <div role="img" aria-label="Rated five out of five stars">
             {Array.from({ length: 5 }).map((_, index) => (
               <Star key={index} className="h-3.5 w-3.5 fill-current" aria-hidden="true" />
             ))}

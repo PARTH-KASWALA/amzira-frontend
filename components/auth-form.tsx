@@ -3,55 +3,26 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-
-const API_BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://127.0.0.1:8000/api/v1";
+import { Eye, EyeOff } from "lucide-react";
+import { browserApi } from "@/lib/api/browser-client";
+import { useSession } from "@/components/session-provider";
 
 type AuthMode = "login" | "signup" | "forgot";
 type FormStatus = { type: "idle" | "success" | "error"; message: string };
 
-function readCookie(name: string) {
-  return document.cookie
-    .split("; ")
-    .find((row) => row.startsWith(`${name}=`))
-    ?.split("=")[1];
-}
-
-async function csrfHeaders() {
-  await fetch(`${API_BASE}/auth/csrf-token`, {
-    method: "GET",
-    credentials: "include",
-    headers: { Accept: "application/json" }
-  });
-  const token = readCookie("csrf_token");
-  return token ? { "X-CSRF-Token": decodeURIComponent(token) } : {};
-}
-
 async function postAuth(path: string, body: Record<string, string>) {
-  const csrf = await csrfHeaders();
-  const headers = new Headers({
-    "Content-Type": "application/json",
-    Accept: "application/json"
-  });
-  Object.entries(csrf).forEach(([key, value]) => headers.set(key, value));
-
-  const response = await fetch(`${API_BASE}${path}`, {
+  return browserApi(path, {
     method: "POST",
-    credentials: "include",
-    headers,
     body: JSON.stringify(body)
   });
-  const payload = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    const detail = typeof payload.detail === "string" ? payload.detail : payload.message;
-    throw new Error(detail || "Please check the details and try again.");
-  }
-  return payload;
 }
 
 export function AuthForm({ mode }: { mode: AuthMode }) {
   const router = useRouter();
+  const { refresh } = useSession();
   const [status, setStatus] = useState<FormStatus>({ type: "idle", message: "" });
   const [submitting, setSubmitting] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const isSignup = mode === "signup";
   const isForgot = mode === "forgot";
 
@@ -86,8 +57,11 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
       }
 
       await postAuth("/auth/login", { email, password });
+      await refresh();
       setStatus({ type: "success", message: "Signed in successfully." });
-      router.push("/account");
+      const requestedPath = new URLSearchParams(window.location.search).get("next");
+      const nextPath = requestedPath?.startsWith("/") && !requestedPath.startsWith("//") ? requestedPath : "/account";
+      router.push(nextPath);
     } catch (error) {
       setStatus({
         type: "error",
@@ -142,14 +116,24 @@ export function AuthForm({ mode }: { mode: AuthMode }) {
         {isForgot ? null : (
           <label className="grid gap-2 text-sm font-semibold text-charcoal">
             Password
-            <input
-              className="min-h-11 rounded-md border border-charcoal/15 px-4 font-normal focus:border-maroon"
-              name="password"
-              type="password"
-              autoComplete={isSignup ? "new-password" : "current-password"}
-              minLength={8}
-              required
-            />
+            <span className="relative block">
+              <input
+                className="min-h-11 w-full rounded-md border border-charcoal/15 px-4 pr-12 font-normal focus:border-maroon"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                autoComplete={isSignup ? "new-password" : "current-password"}
+                minLength={8}
+                required
+              />
+              <button
+                type="button"
+                className="focus-ring absolute inset-y-0 right-0 grid w-11 place-items-center rounded-md text-charcoal/60 hover:text-maroon"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+                onClick={() => setShowPassword((value) => !value)}
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
+              </button>
+            </span>
           </label>
         )}
 

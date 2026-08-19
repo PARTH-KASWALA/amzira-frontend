@@ -1,0 +1,9 @@
+{
+  "/images/[...path]/route": "app/images/[...path]/route.js",
+  "/heritage/page": "app/heritage/page.js",
+  "/category/[slug]/page": "app/category/[slug]/page.js",
+  "/product/[slug]/page": "app/product/[slug]/page.js",
+  "/cart/page": "app/cart/page.js",
+  "/_not-found/page": "app/_not-found/page.js",
+  "/page": "app/page.js"
+}

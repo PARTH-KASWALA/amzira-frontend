@@ -4,7 +4,7 @@ Primary branch: `main`
 
 ## Positioning
 
-AMZIRA is a South Indian luxury ethnic wear storefront for bridal lehenga choli, Kanjeevaram-inspired lehengas, half sarees, pattu pavadai, and family wedding looks. The frontend should feel premium, ceremony-aware, and commerce-ready without copying Manyavar or KALKI.
+AMZIRA is a South Indian luxury ethnic wear storefront initially focused on girls' lehenga choli and pattu pavadai for weddings, pujas, festivals, and family celebrations. The frontend should feel premium, ceremony-aware, and commerce-ready without copying established ethnic-wear marketplaces.
 
 ## Tokens
 
@@ -29,7 +29,8 @@ The signature visual device is the temple-border rule: a restrained gold and mar
 
 ## UX Rules
 
-- Women and Bridal are primary commerce paths.
+- Girls' lehenga choli and pattu pavadai are the only live commerce paths.
+- Women, men, and boys lead to premium coming-soon experiences until inventory is enabled.
 - Keep all touch targets at least `44px`.
 - Use Lucide icons for utility actions.
 - Product/category pages must stay crawlable with metadata, canonical URLs, JSON-LD, and readable category copy.

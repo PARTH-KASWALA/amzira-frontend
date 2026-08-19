@@ -10,9 +10,12 @@ const eslintConfig = [
   {
     ignores: [
       ".next/**",
+      ".next-stale-*/**",
       "node_modules/**",
       "out/**",
       "coverage/**",
+      "playwright-report/**",
+      "test-results/**",
       "tests/test_pdp_contract.py"
     ]
   }

@@ -3,72 +3,83 @@
 import { useState } from "react";
 import { ShoppingBag } from "lucide-react";
 import { Product } from "@/lib/catalog";
+import { addAuthenticatedCartItem } from "@/lib/api/cart";
+import { ApiError } from "@/lib/api/browser-client";
+import { CART_KEY, GuestCartItem, readGuestCart, writeGuestCart } from "@/lib/cart";
+import { useSession } from "@/components/session-provider";
 
-type CartItem = {
-  productId: string | number;
-  slug: string;
-  name: string;
-  image: string;
-  price: number;
-  size: string;
-  quantity: number;
-};
-
-const CART_KEY = "amzira_next_cart";
-
-function readCart(): CartItem[] {
-  try {
-    return JSON.parse(localStorage.getItem(CART_KEY) || "[]");
-  } catch {
-    return [];
-  }
-}
-
-export function addToLocalCart(product: Product, size: string, quantity = 1) {
-  const cart = readCart();
-  const existing = cart.find((item) => item.slug === product.slug && item.size === size);
+export function addToLocalCart(product: Product, variantId: string | number, quantity = 1) {
+  const variant = product.variants.find((entry) => String(entry.id) === String(variantId));
+  const size = variant?.size || "Free";
+  const cart = readGuestCart();
+  const existing = cart.find((item) => item.slug === product.slug && String(item.variantId) === String(variantId));
   if (existing) {
-    existing.quantity += quantity;
+    existing.quantity = Math.min(existing.stockAvailable || 10, existing.quantity + quantity, 10);
   } else {
-    cart.push({
+    const item: GuestCartItem = {
       productId: product.id,
+      variantId,
       slug: product.slug,
       name: product.name,
       image: product.primaryImage,
-      price: product.salePrice,
+      price: product.salePrice + (variant?.additionalPrice || 0),
       size,
-      quantity
-    });
+      quantity,
+      stockAvailable: variant?.stockQuantity || 10
+    };
+    cart.push(item);
   }
-  localStorage.setItem(CART_KEY, JSON.stringify(cart));
-  window.dispatchEvent(new CustomEvent("amzira-cart-updated"));
+  writeGuestCart(cart);
 }
 
 export function AddToCartButton({
   product,
-  size,
+  variantId,
   className = ""
 }: {
   product: Product;
-  size?: string;
+  variantId?: string | number;
   className?: string;
 }) {
+  const { status: sessionStatus } = useSession();
   const [status, setStatus] = useState("Add to cart");
-  const selectedSize = size || product.variants.find((variant) => variant.stockQuantity > 0)?.size || "Free";
+  const selectedVariant =
+    product.variants.find((variant) => String(variant.id) === String(variantId)) ||
+    product.variants.find((variant) => variant.stockQuantity > 0);
+  const canAdd = product.inStock && Boolean(selectedVariant);
+
+  async function addItem() {
+    if (!selectedVariant) return;
+    setStatus("Adding...");
+    try {
+      if (sessionStatus === "authenticated") {
+        const productId = Number(product.id);
+        const selectedVariantId = Number(selectedVariant.id);
+        if (!Number.isInteger(productId) || !Number.isInteger(selectedVariantId)) {
+          throw new ApiError("This preview item is not available in the live catalog.", 400);
+        }
+        await addAuthenticatedCartItem(productId, selectedVariantId);
+        window.dispatchEvent(new CustomEvent("amzira-cart-updated"));
+      } else {
+        addToLocalCart(product, selectedVariant.id);
+      }
+      setStatus("Added to cart");
+    } catch (error) {
+      setStatus(error instanceof Error ? error.message : "Could not add item");
+    }
+    window.setTimeout(() => setStatus("Add to cart"), 2400);
+  }
 
   return (
     <button
       type="button"
       className={`btn-primary gap-2 ${className}`}
-      disabled={!product.inStock}
-      onClick={() => {
-        addToLocalCart(product, selectedSize);
-        setStatus("Added");
-        window.setTimeout(() => setStatus("Add to cart"), 1800);
-      }}
+      disabled={!canAdd || status === "Adding..."}
+      onClick={() => void addItem()}
+      aria-live="polite"
     >
       <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-      {product.inStock ? status : "Sold out"}
+      {canAdd ? status : "Sold out"}
     </button>
   );
 }

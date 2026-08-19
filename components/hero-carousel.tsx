@@ -5,7 +5,7 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring } from "framer-motion";
 import { ProductSlide, type HeroProduct } from "@/components/product-slide";
 
-const products: HeroProduct[] = [
+const defaultProducts: HeroProduct[] = [
   {
     id: "royal-blue-kids",
     title: "Royal Kanchipuram Lehenga Choli",
@@ -84,7 +84,8 @@ const products: HeroProduct[] = [
   }
 ];
 
-export function HeroCarousel() {
+export function HeroCarousel({ products = defaultProducts }: { products?: HeroProduct[] }) {
+  const slides = products.length ? products : defaultProducts;
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const shouldReduceMotion = useReducedMotion();
@@ -93,19 +94,19 @@ export function HeroCarousel() {
   const mouseY = useMotionValue(0);
   const parallaxX = useSpring(mouseX, { stiffness: 80, damping: 24, mass: 0.6 });
   const parallaxY = useSpring(mouseY, { stiffness: 80, damping: 24, mass: 0.6 });
-  const activeProduct = products[activeIndex];
+  const activeProduct = slides[activeIndex];
 
   const goTo = useCallback((nextIndex: number) => {
-    setActiveIndex((nextIndex + products.length) % products.length);
-  }, []);
+    setActiveIndex((nextIndex + slides.length) % slides.length);
+  }, [slides.length]);
 
   const goNext = useCallback(() => {
-    setActiveIndex((current) => (current + 1) % products.length);
-  }, []);
+    setActiveIndex((current) => (current + 1) % slides.length);
+  }, [slides.length]);
 
   const goPrev = useCallback(() => {
-    setActiveIndex((current) => (current - 1 + products.length) % products.length);
-  }, []);
+    setActiveIndex((current) => (current - 1 + slides.length) % slides.length);
+  }, [slides.length]);
 
   useEffect(() => {
     if (isPaused || shouldReduceMotion) {
@@ -168,7 +169,7 @@ export function HeroCarousel() {
             key={activeProduct.id}
             product={activeProduct}
             activeIndex={activeIndex}
-            count={products.length}
+            count={slides.length}
             dragX={dragX}
             parallaxX={parallaxX}
             parallaxY={parallaxY}
@@ -181,7 +182,7 @@ export function HeroCarousel() {
           <ArrowLeft className="h-5 w-5" aria-hidden="true" />
         </button>
         <div className="hero-story-dots" role="tablist" aria-label="Choose product story">
-          {products.map((product, index) => (
+          {slides.map((product, index) => (
             <button
               key={product.id}
               className="focus-ring"

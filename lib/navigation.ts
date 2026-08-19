@@ -1,5 +1,13 @@
 import { Heart, HelpCircle, MapPin, Search, ShoppingBag, UserRound } from "lucide-react";
-import { comingSoonPath, LIVE_CATEGORY_PATH } from "@/lib/storefront";
+import {
+  comingSoonPath,
+  GIRLS_LEHENGA_CATEGORY_PATH,
+  LIVE_CATEGORY_PATH,
+  PATTU_PAVADAI_CATEGORY_PATH
+} from "@/lib/storefront";
+
+const subcategoryHref = (categoryPath: string, subcategory: string) =>
+  `${categoryPath}?subcategory=${subcategory}`;
 
 export const navGroups = [
   {
@@ -7,51 +15,95 @@ export const navGroups = [
     href: LIVE_CATEGORY_PATH,
     status: "live" as const,
     intro: "South Indian lehenga choli for girls and their biggest celebration days.",
+    introCta: ["Shop all girls' styles", LIVE_CATEGORY_PATH],
     quickLinks: [
-      ["Shop all girls' styles", LIVE_CATEGORY_PATH],
-      ["Temple border lehenga", LIVE_CATEGORY_PATH],
-      ["Pattu pavadai", LIVE_CATEGORY_PATH],
-      ["Boys' collection", comingSoonPath("kids-boys")]
+      ["Girls' Lehenga Choli", GIRLS_LEHENGA_CATEGORY_PATH],
+      ["Pattu Pavadai", PATTU_PAVADAI_CATEGORY_PATH],
+      ["Boys' Collection", comingSoonPath("kids-boys")],
+      ["Coming Soon", comingSoonPath("women")],
+      ["View All Kids", LIVE_CATEGORY_PATH]
     ],
     columns: [
       {
         title: "Girls' Lehenga Choli",
         links: [
-          ["South Indian Lehenga Choli", LIVE_CATEGORY_PATH],
-          ["Kanjeevaram-Inspired Lehenga", LIVE_CATEGORY_PATH],
-          ["Silk Choli Sets", LIVE_CATEGORY_PATH],
-          ["Temple Border Lehenga", LIVE_CATEGORY_PATH]
-        ]
+          {
+            label: "South Indian Lehenga Choli",
+            description: "Classic festive silhouettes with contrast borders",
+            href: subcategoryHref(GIRLS_LEHENGA_CATEGORY_PATH, "south-indian-lehenga-choli")
+          },
+          {
+            label: "Temple & Peacock Work",
+            description: "Heritage motifs for weddings and temple ceremonies",
+            href: subcategoryHref(GIRLS_LEHENGA_CATEGORY_PATH, "temple-peacock-work-lehenga")
+          },
+          {
+            label: "Koti Jacket Lehenga Sets",
+            description: "Layered celebration sets with a woven jacket",
+            href: subcategoryHref(GIRLS_LEHENGA_CATEGORY_PATH, "koti-jacket-lehenga-sets")
+          },
+          {
+            label: "Festive Silk Lehenga Choli",
+            description: "Soft lustre with gold-toned festive detailing",
+            href: subcategoryHref(GIRLS_LEHENGA_CATEGORY_PATH, "festive-silk-lehenga-choli")
+          }
+        ],
+        cta: ["View all girls' styles", GIRLS_LEHENGA_CATEGORY_PATH]
       },
       {
         title: "Pattu Pavadai",
         links: [
-          ["Pattu Pavadai Sets", LIVE_CATEGORY_PATH],
-          ["Silk Skirt and Blouse", LIVE_CATEGORY_PATH],
-          ["Festive Dupatta Sets", LIVE_CATEGORY_PATH],
-          ["View All Girls' Styles", LIVE_CATEGORY_PATH]
-        ]
+          {
+            label: "Classic Pattu Pavadai",
+            description: "Traditional skirt-and-choli sets for celebrations",
+            href: subcategoryHref(PATTU_PAVADAI_CATEGORY_PATH, "classic-pattu-pavadai")
+          },
+          {
+            label: "Peacock & Elephant Pattu",
+            description: "South Indian heritage motifs in festive colour",
+            href: subcategoryHref(PATTU_PAVADAI_CATEGORY_PATH, "peacock-elephant-pattu-pavadai")
+          },
+          {
+            label: "Gold Zari Pattu Pavadai",
+            description: "Rich zari borders for weddings and festivals",
+            href: subcategoryHref(PATTU_PAVADAI_CATEGORY_PATH, "gold-zari-pattu-pavadai")
+          }
+        ],
+        cta: ["View all pattu pavadai", PATTU_PAVADAI_CATEGORY_PATH]
       },
       {
         title: "Coming Soon",
         links: [
-          ["Boys' Festive Wear", comingSoonPath("kids-boys")],
-          ["Women's Collection", comingSoonPath("women")],
-          ["Men's Collection", comingSoonPath("men")]
-        ]
+          {
+            label: "Boys' Festive Wear",
+            description: "Stylish outfits for little gentlemen",
+            href: comingSoonPath("kids-boys")
+          },
+          {
+            label: "Women's Collection",
+            description: "Elegant edits for every celebration",
+            href: comingSoonPath("women")
+          },
+          {
+            label: "Men's Collection",
+            description: "Timeless styles for every occasion",
+            href: comingSoonPath("men")
+          }
+        ],
+        cta: ["Explore coming soon", comingSoonPath("women")]
       }
     ],
     promos: [
       {
         title: "Girls' Lehenga Choli",
         cta: "Shop the collection",
-        href: LIVE_CATEGORY_PATH,
+        href: GIRLS_LEHENGA_CATEGORY_PATH,
         image: "/images/hero-upgrade/green-kids-lehenga-front.webp"
       },
       {
         title: "Temple Silk Details",
         cta: "View the edit",
-        href: LIVE_CATEGORY_PATH,
+        href: subcategoryHref(GIRLS_LEHENGA_CATEGORY_PATH, "temple-peacock-work-lehenga"),
         image: "/images/hero-upgrade/blue-kids-lehenga-front.webp"
       }
     ]
@@ -61,6 +113,7 @@ export const navGroups = [
     href: comingSoonPath("women"),
     status: "coming-soon" as const,
     intro: "",
+    introCta: ["", ""],
     quickLinks: [],
     columns: [],
     promos: []
@@ -70,6 +123,7 @@ export const navGroups = [
     href: comingSoonPath("men"),
     status: "coming-soon" as const,
     intro: "",
+    introCta: ["", ""],
     quickLinks: [],
     columns: [],
     promos: []

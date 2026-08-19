@@ -1,8 +1,10 @@
 node_modules
 .next
+.next-stale-*
 out
 .env*
 .DS_Store
 *.zip
 tsconfig.tsbuildinfo
 test-results/
+playwright-report/

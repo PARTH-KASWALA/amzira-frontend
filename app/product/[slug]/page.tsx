@@ -1,10 +1,13 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Ruler, ShieldCheck, Truck } from "lucide-react";
 import { JsonLd } from "@/components/json-ld";
 import { ProductPurchase } from "@/components/product-purchase";
+import { ProductGallery } from "@/components/product-gallery";
+import { ProductReviews } from "@/components/product-reviews";
+import { DeliveryEstimate } from "@/components/delivery-estimate";
+import { WishlistButton } from "@/components/wishlist-button";
 import { getProduct } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { breadcrumbJsonLd, buildMetadata, productJsonLd } from "@/lib/seo";
@@ -38,35 +41,15 @@ export default async function ProductPage({ params }: Props) {
           { name: product.name, path: `/product/${product.slug}` }
         ])}
       />
-      <section className="container-page grid gap-10 py-10 lg:grid-cols-[1.1fr_0.9fr]">
-        <div className="grid gap-4 md:grid-cols-[88px_1fr]">
-          <div className="hidden gap-3 md:grid">
-            {product.images.slice(0, 5).map((image) => (
-              <div key={image} className="relative aspect-[4/5] overflow-hidden rounded-md border border-charcoal/10 bg-sandal">
-                <Image src={image} alt="" fill sizes="88px" className="object-cover" />
-              </div>
-            ))}
-          </div>
-          <div className="grid gap-4">
-            {product.images.slice(0, 3).map((image, index) => (
-              <div key={image} className="relative aspect-[4/5] overflow-hidden rounded-md bg-sandal shadow-soft">
-                <Image
-                  src={image}
-                  alt={index === 0 ? product.name : `${product.name} detail ${index + 1}`}
-                  fill
-                  priority={index === 0}
-                  sizes="(max-width: 1024px) 100vw, 55vw"
-                  className="object-cover"
-                />
-              </div>
-            ))}
-          </div>
-        </div>
+      <section className="product-detail-section">
+        <div className="container-page grid gap-10 py-10 lg:grid-cols-[1.1fr_0.9fr]">
+          <ProductGallery images={product.images} name={product.name} />
 
-        <aside className="h-fit rounded-md border border-charcoal/10 bg-white p-6 shadow-soft lg:sticky lg:top-32">
-          <Link className="focus-ring text-xs font-semibold uppercase tracking-[0.2em] text-gold" href={`/category/${product.categorySlug}`}>
-            {product.categoryName}
-          </Link>
+          <aside className="product-detail-panel h-fit rounded-md border border-charcoal/10 p-6 shadow-soft lg:sticky lg:top-32">
+          <div className="flex items-center justify-between gap-4">
+            <Link className="focus-ring text-xs font-semibold uppercase tracking-[0.2em] text-maroon" href={`/category/${product.categorySlug}`}>{product.categoryName}</Link>
+            <WishlistButton productId={product.id} productName={product.name} />
+          </div>
           <h1 className="mt-4 font-display text-5xl font-semibold leading-tight text-maroon-deep">{product.name}</h1>
           <p className="mt-4 leading-8 text-charcoal/70">{product.description}</p>
 
@@ -74,7 +57,7 @@ export default async function ProductPage({ params }: Props) {
             <span className="text-3xl font-bold text-maroon">{formatMoney(product.salePrice)}</span>
             {product.basePrice > product.salePrice ? (
               <>
-                <span className="text-charcoal/45 line-through">{formatMoney(product.basePrice)}</span>
+                <span className="text-charcoal/70 line-through">{formatMoney(product.basePrice)}</span>
                 <span className="rounded-full bg-emerald/10 px-3 py-1 text-xs font-bold uppercase tracking-[0.14em] text-emerald">
                   {product.discountPercentage}% off
                 </span>
@@ -83,12 +66,13 @@ export default async function ProductPage({ params }: Props) {
           </div>
 
           <ProductPurchase product={product} />
+          <DeliveryEstimate slug={product.slug} />
 
           <div className="mt-8 grid gap-3 border-t border-charcoal/10 pt-6 text-sm text-charcoal/70">
             {[
-              [Truck, "Delivery estimate available at checkout"],
-              [ShieldCheck, "Secure Razorpay and COD-ready commerce flow"],
-              [Ruler, "Custom stitching and blouse guidance available"]
+              [Truck, "Delivery estimate available by pincode"],
+              [ShieldCheck, "Secure Razorpay checkout"],
+              [Ruler, "Size guidance for growing kids"]
             ].map(([Icon, text]) => (
               <p key={String(text)} className="flex items-center gap-3">
                 <Icon className="h-5 w-5 text-gold" aria-hidden="true" />
@@ -111,8 +95,10 @@ export default async function ProductPage({ params }: Props) {
               <dd className="mt-1 text-charcoal/65">{product.careInstructions || "Dry clean recommended."}</dd>
             </div>
           </dl>
-        </aside>
+          </aside>
+        </div>
       </section>
+      <ProductReviews productId={product.id} />
     </>
   );
 }

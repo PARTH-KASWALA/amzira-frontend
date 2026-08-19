@@ -1,23 +1,16 @@
 import Image from "next/image";
 import Link from "next/link";
-import {
-  Facebook,
-  Instagram,
-  Linkedin,
-  Mail,
-  Send,
-  ShieldAlert,
-  Youtube
-} from "lucide-react";
+import { Mail, Send, ShieldAlert } from "lucide-react";
+import { GIRLS_LEHENGA_CATEGORY_PATH, PATTU_PAVADAI_CATEGORY_PATH } from "@/lib/storefront";
 
 const footerColumns = [
   {
     title: "Top categories",
     links: [
-      ["Girls' Lehenga Choli", "/category/kids-pattu-pavadai"],
-      ["Pattu Pavadai", "/category/kids-pattu-pavadai"],
-      ["Temple Border Lehenga", "/category/kids-pattu-pavadai"],
-      ["Kanjeevaram-Inspired Kids' Silk", "/category/kids-pattu-pavadai"],
+      ["Girls' Lehenga Choli", GIRLS_LEHENGA_CATEGORY_PATH],
+      ["Pattu Pavadai", PATTU_PAVADAI_CATEGORY_PATH],
+      ["Temple Border Lehenga", GIRLS_LEHENGA_CATEGORY_PATH],
+      ["Kanjeevaram-Inspired Kids' Silk", GIRLS_LEHENGA_CATEGORY_PATH],
       ["Women's Collection - Coming Soon", "/coming-soon/women"],
       ["Men's Collection - Coming Soon", "/coming-soon/men"],
       ["Boys' Collection - Coming Soon", "/coming-soon/kids-boys"]
@@ -39,7 +32,6 @@ const footerColumns = [
     links: [
       ["Fraud Alert", "/contact-support"],
       ["Track Order", "/order-tracking"],
-      ["Gift Styling", "/appointments"],
       ["Exchange Request", "/returns-refund-policy"],
       ["Sitemap", "/sitemap.xml"],
       ["Contact Us", "/contact-support"]
@@ -56,28 +48,21 @@ const footerColumns = [
   }
 ];
 
-const socialLinks = [
-  ["Instagram", Instagram],
-  ["Facebook", Facebook],
-  ["YouTube", Youtube],
-  ["LinkedIn", Linkedin]
-];
-
 export function SiteFooter() {
   return (
-    <footer className="relative overflow-hidden border-t border-[#edd9d2] bg-[#fff1ec] text-[#56504f]">
+    <footer className="site-footer relative overflow-hidden border-t border-[#edd9d2] bg-[#fff1ec] text-[#56504f]">
       <Image
         src="/images/footer/heritage-illustration-footer.webp"
         alt=""
         fill
         sizes="100vw"
         quality={75}
-        className="absolute inset-0 object-cover object-center saturate-[1.08] contrast-[1.02]"
+        className="pointer-events-none absolute inset-0 object-cover object-center saturate-[1.08] contrast-[1.02]"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-[#fff9f0]/62 via-[#fff0e4]/28 to-[#fff0e4]/8" />
-      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/88 via-white/32 to-transparent" />
+      <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#fff9f0]/88 via-[#fff0e4]/58 to-[#fff0e4]/18" />
+      <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/92 via-white/45 to-transparent" />
 
-      <div className="relative mx-auto grid w-full max-w-[1480px] gap-10 px-4 pb-[28rem] pt-16 sm:px-6 md:grid-cols-2 lg:grid-cols-[1fr_0.9fr_0.9fr_1.15fr_1.45fr] lg:px-8 lg:pb-[24rem]">
+      <div className="site-footer__columns relative mx-auto grid w-full max-w-[1480px] gap-10 px-4 pb-[28rem] pt-16 sm:px-6 md:grid-cols-2 lg:grid-cols-[1fr_0.9fr_0.9fr_1.15fr_1.45fr] lg:px-8 lg:pb-[24rem]">
         {footerColumns.map((column) => (
           <nav key={column.title} aria-label={column.title}>
             <h2 className="text-xs font-semibold uppercase tracking-[0.34em] text-[#df7778]">{column.title}</h2>
@@ -102,43 +87,13 @@ export function SiteFooter() {
             Join our mailing list for girls&apos; ceremony edits, fit guidance, and new collection updates.
           </p>
 
-          <form action="/contact-support" className="mt-8 flex max-w-md items-center border-b-2 border-[#5f5b5a]">
-            <label htmlFor="footer-email" className="sr-only">
-              Email address
-            </label>
-            <input
-              id="footer-email"
-              name="email"
-              type="email"
-              autoComplete="email"
-              placeholder="Enter your email"
-              className="min-h-12 flex-1 border-0 bg-transparent px-0 text-[15px] font-medium text-charcoal placeholder:text-[#6f6765] focus:ring-0"
-            />
-            <button
-              type="submit"
-              className="focus-ring inline-flex h-11 w-11 items-center justify-center rounded-sm text-[#5f5b5a] transition hover:text-maroon"
-              aria-label="Join mailing list"
-            >
-              <Mail className="h-6 w-6" aria-hidden="true" />
-            </button>
-          </form>
-
-          <div className="mt-8 flex flex-wrap gap-4 text-[#df7778]" aria-label="Social links">
-            {socialLinks.map(([label, Icon]) => (
-              <Link
-                key={label as string}
-                href="/contact-support"
-                className="focus-ring inline-flex h-10 w-10 items-center justify-center rounded-sm transition hover:text-maroon"
-                aria-label={`${label} updates`}
-              >
-                <Icon className="h-7 w-7" aria-hidden="true" />
-              </Link>
-            ))}
-          </div>
+          <a href="mailto:care@amzira.com?subject=AMZIRA%20collection%20updates" className="btn-secondary mt-8 w-fit gap-2 bg-white/85">
+            <Mail className="h-4 w-4" aria-hidden="true" /> Email for updates
+          </a>
         </div>
       </div>
 
-      <div className="relative mx-auto flex w-full max-w-[1480px] flex-col gap-5 px-4 pb-10 text-sm font-medium text-[#65605e] sm:px-6 md:flex-row md:items-end md:justify-between lg:px-8">
+      <div className="site-footer__meta relative mx-auto flex w-full max-w-[1480px] flex-col gap-5 px-4 pb-10 text-sm font-medium text-[#65605e] sm:px-6 md:flex-row md:items-end md:justify-between lg:px-8">
         <Link href="/" className="focus-ring inline-flex items-center gap-3 rounded-sm" aria-label="AMZIRA home">
           <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-gold/70 bg-white/80 shadow-soft">
             <Image src="/images/logo/amzira_logo.webp" alt="" fill sizes="48px" className="object-contain p-1.5" />
@@ -158,7 +113,7 @@ export function SiteFooter() {
       </div>
 
       <Link
-        href="/contact-support"
+        href="mailto:care@amzira.com?subject=AMZIRA%20support%20request"
         className="focus-ring absolute bottom-8 right-6 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#df6668] text-white shadow-sari transition hover:bg-maroon"
         aria-label="Contact support"
       >

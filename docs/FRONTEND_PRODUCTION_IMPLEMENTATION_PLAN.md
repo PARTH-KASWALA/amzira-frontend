@@ -1,10 +1,12 @@
 # AMZIRA Frontend Production Implementation Plan
 
-Status: Proposed
+Status: Frontend implementation complete; backend acceptance and release services remain
 
 Frontend workspace: `/Users/parthkaswala/Desktop/amzira-frontend`
 
 Backend contract reference: `/Users/parthkaswala/Desktop/amzira-backend`
+
+Owned catalog migration reference: `docs/ETHZY_CATALOG_MIGRATION_PLAN.md`
 
 ## 1. Objective
 
@@ -14,7 +16,37 @@ The frontend will be implemented and tested against the existing local FastAPI b
 
 The initial public catalog remains focused on South Indian girls' lehenga choli and pattu pavadai. Women, men, and boys remain premium coming-soon experiences until inventory is intentionally enabled.
 
-## 2. Current Baseline
+## 2. Implementation Result
+
+Completed on 2026-08-11:
+
+- The public storefront is now intentionally focused on South Indian girls' lehenga choli and pattu pavadai.
+- Women, men, and boys discovery routes resolve to image-led premium coming-soon experiences and do not expose inventory.
+- Typed browser clients, Zod response validation, CSRF, cookie sessions, timeout handling, and one authenticated refresh retry are implemented.
+- Catalog URL filters, real variant identity, gallery zoom, delivery estimate, reviews, wishlist, guest/authenticated cart, profile, address CRUD, orders, tracking, invoice, cancellation, returns, and Razorpay verification UI are implemented.
+- Simulated payment and unsupported COD controls were removed. Backend totals and verified order identity remain authoritative.
+- Global loading, not-found, recoverable error, empty, guest, and unavailable states are present.
+- CSP, HSTS, frame protection, referrer, permissions, private-route cache controls, and dependency overrides are implemented.
+- Playwright covers Chromium, Firefox, and WebKit. The current suite passes 39/39 tests and includes Axe checks with zero serious or critical findings on key public routes.
+- TypeScript, ESLint, the production build, production-header smoke tests, responsive screenshots, overflow checks, reduced motion, and the Impeccable visual detector pass.
+
+### Readiness after implementation
+
+| Measure | Readiness | Remaining work |
+|---|---:|---|
+| Frontend feature and UX implementation | **90%** | Monitoring, consented analytics, CI budgets, and fixture-backed authenticated acceptance |
+| End-to-end production launch | **68%** | Backend taxonomy/inventory, test data, payment/webhook acceptance, cookie/CORS deployment configuration, and missing submission APIs |
+
+The frontend is ready to move into backend work. It is not responsible to call the store launch-ready until the blockers in `docs/FRONTEND_BACKEND_CONTRACT_GAPS.md` are closed and the same browser suite runs with catalog fallback disabled against deterministic backend fixtures.
+
+### Known frontend release debt
+
+- Homepage first-load JavaScript is 178 kB, 8 kB above the 170 kB target; the motion-rich hero is the primary tradeoff.
+- Sentry or an approved monitoring provider, consent management, and analytics event delivery still require production service decisions.
+- Lighthouse/Core Web Vitals budgets and CI wiring remain release-engineering tasks.
+- Newsletter, support, appointment, and store inquiry actions use honest email links until backend submission contracts exist.
+
+## 2A. Original Baseline
 
 ### Already working
 
@@ -132,7 +164,7 @@ components/
 
 ### ADR-001: Separate public route slugs from backend category identifiers
 
-Status: Proposed
+Status: Accepted and implemented
 
 Context:
 
@@ -155,7 +187,7 @@ Consequences:
 
 ### ADR-002: Use two API clients
 
-Status: Proposed
+Status: Accepted and implemented
 
 Decision:
 
@@ -171,7 +203,7 @@ Consequences:
 
 ### ADR-003: Backend owns stock, prices, tax, shipping, discounts, and order totals
 
-Status: Proposed
+Status: Accepted and implemented
 
 Decision:
 
@@ -182,7 +214,7 @@ Decision:
 
 ### ADR-004: Hybrid guest cart with login synchronization
 
-Status: Proposed
+Status: Accepted and implemented
 
 Decision:
 
@@ -193,7 +225,7 @@ Decision:
 
 ### ADR-005: Razorpay-only launch checkout
 
-Status: Proposed
+Status: Accepted and implemented
 
 Decision:
 
@@ -614,27 +646,27 @@ Acceptance criteria:
 
 | Frontend capability | Backend endpoint | Frontend status | Required action |
 |---|---|---:|---|
-| Categories | `GET /categories` | Partial | Typed client and taxonomy mapping |
-| Product list/search | `GET /products` | Partial | Real filters, pagination, strict schema |
-| Product detail | `GET /products/{slug}` | Partial | Strict PDP and variant identity |
-| Delivery estimate | `GET /products/{slug}/delivery-estimate` | Missing | Build pincode flow |
-| Signup/login/forgot | `/auth/*` | Partial | Session provider and full error states |
-| Logout/refresh | `/auth/logout`, `/auth/refresh` | Missing | Add automatic refresh and logout UI |
-| Profile | `/users/me` | Missing | Build account profile |
-| Addresses | `/users/me/addresses` | Missing | Build CRUD and selection |
-| Cart | `/cart/*` | Missing | Hybrid guest/auth cart |
-| Stock check | `POST /stock/check` | Missing | Add pre-checkout validation |
-| Wishlist | `/wishlist/*` | Missing | Product and account integration |
-| Checkout preview | commerce `/checkout` | Missing | Checkout state machine |
-| Payment order | commerce `/create-payment-order` | Missing | Razorpay launch |
-| Payment verification | commerce `/verify-payment` | Missing | Verified order success |
-| Orders | `/orders/*` | Missing | Account order lifecycle |
-| Tracking | `/orders/*/tracking` | Placeholder | Build status timeline |
-| Invoice | `/orders/orders/{order_number}/invoice` | Missing | PDF download |
-| Returns | `/returns/*` and eligibility | Missing | Build return request |
-| Reviews | `/reviews/*` | Read fields only | Full read/write UI |
-| Coupons | `/coupons/validate` | Missing | Add after checkout core |
-| Newsletter/support | Not confirmed | Placeholder | Backend contract handoff |
+| Categories | `GET /categories` | Implemented | Seed and confirm live `kids` taxonomy |
+| Product list/search | `GET /products` | Implemented | Backend fixture acceptance and pagination contract |
+| Product detail | `GET /products/{slug}` | Implemented | Backend fixture acceptance |
+| Delivery estimate | `GET /products/{slug}/delivery-estimate` | Implemented | Backend fixture acceptance |
+| Signup/login/forgot | `/auth/*` | Implemented | Cookie/CORS deployment acceptance |
+| Logout/refresh | `/auth/logout`, `/auth/refresh` | Implemented | Cookie/CORS deployment acceptance |
+| Profile | `/users/me` | Implemented | Customer fixture acceptance |
+| Addresses | `/users/me/addresses` | Implemented | Customer fixture acceptance |
+| Cart | `/cart/*` | Implemented | Guest merge and stock fixture acceptance |
+| Stock validation | Commerce checkout validation | Implemented | Confirm final endpoint namespace |
+| Wishlist | `/wishlist/*` | Implemented | Customer fixture acceptance |
+| Checkout preview | commerce `/checkout` | Implemented | Confirm root route namespace |
+| Payment order | commerce `/create-payment-order` | Implemented | Razorpay test credentials and fixture acceptance |
+| Payment verification | commerce `/verify-payment` | Implemented | Webhook/idempotency acceptance |
+| Orders | `/orders/*` | Implemented | Order fixture acceptance |
+| Tracking | `/orders/*/tracking` | Implemented | Shipment fixture acceptance |
+| Invoice | `/orders/orders/{order_number}/invoice` | Implemented | PDF fixture acceptance |
+| Returns | `/returns/*` and eligibility | Implemented | Return fixture acceptance |
+| Reviews | `/reviews/*` | Implemented | Verified-purchase fixture acceptance |
+| Coupons | `/coupons/validate` | Deferred | Not required for launch checkout |
+| Newsletter/support | Not confirmed | Backend blocked | Add APIs; frontend currently uses email actions |
 
 ## 9. Failure-Mode Plan
 
@@ -715,15 +747,14 @@ After the frontend completion gate, produce these artifacts before starting back
 - Production CORS, cookie-domain, CSRF, CSP, R2, Razorpay, Shiprocket, SMTP, and monitoring configuration requirements.
 - Load, security, backup, migration, and deployment tasks that remain backend-owned.
 
-## 14. Immediate First Implementation Batch
+## 14. Backend Work Entry Gate
 
-The first frontend implementation batch should contain only:
+Frontend implementation is complete enough to begin the backend phase. Start backend work in this order:
 
-1. Taxonomy mapping and canonical route decision.
-2. Typed API client split.
-3. Zod schemas for categories, product lists, and product detail.
-4. Production-safe fallback policy.
-5. Shared API error and loading states.
-6. Catalog and PDP integration tests against the local backend.
-
-Completion of this batch unlocks every later workstream and prevents cart, checkout, and account code from being built on unstable data assumptions.
+1. Resolve the backend Redis/Celery dependency conflict and publish OpenAPI.
+2. Seed the live `kids` category, products, variants, and inventory states.
+3. Confirm checkout route namespacing and production cookie/CORS origins.
+4. Add deterministic customer, cart, payment, order, return, review, and tracking fixtures.
+5. Run the existing 39-test frontend suite with `NEXT_PUBLIC_ENABLE_CATALOG_FALLBACK=false`.
+6. Add missing newsletter, support, appointment, and store inquiry APIs.
+7. Configure monitoring, consented analytics, CI, and Lighthouse budgets before release approval.
