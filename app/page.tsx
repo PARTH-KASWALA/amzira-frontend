@@ -20,7 +20,7 @@ import { ProductGrid } from "@/components/product-grid";
 import { type HeroProduct } from "@/components/product-slide";
 import { type LuxuryCard } from "@/components/luxury-card-grid";
 import { getCategories, getFeaturedProducts, getProduct, getProducts } from "@/lib/api";
-import { type Product } from "@/lib/catalog";
+import { type Product, type ProductImage } from "@/lib/catalog";
 import { formatMoney } from "@/lib/format";
 import { comingSoonPath, LIVE_CATEGORY_PATH } from "@/lib/storefront";
 
@@ -135,41 +135,138 @@ function homeProductAt(products: Product[], index: number) {
   return products[index % products.length];
 }
 
-function mannequinImages(product: Product) {
-  const gallery = product.images.filter((image, index, images) => image && images.indexOf(image) === index);
-  if (gallery.length < 5) return null;
+const heroTitlePriorityWords = [
+  "Jacquard",
+  "Temple",
+  "Peacock",
+  "Koti",
+  "Checked",
+  "Heritage",
+  "Festive",
+  "Gold",
+  "Satin"
+];
 
-  const pairStart = gallery.length === 5 ? 3 : 4;
-  const choli = gallery[pairStart];
-  const lehenga = gallery[pairStart + 1];
-  return choli && lehenga ? { choli, lehenga } : null;
+function conciseHeroTitle(name: string) {
+  const normalizedName = name.replace(/\s+\d+(?:-\d+)?$/, "").trim();
+  const words = normalizedName.split(/\s+/).filter(Boolean);
+  if (words.length <= 4) return normalizedName;
+
+  const tail =
+    normalizedName.endsWith("Lehenga Choli")
+      ? "Lehenga Choli"
+      : normalizedName.endsWith("Pattu Pavadai")
+        ? "Pattu Pavadai"
+        : "";
+  if (!tail) return normalizedName;
+
+  const prefixWords = normalizedName.slice(0, -tail.length).trim().split(/\s+/).filter(Boolean);
+  const firstWord = prefixWords[0];
+  if (!firstWord) return normalizedName;
+
+  const descriptorWords = prefixWords.slice(1);
+  const priorityDescriptor = heroTitlePriorityWords.find((word) =>
+    descriptorWords.some((descriptor) => descriptor.toLowerCase() === word.toLowerCase())
+  );
+  if (priorityDescriptor) return `${firstWord} ${priorityDescriptor} ${tail}`;
+
+  const colorDescriptor = descriptorWords.slice(0, descriptorWords[0]?.length <= 5 ? 2 : 1).join(" ");
+  return [firstWord, colorDescriptor, tail].filter(Boolean).join(" ");
+}
+
+type HeroDetailKind = "front" | "closure" | "side" | "back" | "outfit" | "choli" | "lengha" | "detail";
+
+type HeroDetailImage = {
+  image: string;
+  label: string;
+  kind: HeroDetailKind;
+};
+
+function imageKind(image: ProductImage, fallbackIndex: number): HeroDetailKind {
+  const alt = (image.altText || "").toLowerCase();
+  const url = image.url.toLowerCase();
+  const descriptor = alt.includes(" - ") ? alt.split(" - ").pop() || alt : alt;
+  const source = descriptor || url;
+
+  if (source.includes("front_view") || source.includes("front view")) return "front";
+  if (source.includes("closure_view") || source.includes("closure view")) return "closure";
+  if (source.includes("side_view") || source.includes("side view")) return "side";
+  if (source.includes("back_view") || source.includes("back view")) return "back";
+  if (source.includes("outfit")) return "outfit";
+  if (source.includes("choli")) return "choli";
+  if (source.includes("lengha") || source.includes("lehenga")) return "lengha";
+
+  return fallbackIndex === 0 ? "front" : "detail";
+}
+
+function heroDetailLabel(kind: HeroDetailKind) {
+  switch (kind) {
+    case "closure":
+      return "Closure";
+    case "side":
+      return "Side View";
+    case "back":
+      return "Back View";
+    case "outfit":
+      return "Outfit";
+    case "choli":
+      return "Choli";
+    case "lengha":
+      return "Lehenga";
+    case "front":
+      return "Front View";
+    default:
+      return "Detail";
+  }
+}
+
+function heroDetailFit(kind: HeroDetailKind) {
+  return ["outfit", "choli", "lengha"].includes(kind) ? "contain" as const : "cover" as const;
+}
+
+function heroDetailImages(product: Product): HeroDetailImage[] | null {
+  const gallery = (product.imageDetails?.length
+    ? product.imageDetails
+    : product.images.map((url, index) => ({ url, altText: null, displayOrder: index, isPrimary: index === 0 }))
+  )
+    .filter((image, index, images) => image.url && images.findIndex((candidate) => candidate.url === image.url) === index)
+    .sort((left, right) => left.displayOrder - right.displayOrder)
+    .map((image, index) => {
+      const kind = imageKind(image, index);
+      return {
+        image: image.url,
+        kind,
+        label: heroDetailLabel(kind)
+      };
+    });
+
+  const choli = gallery.find((image) => image.kind === "choli");
+  const lengha = gallery.find((image) => image.kind === "lengha");
+  if (choli && lengha) return [choli, lengha];
+
+  const detailCandidates = gallery.filter((image) => !["front", "closure"].includes(image.kind));
+  const fallbackCandidates = gallery.filter((image) => image.kind !== "front");
+  const selected = detailCandidates.length >= 2 ? detailCandidates.slice(-2) : fallbackCandidates.slice(-2);
+  return selected.length ? selected : null;
 }
 
 function buildHeroSlides(products: Product[]): HeroProduct[] | undefined {
   if (!products.length) return undefined;
   return products.slice(0, 4).map((product, index) => {
     const visual = heroGradients[index % heroGradients.length];
-    const mannequin = mannequinImages(product);
+    const title = conciseHeroTitle(product.name);
+    const heroDetails = heroDetailImages(product);
     const fallbackImages = [product.primaryImage, ...product.images]
       .filter((image, imageIndex, images) => image && images.indexOf(image) === imageIndex)
       .slice(0, 2);
-    const details = mannequin
-      ? [
-          {
-            label: "Choli",
-            image: mannequin.choli,
-            alt: `${product.name} choli invisible mannequin view`,
-            fit: "contain" as const,
-            tone: detailTones[index % detailTones.length]
-          },
-          {
-            label: "Lehenga",
-            image: mannequin.lehenga,
-            alt: `${product.name} lehenga invisible mannequin view`,
-            fit: "contain" as const,
-            tone: detailTones[index % detailTones.length]
-          }
-        ]
+    const details = heroDetails
+      ? heroDetails.map((detail) => ({
+          label: detail.label,
+          image: detail.image,
+          alt: `${product.name} ${detail.label.toLowerCase()} view`,
+          fit: heroDetailFit(detail.kind),
+          tone: detailTones[index % detailTones.length]
+        }))
       : fallbackImages.map((image, detailIndex) => ({
           label: ["Front view", "Detail view"][detailIndex] || "Product view",
           image,
@@ -179,7 +276,7 @@ function buildHeroSlides(products: Product[]): HeroProduct[] | undefined {
         }));
     return {
       id: String(product.id || product.slug),
-      title: product.name,
+      title,
       price: formatMoney(product.salePrice),
       theme: heroThemes[index % heroThemes.length],
       badge: product.badge || (product.discountPercentage ? `${product.discountPercentage}% off` : "Available now"),

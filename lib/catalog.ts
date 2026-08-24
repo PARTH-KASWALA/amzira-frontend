@@ -17,6 +17,13 @@ export type ProductVariant = {
   additionalPrice?: number;
 };
 
+export type ProductImage = {
+  url: string;
+  altText?: string | null;
+  displayOrder: number;
+  isPrimary: boolean;
+};
+
 export type Product = {
   id: string | number;
   name: string;
@@ -31,6 +38,7 @@ export type Product = {
   discountPercentage: number;
   primaryImage: string;
   images: string[];
+  imageDetails?: ProductImage[];
   fabric?: string | null;
   careInstructions?: string | null;
   occasions: string[];

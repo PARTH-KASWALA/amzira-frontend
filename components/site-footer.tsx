@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Mail, Send, ShieldAlert } from "lucide-react";
 import { GIRLS_LEHENGA_CATEGORY_PATH, PATTU_PAVADAI_CATEGORY_PATH } from "@/lib/storefront";
+import { COMPANY } from "@/lib/company";
 
 const footerColumns = [
   {
@@ -86,8 +87,12 @@ export function SiteFooter() {
           <p className="mt-5 max-w-sm text-[15px] font-medium leading-7 text-[#5f5b5a]">
             Join our mailing list for girls&apos; ceremony edits, fit guidance, and new collection updates.
           </p>
+          <p className="mt-3 max-w-sm text-[14px] leading-6 text-[#5f5b5a]">
+            Support: <a className="underline-offset-4 hover:underline" href={`tel:${COMPANY.supportPhone}`}>{COMPANY.supportPhoneDisplay}</a><br />
+            {COMPANY.address}
+          </p>
 
-          <a href="mailto:care@amzira.com?subject=AMZIRA%20collection%20updates" className="btn-secondary mt-8 w-fit gap-2 bg-white/85">
+          <a href={`mailto:${COMPANY.supportEmail}?subject=AMZIRA%20collection%20updates`} className="btn-secondary mt-8 w-fit gap-2 bg-white/85">
             <Mail className="h-4 w-4" aria-hidden="true" /> Email for updates
           </a>
         </div>
@@ -113,7 +118,7 @@ export function SiteFooter() {
       </div>
 
       <Link
-        href="mailto:care@amzira.com?subject=AMZIRA%20support%20request"
+        href={`mailto:${COMPANY.supportEmail}?subject=AMZIRA%20support%20request`}
         className="focus-ring absolute bottom-8 right-6 inline-flex h-12 w-12 items-center justify-center rounded-full bg-[#df6668] text-white shadow-sari transition hover:bg-maroon"
         aria-label="Contact support"
       >

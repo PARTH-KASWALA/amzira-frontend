@@ -19,7 +19,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/shipping-policy",
     "/returns-refund-policy",
     "/privacy-policy",
-    "/terms-and-conditions"
+    "/terms-and-conditions",
+    "/order-tracking"
   ];
 
   return [

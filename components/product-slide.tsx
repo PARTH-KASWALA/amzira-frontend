@@ -52,7 +52,7 @@ const textVariants: Variants = {
 
 export function ProductSlide({ product, activeIndex, count, dragX, parallaxX, parallaxY }: ProductSlideProps) {
   return (
-    <div className="container-page hero-story-layout relative grid gap-5 py-7 lg:min-h-[clamp(700px,calc(100svh-160px),790px)] lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:gap-8 lg:py-10">
+    <div className="container-page hero-story-layout relative grid gap-5 py-7 lg:min-h-[clamp(620px,calc(100svh-185px),720px)] lg:grid-cols-[0.88fr_1.12fr] lg:items-center lg:gap-8 lg:py-10">
       <motion.div
         key={`copy-${product.id}`}
         className="hero-story-copy"

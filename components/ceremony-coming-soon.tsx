@@ -14,6 +14,7 @@ import {
   type ComingSoonDepartment,
   LIVE_CATEGORY_PATH
 } from "@/lib/storefront";
+import { COMPANY } from "@/lib/company";
 
 const womenProofs = [
   {
@@ -263,13 +264,13 @@ export function CeremonyComingSoon({ department }: { department: ComingSoonDepar
                     <Link className="ceremony-button ceremony-button--primary focus-ring" href={LIVE_CATEGORY_PATH}>
                       Shop girls&apos; lehenga choli <ArrowRight aria-hidden="true" />
                     </Link>
-                    <a className="ceremony-button ceremony-button--outline focus-ring" href={`mailto:care@amzira.com?subject=${mailSubject}`}>
+                    <a className="ceremony-button ceremony-button--outline focus-ring" href={`mailto:${COMPANY.supportEmail}?subject=${mailSubject}`}>
                       <BellRing aria-hidden="true" /> Join updates
                     </a>
                   </>
                 ) : (
                   <>
-                    <a className="ceremony-button ceremony-button--outline focus-ring" href={`mailto:care@amzira.com?subject=${mailSubject}`}>
+                    <a className="ceremony-button ceremony-button--outline focus-ring" href={`mailto:${COMPANY.supportEmail}?subject=${mailSubject}`}>
                       <BellRing aria-hidden="true" /> Join updates
                     </a>
                     <Link className="ceremony-button ceremony-button--light focus-ring" href={department === "men" ? "/heritage" : LIVE_CATEGORY_PATH}>

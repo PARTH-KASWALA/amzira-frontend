@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import { Suspense } from "react";
 import { OrderTracking } from "@/components/order-tracking";
 import { buildMetadata } from "@/lib/seo";
@@ -7,8 +8,18 @@ export const metadata: Metadata = buildMetadata({ title: "Track your order", pat
 
 export default function OrderTrackingPage() {
   return (
-    <div className="bg-[#FDFAF5] py-10 sm:py-14 min-h-[calc(100vh-200px)]">
-      <section className="container-page">
+    <div className="relative isolate min-h-[calc(100vh-200px)] overflow-hidden bg-[#FDFAF5] py-10 sm:py-14">
+      <Image
+        src="/images/backgrounds/kids-silk-procession.png"
+        alt=""
+        fill
+        priority
+        sizes="100vw"
+        className="pointer-events-none absolute inset-x-0 top-0 z-[-2] h-[42rem] object-cover object-[center_top] opacity-75 sm:h-[47rem]"
+      />
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[-1] h-[44rem] bg-[linear-gradient(180deg,rgba(255,250,241,0.25)_0%,rgba(253,250,245,0.78)_68%,#fdfaf5_100%)] sm:h-[49rem]" />
+
+      <section className="container-page relative">
         {/* Page Title & South Indian Lotus Ornament Header */}
         <div className="flex flex-col items-start max-w-2xl">
           <h1 className="font-display text-4xl font-semibold text-maroon-deep sm:text-5xl lg:text-6xl tracking-tight">

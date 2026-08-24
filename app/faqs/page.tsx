@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, HelpCircle, Mail, MessageSquare } from "lucide-react";
 import { buildMetadata } from "@/lib/seo";
+import { COMPANY } from "@/lib/company";
 
 export const metadata: Metadata = buildMetadata({
   title: "Frequently Asked Questions",
@@ -144,8 +145,8 @@ export default function FaqsPage() {
             <Link className="btn-primary gap-2 rounded-xl bg-[#580B26]" href="/contact-support">
               Contact Support Team <ArrowRight className="h-4 w-4" />
             </Link>
-            <a className="btn-secondary gap-2 rounded-xl" href="mailto:care@amzira.com">
-              <Mail className="h-4 w-4" /> Email care@amzira.com
+            <a className="btn-secondary gap-2 rounded-xl" href={`mailto:${COMPANY.supportEmail}`}>
+              <Mail className="h-4 w-4" /> Email {COMPANY.supportEmail}
             </a>
           </div>
         </div>

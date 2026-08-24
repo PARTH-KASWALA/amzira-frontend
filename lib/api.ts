@@ -1,6 +1,7 @@
 import {
   CatalogSubcategory,
   Category,
+  ProductImage,
   Product,
   ProductVariant,
   fallbackCategories,
@@ -39,6 +40,12 @@ function number(value: unknown, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function boolean(value: unknown, fallback = false) {
+  if (typeof value === "boolean") return value;
+  if (typeof value === "string") return value.toLowerCase() === "true";
+  return fallback;
+}
+
 function identifier(value: unknown, fallback: string) {
   if (typeof value === "string" && value.trim()) return value;
   if (typeof value === "number" && Number.isFinite(value)) return String(value);
@@ -59,12 +66,22 @@ function toProduct(input: unknown): Product | null {
   if (!isRecord(input)) return null;
   const category = record(input.category);
   const subcategory = record(input.subcategory);
-  const images = Array.isArray(input.images)
-    ? input.images.map((image) => {
+  const imageDetails: ProductImage[] = Array.isArray(input.images)
+    ? input.images.map<ProductImage | null>((image, index) => {
         const imageRecord = record(image);
-        return assetUrl(text(imageRecord.image_url || imageRecord.url || image));
-      }).filter(Boolean)
+        const url = assetUrl(text(imageRecord.image_url || imageRecord.url || image));
+        return url
+          ? {
+              url,
+              altText: text(imageRecord.alt_text || imageRecord.altText || imageRecord.alt) || null,
+              displayOrder: number(imageRecord.display_order ?? imageRecord.displayOrder, index),
+              isPrimary: boolean(imageRecord.is_primary ?? imageRecord.isPrimary)
+            }
+          : null;
+      }).filter((image): image is ProductImage => image !== null)
+        .sort((left, right) => left.displayOrder - right.displayOrder)
     : [];
+  const images = imageDetails.map((image) => image.url);
   const variants: ProductVariant[] = Array.isArray(input.variants)
     ? input.variants.map((variant) => {
         const variantRecord = record(variant);
@@ -92,7 +109,7 @@ function toProduct(input: unknown): Product | null {
   const categoryName = text(category.name || input.category_name, categorySlug);
   const salePrice = number(input.sale_price ?? input.salePrice ?? input.price ?? input.base_price);
   const basePrice = number(input.base_price ?? input.basePrice, salePrice);
-  const primaryImage = assetUrl(text(input.primary_image || input.image_url || images[0])) || fallbackProducts[0].primaryImage;
+  const primaryImage = assetUrl(text(input.primary_image || input.image_url || imageDetails.find((image) => image.isPrimary)?.url || images[0])) || fallbackProducts[0].primaryImage;
   const occasions = Array.isArray(input.occasions)
     ? input.occasions
         .map((occasion) => {
@@ -118,6 +135,7 @@ function toProduct(input: unknown): Product | null {
       (basePrice > salePrice ? Math.round(((basePrice - salePrice) / basePrice) * 100) : 0),
     primaryImage,
     images: images.length ? images : [primaryImage],
+    imageDetails: imageDetails.length ? imageDetails : undefined,
     fabric: text(input.fabric) || null,
     careInstructions: text(input.care_instructions) || null,
     occasions,

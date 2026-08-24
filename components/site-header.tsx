@@ -14,6 +14,7 @@ import {
   Sparkles
 } from "lucide-react";
 import { useEffect, useState } from "react";
+import { CartCountBadge } from "@/components/cart-count-badge";
 import { navGroups, utilityLinks } from "@/lib/navigation";
 
 const announcementItems = [
@@ -156,12 +157,13 @@ export function SiteHeader() {
             <Link
               key={item.label}
               href={item.href}
-              className={`focus-ring min-h-11 min-w-11 place-items-center rounded-full text-charcoal transition hover:bg-maroon-soft hover:text-maroon ${
+              className={`focus-ring relative min-h-11 min-w-11 place-items-center rounded-full text-charcoal transition hover:bg-maroon-soft hover:text-maroon ${
                 item.label === "Account" || item.label === "Cart" ? "grid" : "hidden md:grid"
               }`}
               aria-label={item.label}
             >
               <item.icon className="h-5 w-5" aria-hidden="true" />
+              {item.label === "Cart" ? <CartCountBadge /> : null}
             </Link>
           ))}
         </div>

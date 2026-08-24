@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight, CalendarDays, Clock, Heart, Mail, Sparkles, UserCheck } from "lucide-react";
 import { buildMetadata } from "@/lib/seo";
+import { COMPANY } from "@/lib/company";
 
 export const metadata: Metadata = buildMetadata({
   title: "Kids Styling Appointments",
@@ -109,10 +110,10 @@ export default function AppointmentsPage() {
                 Send your ceremony dates, delivery city, and outfit preferences to our boutique styling team.
               </p>
               <a
-                href="mailto:care@amzira.com?subject=AMZIRA%20Kids%20Styling%20Appointment"
+                href={`mailto:${COMPANY.supportEmail}?subject=AMZIRA%20Kids%20Styling%20Appointment`}
                 className="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-3 text-xs font-bold uppercase tracking-wider text-maroon-deep shadow-xs transition hover:bg-amber-50"
               >
-                <Mail className="h-4 w-4" /> Email care@amzira.com
+                <Mail className="h-4 w-4" /> Email {COMPANY.supportEmail}
               </a>
             </div>
           </div>
@@ -130,7 +131,7 @@ export default function AppointmentsPage() {
 
             <form
               className="space-y-4"
-              action="mailto:care@amzira.com?subject=AMZIRA%20Styling%20Request"
+              action={`mailto:${COMPANY.supportEmail}?subject=AMZIRA%20Styling%20Request`}
               method="post"
               encType="text/plain"
             >

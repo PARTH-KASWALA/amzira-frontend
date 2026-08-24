@@ -89,7 +89,7 @@ export function OrderTracking() {
   return (
     <div className="space-y-12">
       {/* Primary Card Container */}
-      <div className="relative overflow-hidden rounded-3xl border border-amber-900/10 bg-[#FAF7F2] p-6 shadow-sm sm:p-8 lg:p-10">
+      <div className="relative overflow-hidden rounded-3xl border border-amber-900/15 bg-[#fffaf4]/80 p-6 shadow-[0_20px_70px_rgba(105,62,35,0.08)] backdrop-blur-[2px] sm:p-8 lg:p-10">
         <div className="grid gap-8 lg:grid-cols-[1fr_auto_1.1fr] lg:items-center">
           {/* Left Column: Form */}
           <div className="flex flex-col justify-center">
@@ -141,7 +141,7 @@ export function OrderTracking() {
           </div>
 
           {/* Right Column: 3D Illustration / Active Tracking Details */}
-          <div className="flex flex-col justify-center rounded-2xl bg-white/60 p-4 sm:p-6 backdrop-blur-sm">
+          <div className="flex flex-col justify-center rounded-2xl border border-white/60 bg-white/72 p-4 backdrop-blur-sm sm:p-6">
             {message ? (
               <p
                 className="rounded-xl bg-maroon-soft p-4 text-sm font-semibold text-maroon-deep"

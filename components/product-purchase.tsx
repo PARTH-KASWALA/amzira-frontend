@@ -50,7 +50,7 @@ export function ProductPurchase({ product }: { product: Product }) {
                   onClick={() => setSelectedVariantId(variant.id)}
                 >
                   <span className="font-display text-sm font-bold">{variant.size}</span>
-                  {!disabled && variant.stockQuantity <= 4 ? (
+                  {!disabled ? (
                     <span
                       aria-hidden="true"
                       className={`mt-0.5 rounded-full px-2 py-0.2 text-[9px] font-extrabold ${
