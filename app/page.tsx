@@ -24,7 +24,9 @@ import { type Product, type ProductImage } from "@/lib/catalog";
 import { formatMoney } from "@/lib/format";
 import { comingSoonPath, LIVE_CATEGORY_PATH } from "@/lib/storefront";
 
-export const dynamic = "force-dynamic";
+// The catalog API calls are already cached for five minutes. Keeping the page
+// revalidated instead of force-dynamic avoids a server render on every visit.
+export const revalidate = 300;
 
 const defaultOccasionEdits = [
   {

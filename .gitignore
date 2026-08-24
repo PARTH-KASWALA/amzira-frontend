@@ -1,8 +1,10 @@
 node_modules
 .next
 .next-stale-*
+.next-broken-*
 out
 .env*
+!.env.example
 .DS_Store
 *.zip
 tsconfig.tsbuildinfo
