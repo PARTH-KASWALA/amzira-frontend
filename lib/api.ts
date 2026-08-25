@@ -298,7 +298,10 @@ export async function getProducts(params: Record<string, string | number | boole
     }
   });
   const suffix = search.toString() ? `?${search.toString()}` : "";
-  const firstPage = await apiGet<unknown>(`/products${suffix}`);
+  // Filtered catalog pages must see inventory/category imports immediately.
+  // Keeping the unfiltered homepage/search payload on a short ISR window is
+  // fine, but caching a filtered empty result can hide newly imported stock.
+  const firstPage = await apiGet<unknown>(`/products${suffix}`, { fresh: shouldFilterClientSide });
   const firstPageRecord = record(firstPage);
   const pages = [firstPage];
   const totalPages = number(firstPageRecord.total_pages, 1);
@@ -306,7 +309,7 @@ export async function getProducts(params: Record<string, string | number | boole
     for (let page = 2; page <= totalPages; page += 1) {
       const nextSearch = new URLSearchParams(search);
       nextSearch.set("page", String(page));
-      pages.push(await apiGet<unknown>(`/products?${nextSearch.toString()}`));
+      pages.push(await apiGet<unknown>(`/products?${nextSearch.toString()}`, { fresh: shouldFilterClientSide }));
     }
   }
   const products = pages.flatMap(productList).filter((product) =>
