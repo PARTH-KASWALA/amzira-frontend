@@ -97,7 +97,7 @@ test.describe('AMZIRA storefront', () => {
     await expect(page.locator('#kids-mega-menu')).not.toContainText(/Debli|Piramit|Black V|Satin Jacquard/);
 
     for (const category of [
-      { slug: 'kids-pattu-pavadai', heading: 'Kids', count: 107 },
+      { slug: 'kids-pattu-pavadai', heading: 'Kids', count: 110 },
       { slug: 'girls-lehenga-choli', heading: 'Girls Lehenga Choli', count: 30 },
       { slug: 'pattu-pavadai', heading: 'Pattu Pavadai', count: 77 }
     ]) {
@@ -145,7 +145,7 @@ test.describe('AMZIRA storefront', () => {
     const productLinks = await page.locator('article.group a[aria-label^="View "]').evaluateAll((links) =>
       [...new Set(links.map((link) => link.getAttribute('href')).filter(Boolean))]
     );
-    expect(productLinks).toHaveLength(107);
+    expect(productLinks).toHaveLength(110);
 
     for (const href of productLinks) {
       await page.goto(href);

@@ -62,6 +62,20 @@ function assetUrl(url: string | null | undefined) {
   return url;
 }
 
+function isFrontView(image: ProductImage) {
+  const label = `${image.altText || ""} ${image.url}`.toLowerCase();
+  return /(?:^|[^a-z])front(?:[^a-z]|$)/.test(label);
+}
+
+function preferredImage(images: ProductImage[]) {
+  return [...images].sort(
+    (left, right) =>
+      Number(!isFrontView(left)) - Number(!isFrontView(right)) ||
+      Number(!left.isPrimary) - Number(!right.isPrimary) ||
+      left.displayOrder - right.displayOrder
+  )[0];
+}
+
 function toProduct(input: unknown): Product | null {
   if (!isRecord(input)) return null;
   const category = record(input.category);
@@ -109,7 +123,10 @@ function toProduct(input: unknown): Product | null {
   const categoryName = text(category.name || input.category_name, categorySlug);
   const salePrice = number(input.sale_price ?? input.salePrice ?? input.price ?? input.base_price);
   const basePrice = number(input.base_price ?? input.basePrice, salePrice);
-  const primaryImage = assetUrl(text(input.primary_image || input.image_url || imageDetails.find((image) => image.isPrimary)?.url || images[0])) || fallbackProducts[0].primaryImage;
+  const primaryImage =
+    assetUrl(
+      text(preferredImage(imageDetails)?.url || input.primary_image || input.image_url || images[0])
+    ) || fallbackProducts[0].primaryImage;
   const occasions = Array.isArray(input.occasions)
     ? input.occasions
         .map((occasion) => {
