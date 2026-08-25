@@ -70,16 +70,22 @@ async function parseResponse<T>(response: Response): Promise<T> {
 }
 
 async function refreshSession() {
-  await ensureCsrf();
-  const headers = new Headers({ Accept: "application/json" });
-  const csrf = readCookie("csrf_token");
-  if (csrf) headers.set("X-CSRF-Token", csrf);
-  const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
-    method: "POST",
-    credentials: "include",
-    headers
-  });
-  return response.ok;
+  try {
+    await ensureCsrf();
+    const headers = new Headers({ Accept: "application/json" });
+    const csrf = readCookie("csrf_token");
+    if (csrf) headers.set("X-CSRF-Token", csrf);
+    const response = await fetch(`${API_BASE_URL}/auth/refresh`, {
+      method: "POST",
+      credentials: "include",
+      headers
+    });
+    return response.ok;
+  } catch {
+    // Let the original 401 surface so the UI can report an expired session
+    // instead of misclassifying a failed refresh as an API outage.
+    return false;
+  }
 }
 
 export async function browserApi<T>(path: string, options: RequestOptions = {}): Promise<T> {

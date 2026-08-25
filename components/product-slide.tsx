@@ -105,7 +105,7 @@ export function ProductSlide({ product, activeIndex, count, dragX, parallaxX, pa
         <AnimatePresence mode="wait">
           <motion.div key={`details-${product.id}`} className="contents">
             {product.details.slice(0, 3).map((detail, index) => (
-              <FloatingCard key={`${product.id}-${detail.label}`} detail={detail} index={index} />
+              <FloatingCard key={`${product.id}-${detail.image}`} detail={detail} index={index} />
             ))}
           </motion.div>
         </AnimatePresence>

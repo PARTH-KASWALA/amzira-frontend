@@ -179,9 +179,18 @@ function productList(input: unknown): Product[] {
   return list.map(toProduct).filter(Boolean) as Product[];
 }
 
-function productDetail(input: unknown): Product | null {
+function productPayload(input: unknown) {
   const inputRecord = record(input);
-  return toProduct(inputRecord.product ?? input);
+  return inputRecord.product ?? input;
+}
+
+function hasProductDetailPayload(input: unknown) {
+  const product = productPayload(input);
+  return isRecord(product) && Array.isArray(product.images) && Array.isArray(product.variants);
+}
+
+function productDetail(input: unknown): Product | null {
+  return toProduct(productPayload(input));
 }
 
 function normalizeFilterValue(value: unknown) {
@@ -241,10 +250,10 @@ function applyProductFilters(products: Product[], params: Record<string, string 
   return sortProducts(categoryFilteredProducts.filter((product) => productMatchesFilters(product, params)), params.sort_by);
 }
 
-async function apiGet<T>(path: string): Promise<T | null> {
+async function apiGet<T>(path: string, { fresh = false }: { fresh?: boolean } = {}): Promise<T | null> {
   try {
     const response = await fetch(`${API_BASE}${path}`, {
-      next: { revalidate: 300 },
+      ...(fresh ? { cache: "no-store" as const } : { next: { revalidate: 300 } }),
       headers: { Accept: "application/json" }
     });
     if (!response.ok) return null;
@@ -357,9 +366,14 @@ export async function getCategory(slug: string): Promise<Category | null> {
 }
 
 export async function getProduct(slug: string): Promise<Product | null> {
-  const data = await apiGet<unknown>(`/products/${encodeURIComponent(slug)}`);
+  const data = await apiGet<unknown>(`/products/${encodeURIComponent(slug)}`, { fresh: true });
   const directProduct = productDetail(data);
-  if (directProduct && directProduct.slug === slug && isLiveCategory(directProduct.categorySlug)) {
+  if (
+    hasProductDetailPayload(data) &&
+    directProduct &&
+    directProduct.slug === slug &&
+    isLiveCategory(directProduct.categorySlug)
+  ) {
     return directProduct;
   }
 
@@ -375,14 +389,21 @@ export async function getProduct(slug: string): Promise<Product | null> {
     .find((product) => product.slug === slug);
 
   if (listedProduct && String(listedProduct.id) !== "product") {
-    const idData = await apiGet<unknown>(`/products/${encodeURIComponent(String(listedProduct.id))}`);
+    const idData = await apiGet<unknown>(`/products/${encodeURIComponent(String(listedProduct.id))}`, { fresh: true });
     const idProduct = productDetail(idData);
-    if (idProduct && idProduct.slug === slug && isLiveCategory(idProduct.categorySlug)) {
+    if (
+      hasProductDetailPayload(idData) &&
+      idProduct &&
+      idProduct.slug === slug &&
+      isLiveCategory(idProduct.categorySlug)
+    ) {
       return idProduct;
     }
   }
 
-  const product = listedProduct || (CATALOG_FALLBACK_ENABLED ? findFallbackProduct(slug) : null);
+  // A list response only contains primary_image/default_variant and is not enough
+  // to render a PDP. Never downgrade a product page to that partial shape.
+  const product = CATALOG_FALLBACK_ENABLED ? findFallbackProduct(slug) : null;
   return product && isLiveCategory(product.categorySlug) ? product : null;
 }
 
