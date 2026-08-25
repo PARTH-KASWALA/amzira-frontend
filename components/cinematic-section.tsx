@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { ArrowRight } from "lucide-react";
 import { motion, useReducedMotion } from "framer-motion";
 import { FloatingPetals } from "@/components/floating-petals";
@@ -9,6 +10,30 @@ const sectionEase = [0.16, 1, 0.3, 1] as const;
 
 export function CinematicSection() {
   const shouldReduceMotion = useReducedMotion();
+  const frameRef = useRef<HTMLDivElement>(null);
+  const [shouldLoadVideo, setShouldLoadVideo] = useState(false);
+
+  useEffect(() => {
+    if (shouldReduceMotion) return;
+    const frame = frameRef.current;
+    if (!frame) return;
+    if (!("IntersectionObserver" in window)) {
+      setShouldLoadVideo(true);
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setShouldLoadVideo(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: "400px 0px" }
+    );
+    observer.observe(frame);
+    return () => observer.disconnect();
+  }, [shouldReduceMotion]);
 
   return (
     <section className="cinematic-section relative overflow-hidden">
@@ -32,6 +57,7 @@ export function CinematicSection() {
         </motion.div>
 
         <motion.div
+          ref={frameRef}
           className="cinematic-frame"
           initial={shouldReduceMotion ? false : { opacity: 0, x: 40, filter: "blur(10px)" }}
           whileInView={{ opacity: 1, x: 0, filter: "blur(0px)" }}
@@ -40,12 +66,13 @@ export function CinematicSection() {
         >
           <motion.video
             className="cinematic-video"
-            src="/images/animations/royal-wedding-procession-cinematic.mp4#t=0.2"
-            autoPlay
+            src={shouldLoadVideo ? "/images/animations/royal-wedding-procession-cinematic.mp4#t=0.2" : undefined}
+            poster="/images/backgrounds/kids-silk-procession.png"
+            autoPlay={shouldLoadVideo}
             muted
             loop
             playsInline
-            preload="metadata"
+            preload={shouldLoadVideo ? "metadata" : "none"}
             aria-label="Royal Indian wedding procession with elephant, musicians, and wedding attendants"
             initial={false}
             animate={shouldReduceMotion ? { scale: 1 } : { scale: 1.04 }}

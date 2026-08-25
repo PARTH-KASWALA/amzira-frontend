@@ -4,7 +4,7 @@ import { Suspense } from "react";
 import { OrderTracking } from "@/components/order-tracking";
 import { buildMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = buildMetadata({ title: "Track your order", path: "/order-tracking" });
+export const metadata: Metadata = buildMetadata({ title: "Track your order", path: "/order-tracking", noIndex: true });
 
 export default function OrderTrackingPage() {
   return (

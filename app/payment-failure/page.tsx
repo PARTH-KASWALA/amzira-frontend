@@ -1,4 +1,8 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = buildMetadata({ title: "Payment not completed", path: "/payment-failure", noIndex: true });
 
 export default function PaymentFailurePage() {
   return (

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Product } from "@/lib/catalog";
-import { absoluteUrl, formatMoney } from "@/lib/format";
+import { absoluteUrl, formatMoney, siteOrigin } from "@/lib/format";
 
 export const siteName = "AMZIRA";
 export const defaultDescription =
@@ -10,19 +10,22 @@ export function buildMetadata({
   title,
   description = defaultDescription,
   path = "/",
-  image = "/images/hero/hero-3.webp"
+  image = "/images/hero/hero-3.webp",
+  noIndex = false
 }: {
   title: string;
   description?: string;
   path?: string;
   image?: string;
+  noIndex?: boolean;
 }): Metadata {
   const fullTitle = title.includes(siteName) ? title : `${title} | ${siteName}`;
   return {
     title: fullTitle,
     description,
-    metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://www.amzira.com"),
+    metadataBase: new URL(siteOrigin()),
     alternates: { canonical: absoluteUrl(path) },
+    robots: noIndex ? { index: false, follow: false } : { index: true, follow: true },
     openGraph: {
       title: fullTitle,
       description,

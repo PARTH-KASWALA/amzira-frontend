@@ -1,5 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { CheckCircle2 } from "lucide-react";
+import { buildMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = buildMetadata({ title: "Order confirmed", path: "/order-success", noIndex: true });
 
 export default async function OrderSuccessPage({ searchParams }: { searchParams: Promise<{ order?: string }> }) {
   const { order } = await searchParams;

@@ -1,17 +1,13 @@
 import type { MetadataRoute } from "next";
 import { getCategories, getProducts } from "@/lib/api";
+import { siteOrigin } from "@/lib/format";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://www.amzira.com";
-  const [categories, products] = await Promise.all([getCategories(), getProducts({ limit: 100 })]);
+  const siteUrl = siteOrigin();
+  // getProducts() follows backend pagination so every live product is covered.
+  const [categories, products] = await Promise.all([getCategories(), getProducts()]);
   const staticPaths = [
     "/",
-    "/cart",
-    "/checkout",
-    "/account",
-    "/login",
-    "/signup",
-    "/forgot-password",
     "/contact-support",
     "/appointments",
     "/stores",

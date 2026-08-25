@@ -3,7 +3,7 @@ import { ProductGrid } from "@/components/product-grid";
 import { getProducts } from "@/lib/api";
 import { buildMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = buildMetadata({ title: "Search", path: "/search" });
+export const metadata: Metadata = buildMetadata({ title: "Search", path: "/search", noIndex: true });
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<{ q?: string }> }) {
   const { q } = await searchParams;

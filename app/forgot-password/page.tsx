@@ -5,7 +5,8 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildMetadata({
   title: "Forgot Password",
   description: "Request AMZIRA password reset instructions for your account.",
-  path: "/forgot-password"
+  path: "/forgot-password",
+  noIndex: true
 });
 
 export default function ForgotPasswordPage() {

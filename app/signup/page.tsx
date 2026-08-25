@@ -5,7 +5,8 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildMetadata({
   title: "Create Account",
   description: "Create an AMZIRA account for faster checkout, order tracking, saved addresses, and return requests.",
-  path: "/signup"
+  path: "/signup",
+  noIndex: true
 });
 
 export default function SignupPage() {

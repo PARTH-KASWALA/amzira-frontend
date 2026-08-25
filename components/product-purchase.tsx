@@ -24,7 +24,7 @@ export function ProductPurchase({ product }: { product: Product }) {
       <div className="rounded-3xl border border-amber-900/10 bg-[#FAF7F2] p-5 sm:p-6 space-y-4">
         <div className="flex items-center justify-between">
           <h2 className="text-xs font-extrabold uppercase tracking-widest text-maroon-deep flex items-center gap-1.5">
-            <Ruler className="h-4 w-4 text-maroon" /> Select Size <span className="text-charcoal/60 font-medium lowercase tracking-normal">(Age Group)</span>
+            <Ruler className="h-4 w-4 text-maroon" /> Select Size <span className="text-charcoal/70 font-medium lowercase tracking-normal">(Age Group)</span>
           </h2>
           <SizeChartDialog selectedSize={selectedSize} />
         </div>

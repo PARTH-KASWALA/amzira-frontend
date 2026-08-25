@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AccountDashboard } from "@/components/account-dashboard";
 import { buildMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = buildMetadata({ title: "Account", path: "/account" });
+export const metadata: Metadata = buildMetadata({ title: "Account", path: "/account", noIndex: true });
 
 export default function AccountPage() {
   return (

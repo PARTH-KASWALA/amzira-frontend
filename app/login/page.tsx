@@ -5,7 +5,8 @@ import { buildMetadata } from "@/lib/seo";
 export const metadata: Metadata = buildMetadata({
   title: "Sign in",
   description: "Sign in to your AMZIRA account to view orders, addresses, returns, and saved styles.",
-  path: "/login"
+  path: "/login",
+  noIndex: true
 });
 
 export default function LoginPage() {

@@ -7,7 +7,8 @@ import { Award, CheckCircle2, Lock, ShieldCheck, ShoppingBag, Truck } from "luci
 export const metadata: Metadata = buildMetadata({
   title: "Secure Checkout",
   description: "Complete your AMZIRA checkout with delivery address, contact details, and secure payment.",
-  path: "/checkout"
+  path: "/checkout",
+  noIndex: true
 });
 
 export default function CheckoutPage() {
