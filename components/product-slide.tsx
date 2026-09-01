@@ -97,6 +97,7 @@ export function ProductSlide({ product, activeIndex, count, dragX, parallaxX, pa
             alt={product.modelAlt}
             fill
             priority={activeIndex === 0}
+            unoptimized={product.modelImage.startsWith("/images/") || product.modelImage.startsWith("https://cdn.amzira.com/")}
             sizes="(min-width: 1280px) 39vw, (min-width: 1024px) 48vw, 92vw"
             className="object-cover object-top"
           />

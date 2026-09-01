@@ -63,7 +63,7 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
             aria-pressed={active === index}
             onClick={() => scrollToImage(index)}
           >
-            <Image src={source} alt="" fill sizes="88px" className="object-cover" />
+            <Image src={source} alt="" fill sizes="88px" unoptimized={source.startsWith("/images/") || source.startsWith("https://cdn.amzira.com/")} className="object-cover" />
           </button>
         ))}
       </div>
@@ -82,6 +82,7 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
               alt={index === 0 ? name : `${name}, view ${index + 1}`}
               fill
               priority={index === 0}
+              unoptimized={source.startsWith("/images/") || source.startsWith("https://cdn.amzira.com/")}
               sizes="(max-width: 1024px) 100vw, 55vw"
               className="object-cover"
             />
@@ -95,7 +96,7 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
         <div className="fixed inset-0 z-[100] grid place-items-center bg-charcoal/90 p-4" role="dialog" aria-modal="true" aria-label={`${name} enlarged image`} onClick={() => setZoomed(false)}>
           <button type="button" className="icon-button absolute right-4 top-4" aria-label="Close enlarged image" onClick={() => setZoomed(false)}><X className="h-5 w-5" aria-hidden="true" /></button>
           <div className="relative h-[88dvh] w-full max-w-5xl" onClick={(event) => event.stopPropagation()}>
-            <Image src={image} alt={`${name}, enlarged view ${active + 1}`} fill sizes="100vw" className="object-contain" />
+            <Image src={image} alt={`${name}, enlarged view ${active + 1}`} fill unoptimized={image.startsWith("/images/") || image.startsWith("https://cdn.amzira.com/")} sizes="100vw" className="object-contain" />
           </div>
         </div>
       ) : null}

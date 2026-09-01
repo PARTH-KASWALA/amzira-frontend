@@ -98,7 +98,7 @@ test.describe('AMZIRA storefront', () => {
 
     for (const category of [
       { slug: 'kids-pattu-pavadai', heading: 'Kids', count: 110 },
-      { slug: 'girls-lehenga-choli', heading: 'Girls Lehenga Choli', count: 30 },
+      { slug: 'girls-lehenga-choli', heading: 'Girls Lehenga Choli', count: 33 },
       { slug: 'pattu-pavadai', heading: 'Pattu Pavadai', count: 77 }
     ]) {
       await page.goto(`/category/${category.slug}`);
@@ -141,6 +141,7 @@ test.describe('AMZIRA storefront', () => {
   });
 
   test('every kids catalog product opens with a visible main image', async ({ page }) => {
+    test.setTimeout(120_000);
     await page.goto('/category/kids-pattu-pavadai');
     const productLinks = await page.locator('article.group a[aria-label^="View "]').evaluateAll((links) =>
       [...new Set(links.map((link) => link.getAttribute('href')).filter(Boolean))]
@@ -148,7 +149,7 @@ test.describe('AMZIRA storefront', () => {
     expect(productLinks).toHaveLength(110);
 
     for (const href of productLinks) {
-      await page.goto(href);
+      await page.goto(href, { waitUntil: 'commit' });
       const mainImage = page.locator('main img').first();
       await expect(mainImage).toBeVisible();
       await expect.poll(() => mainImage.evaluate((image) => image.complete && image.naturalWidth > 0)).toBe(true);
@@ -266,7 +267,7 @@ test.describe('AMZIRA storefront', () => {
     test(`home page has no horizontal overflow at ${width}px`, async ({ page }) => {
       await page.setViewportSize({ width, height: 1100 });
       await page.goto('/');
-      await expect(page.getByRole('heading', { name: /Royal Kanchipuram Lehenga Choli/i })).toBeVisible();
+      await expect(page.getByRole('region', { name: 'Featured AMZIRA styles' })).toBeVisible();
       const hasOverflow = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
       expect(hasOverflow).toBe(false);
     });

@@ -53,6 +53,7 @@ export function HeritageInventoryRotator({
         src={activeProduct.primaryImage}
         alt={activeProduct.name}
         fill
+        unoptimized={activeProduct.primaryImage.startsWith("/images/") || activeProduct.primaryImage.startsWith("https://cdn.amzira.com/")}
         sizes="(min-width: 1024px) 16vw, 34vw"
         className="heritage-inventory-outfit-image object-contain"
       />

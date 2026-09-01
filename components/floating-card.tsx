@@ -31,6 +31,7 @@ export function FloatingCard({ detail, index }: FloatingCardProps) {
         src={detail.image}
         alt={detail.alt}
         fill
+        unoptimized={detail.image.startsWith("/images/") || detail.image.startsWith("https://cdn.amzira.com/")}
         sizes="(max-width: 768px) 34vw, 190px"
         className={detail.fit === "cover" ? "object-cover object-top" : "object-contain p-3"}
       />

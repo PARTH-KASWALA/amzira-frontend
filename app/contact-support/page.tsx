@@ -14,6 +14,7 @@ export default function ContactSupportPage() {
         alt="Illustrated domed ceremonial pavilion in a peaceful flowering garden"
         fill
         priority
+        unoptimized
         sizes="100vw"
         className="support-page__art"
       />

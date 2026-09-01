@@ -629,6 +629,7 @@ export function AccountDashboard() {
                                         src={item.image}
                                         alt={item.productName}
                                         fill
+                                        unoptimized={item.image.startsWith("/images/") || item.image.startsWith("https://cdn.amzira.com/")}
                                         sizes="48px"
                                         className="object-cover"
                                       />
@@ -787,7 +788,7 @@ export function AccountDashboard() {
                 <article className="overflow-hidden rounded-2xl border border-amber-900/10 bg-white shadow-xs" key={item.id}>
                   <Link className="focus-ring block" href={`/product/${item.product_slug}`}>
                     <div className="relative aspect-[4/5] bg-sandal">
-                      {item.product_image ? <Image src={item.product_image} alt={item.product_name} fill sizes="(min-width: 1280px) 24vw, 50vw" className="object-cover" /> : null}
+                      {item.product_image ? <Image src={item.product_image} alt={item.product_name} fill unoptimized={item.product_image.startsWith("/images/") || item.product_image.startsWith("https://cdn.amzira.com/")} sizes="(min-width: 1280px) 24vw, 50vw" className="object-cover" /> : null}
                     </div>
                     <div className="p-4"><h3 className="font-display text-xl font-semibold text-maroon-deep">{item.product_name}</h3><p className="mt-2 font-bold text-maroon">{formatMoney(item.product_price)}</p></div>
                   </Link>

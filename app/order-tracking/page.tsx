@@ -14,6 +14,7 @@ export default function OrderTrackingPage() {
         alt=""
         fill
         priority
+        unoptimized
         sizes="100vw"
         className="pointer-events-none absolute inset-x-0 top-0 z-[-2] h-[42rem] object-cover object-[center_top] opacity-75 sm:h-[47rem]"
       />

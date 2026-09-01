@@ -56,6 +56,7 @@ export function SiteFooter() {
         src="/images/footer/heritage-illustration-footer.webp"
         alt=""
         fill
+        unoptimized
         sizes="100vw"
         quality={75}
         className="pointer-events-none absolute inset-0 object-cover object-center saturate-[1.08] contrast-[1.02]"
@@ -101,7 +102,7 @@ export function SiteFooter() {
       <div className="site-footer__meta relative mx-auto flex w-full max-w-[1480px] flex-col gap-5 px-4 pb-10 text-sm font-medium text-[#65605e] sm:px-6 md:flex-row md:items-end md:justify-between lg:px-8">
         <Link href="/" className="focus-ring inline-flex items-center gap-3 rounded-sm" aria-label="AMZIRA home">
           <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-gold/70 bg-white/80 shadow-soft">
-            <Image src="/images/logo/amzira_logo.webp" alt="" fill sizes="48px" className="object-contain p-1.5" />
+            <Image src="/images/logo/amzira_logo.webp" alt="" fill unoptimized sizes="48px" className="object-contain p-1.5" />
           </span>
           <span>
             <span className="block text-3xl font-bold leading-none tracking-tight text-charcoal">amzira</span>

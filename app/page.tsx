@@ -367,6 +367,7 @@ export default async function HomePage() {
               src={craftProduct?.primaryImage || "/images/hero-upgrade/green-kids-lehenga-front.webp"}
               alt={craftProduct?.name || "Girl wearing an emerald South Indian lehenga choli with a temple border"}
               fill
+              unoptimized={Boolean(craftProduct?.primaryImage?.startsWith("/images/") || craftProduct?.primaryImage?.startsWith("https://cdn.amzira.com/") || !craftProduct?.primaryImage)}
               sizes="(min-width: 1024px) 48vw, 100vw"
               className="object-cover brightness-[1.04] saturate-[1.08]"
             />
@@ -464,6 +465,7 @@ export default async function HomePage() {
                     src={edit.image}
                     alt={`${edit.name} ethnic wear edit`}
                     fill
+                    unoptimized={edit.image.startsWith("/images/") || edit.image.startsWith("https://cdn.amzira.com/")}
                     sizes="(min-width: 1280px) 24vw, (min-width: 768px) 48vw, 100vw"
                     className="object-cover transition duration-700 group-hover:scale-[1.04]"
                   />

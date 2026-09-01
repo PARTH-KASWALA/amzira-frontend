@@ -102,10 +102,14 @@ export function OrderTracking() {
 
             <form className="mt-6" onSubmit={submit}>
               <div className="relative">
+                <label htmlFor="order-reference" className="sr-only">
+                  Order reference
+                </label>
                 <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3.5 text-maroon/60">
                   <Package className="h-5 w-5" aria-hidden="true" />
                 </div>
                 <input
+                  id="order-reference"
                   type="text"
                   value={reference}
                   onChange={(event) => setReference(event.target.value)}
@@ -252,6 +256,7 @@ export function OrderTracking() {
                     src="/images/order-tracking-3d-illustration.jpg"
                     alt="3D Order tracking presentation"
                     fill
+                    unoptimized
                     className="object-cover object-center"
                     priority
                   />

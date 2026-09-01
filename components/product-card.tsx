@@ -17,6 +17,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
             alt={product.name}
             fill
             priority={priority}
+            unoptimized={product.primaryImage.startsWith("/images/") || product.primaryImage.startsWith("https://cdn.amzira.com/")}
             sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
             className="object-cover transition duration-500 group-hover:scale-105"
           />

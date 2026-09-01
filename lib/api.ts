@@ -174,11 +174,12 @@ function toCategory(input: unknown): Category | null {
   const backendSlug = text(input.slug || input.name).toLowerCase();
   const slug = publicCategorySlug(backendSlug);
   if (!slug) return null;
+  const fallbackCategory = fallbackCategories.find((category) => category.slug === slug);
   return {
     id: identifier(input.id, slug),
     name: text(input.name, slug),
     slug,
-    description: text(input.description),
+    description: text(input.description, fallbackCategory?.description || `Explore ${text(input.name, "AMZIRA")} styles for every celebration.`),
     imageUrl: assetUrl(text(input.image_url || input.imageUrl)) || fallbackCategories[0].imageUrl,
     parentId: typeof input.parent_id === "number" ? input.parent_id : null,
     displayOrder: number(input.display_order ?? input.displayOrder, 999)

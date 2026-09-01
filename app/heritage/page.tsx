@@ -211,6 +211,7 @@ export default async function HeritagePage() {
           alt="South Indian temple courtyard with silk borders, brass lamps, and heritage architecture"
           fill
           priority
+          unoptimized
           sizes="100vw"
           className="object-cover opacity-80"
         />
@@ -245,6 +246,7 @@ export default async function HeritagePage() {
                 src={heritageInventoryLooks.green.image}
                 alt={heritageInventoryLooks.green.alt}
                 fill
+                unoptimized={heritageInventoryLooks.green.image.startsWith("/images/") || heritageInventoryLooks.green.image.startsWith("https://cdn.amzira.com/")}
                 sizes="(min-width: 1024px) 28vw, 46vw"
                 className="object-cover"
               />
@@ -254,6 +256,7 @@ export default async function HeritagePage() {
                 src={heritageInventoryLooks.blue.image}
                 alt={heritageInventoryLooks.blue.alt}
                 fill
+                unoptimized={heritageInventoryLooks.blue.image.startsWith("/images/") || heritageInventoryLooks.blue.image.startsWith("https://cdn.amzira.com/")}
                 sizes="(min-width: 1024px) 30vw, 54vw"
                 className="object-cover"
               />
@@ -273,6 +276,7 @@ export default async function HeritagePage() {
           src="/images/heritage/heritage-proof-courtyard.webp"
           alt=""
           fill
+          unoptimized
           sizes="100vw"
           className="heritage-proof-backdrop pointer-events-none -z-10 object-cover"
         />
@@ -334,6 +338,7 @@ export default async function HeritagePage() {
                 src="/images/heritage/heritage-master-weaver.webp"
                 alt="A South Indian master weaver crafting maroon and gold silk on a traditional handloom"
                 fill
+                unoptimized
                 sizes="(min-width: 1024px) 44vw, 100vw"
                 className="object-cover"
               />
@@ -399,10 +404,11 @@ export default async function HeritagePage() {
 
       <section id="craft" className="relative isolate overflow-hidden bg-ivory py-10 lg:py-[3.6rem]">
         <Image
-          src="/images/heritage/craft-route-background.webp"
-          alt=""
-          fill
-          sizes="100vw"
+        src="/images/heritage/craft-route-background.webp"
+        alt=""
+        fill
+        unoptimized
+        sizes="100vw"
           className="pointer-events-none -z-10 object-cover opacity-95"
         />
         <div className="absolute inset-0 -z-10 bg-white/72" />
@@ -426,10 +432,11 @@ export default async function HeritagePage() {
               >
                 <div className="relative aspect-[4/5] bg-sandal sm:aspect-auto">
                   <Image
-                    src={inventoryHighlight.primaryImage}
-                    alt={inventoryHighlight.name}
-                    fill
-                    sizes="(min-width: 640px) 150px, 100vw"
+                  src={inventoryHighlight.primaryImage}
+                  alt={inventoryHighlight.name}
+                  fill
+                  unoptimized={inventoryHighlight.primaryImage.startsWith("/images/") || inventoryHighlight.primaryImage.startsWith("https://cdn.amzira.com/")}
+                  sizes="(min-width: 640px) 150px, 100vw"
                     className="object-cover transition duration-700 group-hover:scale-[1.04]"
                   />
                 </div>
@@ -504,6 +511,7 @@ export default async function HeritagePage() {
             src="/images/heritage/heritage-archive-atelier.webp"
             alt=""
             fill
+            unoptimized
             sizes="100vw"
             className="object-cover"
           />
@@ -544,6 +552,7 @@ export default async function HeritagePage() {
                   src={item.image}
                   alt={item.alt}
                   fill
+                  unoptimized={item.image.startsWith("/images/") || item.image.startsWith("https://cdn.amzira.com/")}
                   sizes={item.className ? "(min-width: 1024px) 48vw, 100vw" : "(min-width: 1024px) 24vw, 100vw"}
                   className="object-cover transition duration-700 group-hover:scale-[1.04]"
                 />
@@ -566,10 +575,11 @@ export default async function HeritagePage() {
       <section className="heritage-promise-section text-white">
         <div className="heritage-promise-image absolute inset-y-0 right-0 w-full lg:w-[40%]">
           <Image
-            src="/images/heritage/heritage-hero-backdrop.webp"
-            alt="Warm South Indian temple courtyard decorated with brass lamps and ceremonial flowers"
-            fill
-            sizes="(min-width: 1024px) 40vw, 100vw"
+          src="/images/heritage/heritage-hero-backdrop.webp"
+          alt="Warm South Indian temple courtyard decorated with brass lamps and ceremonial flowers"
+          fill
+          unoptimized
+          sizes="(min-width: 1024px) 40vw, 100vw"
             className="object-cover object-[74%_center]"
           />
           <div className="heritage-promise-image-shade absolute inset-0" />

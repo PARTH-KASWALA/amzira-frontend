@@ -95,6 +95,7 @@ export function LuxuryCardGrid({ cards = defaultLuxuryCards }: { cards?: LuxuryC
                 src={luxuryCards[0].image}
                 alt=""
                 fill
+                unoptimized={luxuryCards[0].image.startsWith("/images/") || luxuryCards[0].image.startsWith("https://cdn.amzira.com/")}
                 sizes="(min-width: 1024px) 46vw, 100vw"
                 className="object-cover transition duration-700 group-hover:scale-[1.045]"
               />
@@ -128,6 +129,7 @@ export function LuxuryCardGrid({ cards = defaultLuxuryCards }: { cards?: LuxuryC
                     src={card.image}
                     alt=""
                     fill
+                    unoptimized={card.image.startsWith("/images/") || card.image.startsWith("https://cdn.amzira.com/")}
                     sizes="(min-width: 1024px) 27vw, 100vw"
                     className="object-cover transition duration-700 group-hover:scale-[1.055]"
                   />

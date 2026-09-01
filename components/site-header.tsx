@@ -84,6 +84,7 @@ export function SiteHeader() {
               src="/images/logo/amzira_logo.webp"
               alt=""
               fill
+              unoptimized
               sizes="48px"
               className="object-contain p-1.5"
               priority
@@ -95,6 +96,7 @@ export function SiteHeader() {
                 src="/images/logo/Amzira_name.webp"
                 alt="AMZIRA"
                 fill
+                unoptimized
                 sizes="160px"
                 className="object-contain object-left"
                 priority
@@ -254,6 +256,7 @@ export function SiteHeader() {
                     src={promo.image}
                     alt=""
                     fill
+                    unoptimized={promo.image.startsWith("/images/") || promo.image.startsWith("https://cdn.amzira.com/")}
                     sizes="300px"
                     className="object-cover transition duration-700 group-hover:scale-[1.035]"
                   />

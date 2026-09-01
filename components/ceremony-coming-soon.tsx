@@ -200,7 +200,7 @@ function Followup({ department }: { department: ComingSoonDepartment }) {
             {womenStories.map((story) => (
               <Link className="ceremony-story focus-ring" href={LIVE_CATEGORY_PATH} key={story.title}>
                 <span className="ceremony-story__media">
-                  <Image src={story.image} alt="" fill sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />
+                  <Image src={story.image} alt="" fill unoptimized={story.image.startsWith("/images/") || story.image.startsWith("https://cdn.amzira.com/")} sizes="(min-width: 768px) 33vw, 100vw" className="object-cover" />
                 </span>
                 <span className="ceremony-story__copy">
                   <strong>{story.title}</strong>
@@ -243,6 +243,7 @@ export function CeremonyComingSoon({ department }: { department: ComingSoonDepar
             alt={collection.imageAlt}
             fill
             priority
+            unoptimized={collection.image.startsWith("/images/") || collection.image.startsWith("https://cdn.amzira.com/")}
             sizes="(min-width: 1024px) 52vw, 100vw"
             className="ceremony-hero__image"
           />

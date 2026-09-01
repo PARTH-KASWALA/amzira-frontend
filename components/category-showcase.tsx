@@ -38,6 +38,7 @@ export function CategoryShowcase({ categories, featuredProduct }: { categories: 
           src={primaryImage}
           alt={primaryAlt}
           fill
+          unoptimized={primaryImage.startsWith("/images/") || primaryImage.startsWith("https://cdn.amzira.com/")}
           sizes="(min-width: 1280px) 50vw, 100vw"
           className="object-cover transition duration-700 group-hover:scale-[1.035]"
         />
@@ -63,6 +64,7 @@ export function CategoryShowcase({ categories, featuredProduct }: { categories: 
             src={collection.image}
             alt={`${collection.name} collection preview`}
             fill
+            unoptimized={collection.image.startsWith("/images/") || collection.image.startsWith("https://cdn.amzira.com/")}
             sizes="(min-width: 1280px) 17vw, (min-width: 768px) 50vw, 100vw"
             className="object-cover opacity-80 grayscale-[18%] transition duration-700 group-hover:scale-[1.04] group-hover:opacity-68"
           />

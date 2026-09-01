@@ -53,6 +53,7 @@ export function ParentsLoveSection() {
                     alt=""
                     width={140}
                     height={96}
+                    unoptimized={feature.image.startsWith("/images/") || feature.image.startsWith("https://cdn.amzira.com/")}
                     sizes="(min-width: 768px) 140px, 110px"
                     className={["parents-love-feature__image", feature.imageClassName].filter(Boolean).join(" ")}
                   />

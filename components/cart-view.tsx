@@ -200,7 +200,7 @@ export function CartView({ checkout = false }: { checkout?: boolean }) {
           {displayItems.map((item) => (
             <article className="flex items-center gap-4 p-4" key={item.key}>
               <div className="relative h-16 w-14 shrink-0 overflow-hidden rounded-xl bg-sandal/40 border border-amber-900/10 shadow-xs">
-                <Image src={item.image} alt={item.name} fill sizes="60px" className="object-cover" />
+                <Image src={item.image} alt={item.name} fill unoptimized={item.image.startsWith("/images/") || item.image.startsWith("https://cdn.amzira.com/")} sizes="60px" className="object-cover" />
               </div>
               <div className="flex-1 min-w-0">
                 <h3 className="truncate font-display text-base font-semibold text-maroon-deep">
@@ -272,7 +272,7 @@ export function CartView({ checkout = false }: { checkout?: boolean }) {
               className="grid gap-4 border-b border-charcoal/10 bg-white p-4 sm:grid-cols-[120px_1fr]"
             >
               <div className="relative aspect-[4/5] overflow-hidden rounded-md bg-sandal">
-                <Image src={item.image} alt={item.name} fill sizes="120px" className="object-cover" />
+                <Image src={item.image} alt={item.name} fill unoptimized={item.image.startsWith("/images/") || item.image.startsWith("https://cdn.amzira.com/")} sizes="120px" className="object-cover" />
               </div>
               <div className="flex flex-col gap-5 sm:flex-row sm:items-start sm:justify-between">
                 <div>

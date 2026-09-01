@@ -128,6 +128,7 @@ export function HeroCarousel({ products = defaultProducts }: { products?: HeroPr
   return (
     <motion.section
       className="hero-story relative overflow-hidden text-white"
+      aria-label="Featured AMZIRA styles"
       style={heroStyle}
       animate={{ background: activeProduct.gradient }}
       transition={{ duration: shouldReduceMotion ? 0 : 0.92, ease: [0.16, 1, 0.3, 1] }}
