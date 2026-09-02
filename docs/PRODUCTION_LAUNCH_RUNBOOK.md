@@ -73,7 +73,7 @@ From the backend repository:
 .venv/bin/alembic current
 ```
 
-Verified local evidence (2026-09-02): backend `92 passed, 2 skipped`; the two opt-in checks are the PostgreSQL concurrency test and PostgreSQL enum migration test. The order-status migration was also applied from an empty PostgreSQL database through Alembic head and its lowercase enum contract passed. Seller browser suite `15 passed` across Chromium, Firefox, and WebKit. The storefront Chromium suite passed all 28 cases with the real local API/database topology (20 initial passes plus 8 API-dependent reruns). Frontend lint, typecheck, production build, npm audit, pip audit, compile check, diff check, and secret scan passed.
+Verified release evidence (2026-09-02): backend `95 passed, 0 skipped` against a freshly migrated isolated PostgreSQL database, including the real 20-way final-unit inventory race and enum migration checks. Both PostgreSQL tests are mandatory in backend CI. Seller browser suite `15 passed` across Chromium, Firefox, and WebKit. The storefront Chromium suite passed all 28 cases with the real local API/database topology (20 initial passes plus 8 API-dependent reruns). Frontend lint, typecheck, production build, npm audit, pip audit, compile check, diff check, and secret scan passed. See `docs/PRODUCTION_RELEASE_EVIDENCE_2026-09-02.md` for commit, deployment, CI, runtime, and remaining-gate evidence.
 
 ## 4. Deploy closed
 
