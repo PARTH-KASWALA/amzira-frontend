@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Cormorant, Montserrat } from "next/font/google";
 import "@/app/globals.css";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
+import { AppChrome } from "@/components/app-chrome";
 import { JsonLd } from "@/components/json-ld";
 import { SessionProvider } from "@/components/session-provider";
 import { buildMetadata, organizationJsonLd } from "@/lib/seo";
@@ -37,15 +36,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body suppressHydrationWarning>
         <SessionProvider>
           <JsonLd data={organizationJsonLd()} />
-          <a
-            href="#main"
-            className="focus-ring sr-only rounded-md bg-white px-4 py-3 text-charcoal focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100]"
-          >
-            Skip to content
-          </a>
-          <SiteHeader />
-          <main id="main">{children}</main>
-          <SiteFooter />
+          <AppChrome>{children}</AppChrome>
         </SessionProvider>
       </body>
     </html>

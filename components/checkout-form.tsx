@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { FormEvent, useEffect, useMemo, useState } from "react";
 import { Check, CreditCard, LockKeyhole, MapPin, Plus, ShieldCheck, Tag } from "lucide-react";
 import { useSession } from "@/components/session-provider";
-import { createPaymentOrder, validateCheckout, verifyPayment } from "@/lib/api/checkout";
+import { createPaymentOrder, getCommerceStatus, validateCheckout, verifyPayment } from "@/lib/api/checkout";
 import { createAddress, getAddresses } from "@/lib/api/customer";
 import type { Address, AddressInput, CheckoutPreview } from "@/lib/api/types";
 import { formatMoney } from "@/lib/format";
@@ -50,6 +50,24 @@ export function CheckoutForm() {
   const [couponCode, setCouponCode] = useState("");
   const [stage, setStage] = useState<"loading" | "ready" | "validating" | "paying" | "verifying">("loading");
   const [message, setMessage] = useState("");
+  const [checkoutEnabled, setCheckoutEnabled] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    getCommerceStatus()
+      .then((value) => {
+        if (active) setCheckoutEnabled(value.checkoutEnabled);
+      })
+      .catch(() => {
+        if (active) {
+          setCheckoutEnabled(false);
+          setMessage("Checkout availability could not be verified. For your safety, payment has been disabled.");
+        }
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (sessionStatus !== "authenticated") {
@@ -93,7 +111,7 @@ export function CheckoutForm() {
   }
 
   async function beginPayment() {
-    if (!customer || !selectedAddressId || isBusy) return;
+    if (!customer || !selectedAddressId || isBusy || !checkoutEnabled) return;
     setMessage("");
     try {
       setStage("validating");
@@ -171,7 +189,7 @@ export function CheckoutForm() {
     }
   }
 
-  if (sessionStatus === "loading" || stage === "loading") {
+  if (sessionStatus === "loading" || stage === "loading" || checkoutEnabled === null) {
     return <div className="h-96 animate-pulse rounded-3xl bg-amber-900/5 border border-amber-900/10" aria-label="Loading checkout" />;
   }
 
@@ -186,6 +204,19 @@ export function CheckoutForm() {
         <Link className="btn-primary mt-6 rounded-xl bg-[#580B26] px-8 py-3.5 text-xs uppercase font-bold tracking-wider" href="/login?next=/checkout">
           Sign in to checkout
         </Link>
+      </div>
+    );
+  }
+
+  if (!checkoutEnabled) {
+    return (
+      <div className="rounded-3xl border border-amber-900/10 bg-[#FAF7F2] p-8 text-center shadow-xs">
+        <LockKeyhole className="mx-auto h-8 w-8 text-maroon" aria-hidden="true" />
+        <h2 className="mt-4 font-display text-3xl font-semibold text-maroon-deep">Checkout is temporarily paused</h2>
+        <p className="mx-auto mt-3 max-w-lg leading-7 text-charcoal/65">
+          We are completing final payment checks. Your cart is safe, and no payment can be started while checkout is paused.
+        </p>
+        <Link className="btn-secondary mt-6" href="/cart">Return to cart</Link>
       </div>
     );
   }
@@ -350,7 +381,7 @@ export function CheckoutForm() {
         <button
           type="button"
           className="mt-6 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#580B26] py-4 text-xs font-extrabold uppercase tracking-widest text-white shadow-lg transition-all hover:bg-[#43071c] active:scale-[0.99] disabled:opacity-60"
-          disabled={!selectedAddressId || isBusy}
+          disabled={!selectedAddressId || isBusy || !checkoutEnabled}
           onClick={() => void beginPayment()}
         >
           {stage === "ready" ? <ShieldCheck className="h-4 w-4" aria-hidden="true" /> : <Check className="h-4 w-4" aria-hidden="true" />}

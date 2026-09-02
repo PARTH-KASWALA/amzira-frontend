@@ -19,7 +19,8 @@ export default function robots(): MetadataRoute.Robots {
         "/order-success",
         "/payment-failure",
         "/order-tracking",
-        "/search"
+        "/search",
+        "/seller"
       ]
     },
     sitemap: `${siteUrl}/sitemap.xml`

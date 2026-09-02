@@ -2,6 +2,11 @@ import { z } from "zod";
 import { browserApi } from "@/lib/api/browser-client";
 import type { CheckoutPreview, PaymentOrder } from "@/lib/api/types";
 
+const commerceStatusSchema = z.object({
+  checkout_enabled: z.boolean(),
+  cod_enabled: z.boolean()
+});
+
 const checkoutItemSchema = z.object({
   cart_item_id: z.coerce.number(),
   product_id: z.coerce.number(),
@@ -56,6 +61,11 @@ function mapItems(items: z.infer<typeof checkoutItemSchema>[]) {
     totalPrice: item.total_price,
     stockAvailable: item.quantity
   }));
+}
+
+export async function getCommerceStatus() {
+  const value = commerceStatusSchema.parse(await browserApi<unknown>("/commerce/status"));
+  return { checkoutEnabled: value.checkout_enabled, codEnabled: value.cod_enabled };
 }
 
 export async function validateCheckout(userId: number, addressId: number): Promise<CheckoutPreview> {
