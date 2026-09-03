@@ -18,7 +18,9 @@ monitoring, DNS, and commercial-hosting gates below are evidenced.
 | Seller browser regression | Chromium seller suite: 6 passed | Pass |
 | Invalid webhook handling | Razorpay and Shiprocket invalid signatures both returned HTTP 400 in production | Pass |
 | Razorpay test account | Local test-mode order handshake created INR 100 test order; no live charge | Pass |
+| Razorpay application matrix | 19 focused payment, webhook, refund, idempotency, cancellation, and inventory tests passed | Pass with live-provider gate |
 | Shiprocket test account | Login HTTP 200 and serviceability HTTP 200 with 7 available couriers | Pass |
+| Seller network allowlist | Current public IPv4 and IPv6 are included in the API production allowlist; protected verifier accepts the configuration | Pass with credential gate |
 | Product recommendations | Live product page contains all three recommendation sections | Pass |
 | Vercel runtime | No production runtime errors in the selected 24-hour window | Pass |
 | API/worker/Beat logs | No error logs after the latest bcrypt-compatible deployments | Pass |
