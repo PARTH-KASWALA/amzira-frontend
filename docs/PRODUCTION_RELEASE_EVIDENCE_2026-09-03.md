@@ -10,7 +10,7 @@ monitoring, DNS, and commercial-hosting gates below are evidenced.
 
 | Area | Evidence | State |
 |---|---|---|
-| Frontend | Vercel deployment `dpl_DSD1YdLjeGEdDSmKjGABWXtpsDZg`, commit `b7c3613`, READY | Pass |
+| Frontend | Vercel deployment `dpl_8TbeKgRPDTzFcV6UaHCCygj8wwfK`, commit `0c669d8`, READY | Pass |
 | Backend | Render deployment `dep-dachmc0ae00c73fbuok0`, commit `a613664`, live | Pass |
 | Persistent queue store | `amzira-redis-persistent`, Starter, `journal_snapshot`, `noeviction`; wired to API, worker, and Beat | Pass |
 | Protected launch verifier | 13 passed, 0 failed; only seller acceptance skipped because credentials were not supplied | Pass with credential gate |
