@@ -11,7 +11,7 @@ monitoring, DNS, and commercial-hosting gates below are evidenced.
 | Area | Evidence | State |
 |---|---|---|
 | Frontend | Vercel deployment `dpl_DSD1YdLjeGEdDSmKjGABWXtpsDZg`, commit `b7c3613`, READY | Pass |
-| Backend | Render deployment `dep-dachf48ae00c73fb6dfg`, commit `e125f83`, live | Pass |
+| Backend | Render deployment `dep-dachmc0ae00c73fbuok0`, commit `a613664`, live | Pass |
 | Persistent queue store | `amzira-redis-persistent`, Starter, `journal_snapshot`, `noeviction`; wired to API, worker, and Beat | Pass |
 | Protected launch verifier | 13 passed, 0 failed; only seller acceptance skipped because credentials were not supplied | Pass with credential gate |
 | Backend regression suite | 104 passed, 2 PostgreSQL-only skips locally; `pip-audit` found no known vulnerabilities | Pass with CI-only DB gates |
@@ -22,6 +22,13 @@ monitoring, DNS, and commercial-hosting gates below are evidenced.
 | Product recommendations | Live product page contains all three recommendation sections | Pass |
 | Vercel runtime | No production runtime errors in the selected 24-hour window | Pass |
 | API/worker/Beat logs | No error logs after the latest bcrypt-compatible deployments | Pass |
+
+The TLS-aware backup/restore scripts were deployed to API, worker, and Beat
+(`dep-dachmc0ae00c73fbuok0`, `dep-dachmcajnfac73cjuj1g`, and
+`dep-dachmd2jnfac73cjukd0`). A disposable localhost database passed the custom
+dump checksum and restore procedure; the temporary restore database was then
+removed. This does not replace a production backup and isolated production
+restore.
 
 The backend now pins `bcrypt==4.0.1` to avoid the Passlib/bcrypt compatibility
 error previously emitted during password operations.
