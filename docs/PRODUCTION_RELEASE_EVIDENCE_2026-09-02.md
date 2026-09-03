@@ -37,6 +37,9 @@ CI evidence:
 
 ## Production runtime evidence
 
+- On 2026-09-03, the privacy-safe production verifier passed all 9 public checks
+  and skipped only the deliberately credential-gated protected-health and seller
+  groups. Its default acceptance requires checkout and COD to remain disabled.
 - `https://api.amzira.com/health` returned HTTP 200 and production healthy status.
 - `https://api.amzira.com/api/v1/commerce/status` returned `checkout_enabled=false` and `cod_enabled=false` after every backend deployment.
 - Unauthenticated `GET /api/v1/admin/orders` returned 401 without order data.

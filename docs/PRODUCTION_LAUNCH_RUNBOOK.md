@@ -86,6 +86,29 @@ Verified release evidence (2026-09-02): backend `95 passed, 0 skipped` against a
 
 ## 5. Closed-checkout acceptance
 
+From the backend repository, run the privacy-safe public preflight. Its defaults
+fail unless checkout and COD remain disabled:
+
+```bash
+.venv/bin/python scripts/verify_production_launch.py
+```
+
+Then provide `AMZIRA_HEALTHCHECK_TOKEN`, `AMZIRA_SELLER_EMAIL`, and
+`AMZIRA_SELLER_PASSWORD` through the approved secret manager and run the strict
+operator pass from an address in `ADMIN_ALLOWED_IPS`:
+
+```bash
+.venv/bin/python scripts/verify_production_launch.py \
+  --require-protected-health \
+  --require-seller
+```
+
+The seller pass establishes and closes an admin session but never changes an
+order. Its output excludes response bodies, order numbers, customer fields,
+tokens, and credentials. Attach the summary to the launch ticket. The verifier
+does not replace the transaction, refund, fulfilment, monitoring, or restore
+acceptance below.
+
 These checks must pass while checkout remains disabled:
 
 - `GET https://api.amzira.com/health` is healthy.
