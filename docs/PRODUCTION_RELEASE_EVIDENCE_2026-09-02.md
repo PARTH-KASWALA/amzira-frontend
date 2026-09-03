@@ -17,18 +17,21 @@ This record separates verified evidence from checks that still require a human o
 | Backend main | `ab9e9b9ff8a757b27be6e8f62396757b39e260e7` | Mandatory PostgreSQL race and enum gates enabled in CI |
 | Backend API code | `f14f6b0df0fbbf7a25a76b08a29dd4f844776193` | Render `dep-dabumuajnfac73ec1ivg`, live |
 | Backend order migration, worker, and Beat code | `37b337c08117fb0ba544d0b36c7357e7937aa917` | API migration `b0c1d2e3f4a5`; worker `dep-dabugi7avr4c73armet0`; Beat `dep-dabughvavr4c73armdv0`, live |
-| Frontend main | `6246d5aff58ced7d946241f94d65b768220039fa` | Vercel `dpl_AYixiaKvtVvLyEsWmkq3PPWg4AFE`, READY and aliased to production domains; seller implementation remains from `4f1c04aff04f9073cd8ef0a48291301c2aa87785` |
+| Frontend seller application | `4f1c04aff04f9073cd8ef0a48291301c2aa87785` | Vercel `dpl_HHWDx48uYLVqwWyCqnKX3u3sRRJZ`, READY and subsequently preserved by docs/workflow-only production deployments |
+| Production acceptance tooling | Backend `58e9b35158bf71afbf8750488a94349e204ff0ce`; hardening `5fea9652f02fd6fb931f33b925418f4c682d4ae0` | Public verifier plus HTTP(S)/CDN-host/defused-XML catalog reconciliation controls |
 
 CI evidence:
 
 - Backend mandatory PostgreSQL release run: <https://github.com/PARTH-KASWALA/amzira-backend/actions/runs/33614427701> — completed successfully.
 - Backend no-store release run: <https://github.com/PARTH-KASWALA/amzira-backend/actions/runs/33613708707> — completed successfully.
 - Frontend seller release run: <https://github.com/PARTH-KASWALA/amzira-frontend/actions/runs/33612958655> — completed successfully.
+- Backend current release run: <https://github.com/PARTH-KASWALA/amzira-backend/actions/runs/33714065477> — completed successfully with 106 collected tests, mandatory PostgreSQL gates, expanded script SAST, dependency audit, Gitleaks, and Trivy.
+- Frontend current release run: <https://github.com/PARTH-KASWALA/amzira-frontend/actions/runs/33714066037> — completed successfully after migrating CI actions to Node 24-compatible majors.
 
 ## Automated acceptance evidence
 
 - A clean isolated PostgreSQL database migrated from the first Alembic revision through `b0c1d2e3f4a5`.
-- Backend suite: `95 passed, 0 skipped` with both PostgreSQL-only gates enabled.
+- Backend original release suite: `95 passed, 0 skipped` with both PostgreSQL-only gates enabled. The current suite collects 106 tests; the latest CI passed with both PostgreSQL-only gates mandatory. A local post-hardening run passed `104 passed, 2 skipped`, where the two skips are those CI-required PostgreSQL gates.
 - The PostgreSQL inventory race launched 20 simultaneous reservations for one final unit; exactly one succeeded and stock ended at zero.
 - Seller Playwright suite: `15 passed` across Chromium, Firefox, and WebKit locally.
 - Live production seller smoke: `5 passed` in Chromium.
