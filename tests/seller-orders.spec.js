@@ -86,6 +86,19 @@ test.describe('AMZIRA seller order desk', () => {
     await expect.poll(() => requestedUrl).toContain('status=confirmed');
   });
 
+  test('admin sees the approved-network requirement when the API rejects the IP', async ({ page }) => {
+    await mockAdminSession(page);
+    await page.route('**/api/v1/admin/orders?**', (route) => route.fulfill({
+      status: 403,
+      contentType: 'application/json',
+      body: JSON.stringify({ success: false, detail: 'Access denied' })
+    }));
+
+    await page.goto('/seller/orders');
+    await expect(page.getByText(/approved admin network/i)).toBeVisible();
+    await expect(page.getByText(/no longer has seller access/i)).toHaveCount(0);
+  });
+
   test('admin can inspect an order and make a controlled lifecycle update', async ({ page }) => {
     await mockAdminSession(page);
     let currentDetail = orderDetail;

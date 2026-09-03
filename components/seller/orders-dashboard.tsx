@@ -10,7 +10,15 @@ import { ORDER_STATUSES, PAYMENT_STATUSES, formatAdminDate, orderStatusLabel, st
 import { formatMoney } from "@/lib/format";
 
 function errorMessage(error: unknown) {
-  if (error instanceof ApiError && error.status === 403) return "Your account no longer has seller access. Sign out and contact an administrator.";
+  if (error instanceof ApiError && error.status === 403) {
+    if (error.message === "Access denied") {
+      return "Seller operations are restricted to the approved admin network. Connect to the AMZIRA office/VPN and try again.";
+    }
+    if (error.message === "Admin access required") {
+      return "Your account does not have seller access. Sign out and contact an administrator.";
+    }
+    return "Seller access was denied. Sign out and contact an administrator.";
+  }
   if (error instanceof ApiError && error.status === 429) return "Too many requests. Wait a moment, then refresh.";
   return error instanceof Error ? error.message : "Orders could not be loaded.";
 }
