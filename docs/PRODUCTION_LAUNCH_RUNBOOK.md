@@ -1,6 +1,11 @@
 # AMZIRA Production Launch Runbook
 
-**Decision baseline:** catalog launch is safe; live checkout remains **NO-GO** until every external acceptance gate below is signed off. The production backend defaults to `CHECKOUT_ENABLED=False` and `COD_ENABLED=False`.
+**Decision baseline:** the catalog build is technically ready, but commercial
+public launch is **NO-GO** while the Vercel team remains on Hobby. Vercel
+[restricts Hobby to personal, non-commercial use](https://vercel.com/docs/plans/hobby).
+Live checkout remains **NO-GO**
+until every external acceptance gate below is signed off. The production backend
+defaults to `CHECKOUT_ENABLED=False` and `COD_ENABLED=False`.
 
 ## 1. Roles and evidence record
 
@@ -21,6 +26,10 @@ Record the reviewed frontend and backend Git commit IDs, Render deploy IDs, Verc
 ## 2. Required production configuration
 
 ### Vercel frontend
+
+- The Vercel team must report Pro or Enterprise. The account reported Hobby on
+  2026-09-03; [Vercel requires a paid plan for commercial usage](https://vercel.com/docs/limits/fair-use-guidelines).
+  Upgrade it before commercial launch and record the plan evidence.
 
 - `NEXT_PUBLIC_SITE_URL=https://www.amzira.com`
 - `NEXT_PUBLIC_API_BASE_URL=https://api.amzira.com/api/v1`
@@ -160,6 +169,10 @@ If any reconciliation differs, immediately set `CHECKOUT_ENABLED=False`, stop fu
 ## 8. Final GO/NO-GO
 
 Live checkout is **GO** only when every item above is evidenced and the named release commander signs the decision. Otherwise the site launches catalog-only with checkout disabled.
+
+Do not treat the current Hobby-hosted site as an approved commercial catalog
+launch. Upgrade Vercel to Pro/Enterprise (or complete a reviewed migration to a
+host that permits commercial use) before announcing the public launch.
 
 Required final assertions:
 

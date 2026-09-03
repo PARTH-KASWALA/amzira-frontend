@@ -2,7 +2,9 @@
 
 ## Decision
 
-- **Catalog/storefront launch:** GO.
+- **Catalog/storefront build:** technically GO.
+- **Commercial public launch:** NO-GO; the Vercel account reports Hobby, which
+  Vercel restricts to personal/non-commercial use.
 - **Razorpay checkout:** NO-GO; backend flag verified false.
 - **COD checkout:** NO-GO; backend flag verified false.
 
@@ -15,7 +17,7 @@ This record separates verified evidence from checks that still require a human o
 | Backend main | `ab9e9b9ff8a757b27be6e8f62396757b39e260e7` | Mandatory PostgreSQL race and enum gates enabled in CI |
 | Backend API code | `f14f6b0df0fbbf7a25a76b08a29dd4f844776193` | Render `dep-dabumuajnfac73ec1ivg`, live |
 | Backend order migration, worker, and Beat code | `37b337c08117fb0ba544d0b36c7357e7937aa917` | API migration `b0c1d2e3f4a5`; worker `dep-dabugi7avr4c73armet0`; Beat `dep-dabughvavr4c73armdv0`, live |
-| Frontend main | `4f1c04aff04f9073cd8ef0a48291301c2aa87785` | Vercel `dpl_HHWDx48uYLVqwWyCqnKX3u3sRRJZ`, READY and aliased to production domains |
+| Frontend main | `6246d5aff58ced7d946241f94d65b768220039fa` | Vercel `dpl_AYixiaKvtVvLyEsWmkq3PPWg4AFE`, READY and aliased to production domains; seller implementation remains from `4f1c04aff04f9073cd8ef0a48291301c2aa87785` |
 
 CI evidence:
 
@@ -54,6 +56,12 @@ CI evidence:
 
 ## Infrastructure and email facts
 
+- The Vercel team API reported plan `hobby` on 2026-09-03. Vercel's Hobby
+  [documentation](https://vercel.com/docs/plans/hobby) and
+  [terms](https://vercel.com/legal/terms) restrict that plan to
+  personal/non-commercial use;
+  Pro/Enterprise (or a reviewed commercial-compatible host migration) is a hard
+  commercial-launch gate.
 - Production PostgreSQL is available on Render `basic_256mb`, PostgreSQL 15, with 15 GB disk autoscaling. High availability and a connection pool are not enabled.
 - Production Render Key Value is on the free plan with `persistenceMode=off`. This is a hard blocker for enabling payment-related queue processing; the Blueprint target is Starter with journal/snapshot persistence.
 - Email DNS includes a Resend DKIM record and SPF/MX records on `send.amzira.com`. No DMARC record was observed at `_dmarc.amzira.com`; add and verify one before treating transactional email authentication as complete.
@@ -61,6 +69,8 @@ CI evidence:
 ## Required external evidence still missing
 
 - Named release, payment, fulfilment, database, monitoring, and support owners.
+- Vercel Pro/Enterprise activation or an accepted migration to a host that
+  permits commercial use.
 - Persistent Render Key Value upgrade and post-upgrade worker/Beat verification.
 - Fresh production backup plus an isolated restore with migration, catalog, and order reconciliation.
 - Detailed token-protected database, email, queue, and catalog health checks.
