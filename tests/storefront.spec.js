@@ -140,6 +140,14 @@ test.describe('AMZIRA storefront', () => {
     await expect(dialog).toHaveCount(0);
   });
 
+  test('product pages show deterministic curated recommendations', async ({ page }) => {
+    await page.goto('/product/amzira-girls-festive-lehenga-choli-101');
+    const recommendations = page.getByRole('heading', { name: 'More to love' });
+    await expect(recommendations).toBeVisible();
+    const section = recommendations.locator('xpath=ancestor::section');
+    await expect(section.locator('a[aria-label^="View "]')).toHaveCount(4);
+  });
+
   test('every kids catalog product opens with a visible main image', async ({ page }) => {
     test.setTimeout(120_000);
     await page.goto('/category/kids-pattu-pavadai');

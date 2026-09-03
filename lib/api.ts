@@ -428,6 +428,58 @@ export async function getProduct(slug: string): Promise<Product | null> {
   return product && isLiveCategory(product.categorySlug) ? product : null;
 }
 
+function recommendationText(value: string | null | undefined) {
+  return (value || "").trim().toLowerCase();
+}
+
+function recommendationScore(source: Product, candidate: Product) {
+  if (source.slug === candidate.slug || !candidate.inStock) return Number.NEGATIVE_INFINITY;
+
+  let score = 0;
+  if (source.categorySlug === candidate.categorySlug) score += 6;
+  if (source.subcategorySlug && source.subcategorySlug === candidate.subcategorySlug) score += 8;
+
+  const sourceOccasions = new Set(source.occasions.map(recommendationText));
+  const sharedOccasions = candidate.occasions.filter((occasion) => sourceOccasions.has(recommendationText(occasion))).length;
+  score += Math.min(sharedOccasions * 2, 6);
+
+  if (source.fabric && candidate.fabric && recommendationText(source.fabric) === recommendationText(candidate.fabric)) score += 2;
+
+  const highestPrice = Math.max(source.salePrice, candidate.salePrice);
+  const lowestPrice = Math.min(source.salePrice, candidate.salePrice);
+  if (highestPrice > 0) score += Math.round((lowestPrice / highestPrice) * 3);
+
+  // Keep popular, well-reviewed pieces useful as tie-breakers without letting
+  // popularity overpower an obvious style/category match.
+  score += Math.min(candidate.avgRating, 5) * 0.4;
+  score += Math.min(candidate.reviewCount, 100) / 100;
+  return score;
+}
+
+/**
+ * Return explainable, deterministic recommendations for a PDP. This is a
+ * server-side content-based baseline: it uses catalog metadata only, avoids
+ * tracking or personal data, and remains useful before enough events exist to
+ * train a behavioral model.
+ */
+export async function getRecommendedProducts(source: Product, limit = 4): Promise<Product[]> {
+  const sameCategory = await getProducts({ category: source.categorySlug, limit: 100 });
+  const broadCatalog = sameCategory.length >= limit ? [] : await getProducts({ limit: 100 });
+  const candidates = [...new Map([...sameCategory, ...broadCatalog].map((product) => [product.slug, product])).values()];
+
+  return candidates
+    .map((product) => ({ product, score: recommendationScore(source, product) }))
+    .filter(({ score }) => Number.isFinite(score))
+    .sort((left, right) =>
+      right.score - left.score ||
+      Number(right.product.inStock) - Number(left.product.inStock) ||
+      right.product.reviewCount - left.product.reviewCount ||
+      left.product.slug.localeCompare(right.product.slug)
+    )
+    .slice(0, Math.max(0, limit))
+    .map(({ product }) => product);
+}
+
 export async function getFeaturedProducts() {
   const products = await getProducts({ featured: true, limit: 8 });
   return products.length || !CATALOG_FALLBACK_ENABLED ? products : fallbackProducts.slice(0, 6);

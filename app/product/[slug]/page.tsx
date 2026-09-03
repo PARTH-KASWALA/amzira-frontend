@@ -8,6 +8,7 @@ import { ProductGallery } from "@/components/product-gallery";
 import { ProductReviews } from "@/components/product-reviews";
 import { DeliveryEstimate } from "@/components/delivery-estimate";
 import { WishlistButton } from "@/components/wishlist-button";
+import { ProductRecommendations } from "@/components/product-recommendations";
 import { getProduct } from "@/lib/api";
 import { formatMoney } from "@/lib/format";
 import { breadcrumbJsonLd, buildMetadata, productJsonLd } from "@/lib/seo";
@@ -99,6 +100,7 @@ export default async function ProductPage({ params }: Props) {
         </div>
       </section>
       <ProductReviews productId={product.id} />
+      <ProductRecommendations product={product} />
     </>
   );
 }
