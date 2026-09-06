@@ -47,9 +47,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
             <span>{product.avgRating.toFixed(1)}</span>
             <span>({product.reviewCount})</span>
           </div>
-        ) : (
-          <p className="text-xs text-charcoal/60">{product.isNewArrival ? "New arrival" : "No reviews yet"}</p>
-        )}
+        ) : null}
         {product.inStock ? (
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-semibold text-charcoal/60">
             {product.availableSizeCount ? <span>{product.availableSizeCount} sizes available</span> : null}

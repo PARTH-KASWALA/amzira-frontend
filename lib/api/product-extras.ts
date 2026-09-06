@@ -25,7 +25,8 @@ const reviewSchema = z.object({
     id: z.coerce.number(),
     media_url: z.string(),
     alt_text: z.string().nullish(),
-    display_order: z.coerce.number()
+    display_order: z.coerce.number(),
+    is_published: z.boolean().optional().default(true)
   })).optional().default([])
 });
 
@@ -50,6 +51,19 @@ export async function createProductReview(productId: number, rating: number, com
     await browserApi<unknown>("/reviews/", {
       method: "POST",
       body: JSON.stringify({ product_id: productId, rating, comment })
+    })
+  );
+}
+
+export async function uploadProductReviewPhoto(reviewId: string, file: File) {
+  const body = new FormData();
+  body.append("file", file);
+  body.append("consent_to_publish", "true");
+  return reviewSchema.parse(
+    await browserApi<unknown>(`/reviews/${encodeURIComponent(reviewId)}/media`, {
+      method: "POST",
+      body,
+      timeoutMs: 30_000
     })
   );
 }

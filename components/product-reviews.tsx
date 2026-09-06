@@ -5,7 +5,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { CheckCircle2, Images, Star } from "lucide-react";
 import { useSession } from "@/components/session-provider";
-import { createProductReview, getProductReviews, type ProductReview } from "@/lib/api/product-extras";
+import {
+  createProductReview,
+  getProductReviews,
+  type ProductReview,
+  uploadProductReviewPhoto
+} from "@/lib/api/product-extras";
 
 export function ProductReviews({ productId }: { productId: string | number }) {
   const { status } = useSession();
@@ -14,6 +19,7 @@ export function ProductReviews({ productId }: { productId: string | number }) {
   const [total, setTotal] = useState(0);
   const [selectedRating, setSelectedRating] = useState<number | undefined>();
   const [message, setMessage] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (!Number.isInteger(numericId)) return;
@@ -31,15 +37,37 @@ export function ProductReviews({ productId }: { productId: string | number }) {
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    const photos = form
+      .getAll("photos")
+      .filter((value): value is File => value instanceof File && value.size > 0);
+    if (photos.length > 3) {
+      setMessage("Please choose no more than three customer photos.");
+      return;
+    }
+    if (photos.length && form.get("photo_consent") !== "on") {
+      setMessage("Please confirm that AMZIRA may review the customer photos before submitting them.");
+      return;
+    }
+    setIsSubmitting(true);
+    setMessage("");
     try {
-      await createProductReview(numericId, Number(form.get("rating")), String(form.get("comment") || ""));
+      const review = await createProductReview(numericId, Number(form.get("rating")), String(form.get("comment") || ""));
+      for (const photo of photos) {
+        await uploadProductReviewPhoto(review.id, photo);
+      }
       const latest = await getProductReviews(numericId, selectedRating);
       setReviews(latest.reviews);
       setTotal(latest.total);
-      setMessage("Your review has been published.");
+      setMessage(
+        photos.length
+          ? "Your review is published. Your customer photo will appear after AMZIRA moderation."
+          : "Your review has been published."
+      );
       event.currentTarget.reset();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Review could not be submitted.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -90,14 +118,17 @@ export function ProductReviews({ productId }: { productId: string | number }) {
                 ) : null}
               </article>
             ))}
-            {!reviews.length ? <p className="flex items-center gap-2 text-sm text-charcoal/60"><Images className="h-4 w-4" aria-hidden="true" /> No published reviews match this filter yet.</p> : null}
+            {!reviews.length ? <p className="flex items-center gap-2 text-sm text-charcoal/60"><Images className="h-4 w-4" aria-hidden="true" /> The first verified customer review for this selection will appear here.</p> : null}
           </div>
           {status === "authenticated" ? (
             <form className="h-fit rounded-md border border-charcoal/10 bg-white p-5" onSubmit={submit}>
               <h3 className="font-display text-2xl text-maroon-deep">Share your experience</h3>
               <label className="form-field mt-5">Rating<select name="rating" defaultValue="5"><option value="5">5 stars</option><option value="4">4 stars</option><option value="3">3 stars</option><option value="2">2 stars</option><option value="1">1 star</option></select></label>
               <label className="form-field mt-4">Review<textarea name="comment" rows={4} maxLength={1000} required /></label>
-              <button className="btn-primary mt-5 w-full" type="submit">Publish review</button>
+              <label className="form-field mt-4">Customer photos (optional)<input accept="image/jpeg,image/png,image/webp" multiple name="photos" type="file" /></label>
+              <label className="mt-3 flex gap-2 text-xs leading-5 text-charcoal/65"><input className="mt-0.5" name="photo_consent" type="checkbox" /> I confirm I have permission to share these photos and allow AMZIRA to review them for publication.</label>
+              <p className="mt-2 text-xs leading-5 text-charcoal/55">Up to three JPG, PNG, or WebP photos. Customer photos are reviewed before they are shown publicly.</p>
+              <button className="btn-primary mt-5 w-full" disabled={isSubmitting} type="submit">{isSubmitting ? "Submitting review…" : "Publish review"}</button>
               {message ? <p className="mt-3 text-sm font-semibold text-maroon" role="status">{message}</p> : null}
             </form>
           ) : (

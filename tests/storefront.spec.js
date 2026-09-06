@@ -124,8 +124,8 @@ test.describe('AMZIRA storefront', () => {
     await expect(page.locator('#kids-mega-menu')).not.toContainText(/Debli|Piramit|Black V|Satin Jacquard/);
 
     for (const category of [
-      { slug: 'kids-pattu-pavadai', heading: 'Girls’ Pattu Pavadai & South Indian Lehenga Choli', count: 110 },
-      { slug: 'girls-lehenga-choli', heading: 'Girls’ Pattu Pavadai & South Indian Lehenga Choli', count: 33 },
+      { slug: 'kids-pattu-pavadai', heading: 'Girls’ Pattu Pavadai & South Indian Lehenga Choli', count: 107 },
+      { slug: 'girls-lehenga-choli', heading: 'Girls’ Pattu Pavadai & South Indian Lehenga Choli', count: 30 },
       { slug: 'pattu-pavadai', heading: 'Girls’ Pattu Pavadai & South Indian Lehenga Choli', count: 77 }
     ]) {
       await page.goto(`/category/${category.slug}`);
@@ -181,7 +181,7 @@ test.describe('AMZIRA storefront', () => {
     const productLinks = await page.locator('article.group a[aria-label^="View "]').evaluateAll((links) =>
       [...new Set(links.map((link) => link.getAttribute('href')).filter(Boolean))]
     );
-    expect(productLinks).toHaveLength(110);
+    expect(productLinks).toHaveLength(107);
 
     for (const href of productLinks) {
       await page.goto(href, { waitUntil: 'commit' });

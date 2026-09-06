@@ -117,10 +117,9 @@ export const fallbackProducts: Product[] = [
       color: "Kanjivaram Magenta",
       stockQuantity: index === 5 ? 2 : 6
     })),
-    avgRating: 4.9,
-    reviewCount: 128,
-    inStock: true,
-    badge: "Bestseller"
+    avgRating: 0,
+    reviewCount: 0,
+    inStock: true
   },
   {
     id: "sil-002",
@@ -144,10 +143,9 @@ export const fallbackProducts: Product[] = [
       color: "Sun Gold",
       stockQuantity: 5
     })),
-    avgRating: 4.8,
-    reviewCount: 94,
-    inStock: true,
-    badge: "Trending"
+    avgRating: 0,
+    reviewCount: 0,
+    inStock: true
   },
   {
     id: "sil-003",
@@ -171,10 +169,9 @@ export const fallbackProducts: Product[] = [
       color: "Bridal Crimson",
       stockQuantity: index === 5 ? 1 : 4
     })),
-    avgRating: 5,
-    reviewCount: 156,
-    inStock: true,
-    badge: "Bridal Choice"
+    avgRating: 0,
+    reviewCount: 0,
+    inStock: true
   },
   {
     id: "sil-004",
@@ -197,10 +194,9 @@ export const fallbackProducts: Product[] = [
       color: "Emerald Green",
       stockQuantity: 7
     })),
-    avgRating: 4.7,
-    reviewCount: 62,
-    inStock: true,
-    badge: "Popular"
+    avgRating: 0,
+    reviewCount: 0,
+    inStock: true
   },
   {
     id: "sil-005",
@@ -223,10 +219,9 @@ export const fallbackProducts: Product[] = [
       color: "Royal Violet",
       stockQuantity: 5
     })),
-    avgRating: 4.9,
-    reviewCount: 87,
-    inStock: true,
-    badge: "Handloom"
+    avgRating: 0,
+    reviewCount: 0,
+    inStock: true
   },
   {
     id: "sil-006",
@@ -253,10 +248,9 @@ export const fallbackProducts: Product[] = [
       color: "Rani Pink",
       stockQuantity: 8
     })),
-    avgRating: 4.9,
-    reviewCount: 142,
-    inStock: true,
-    badge: "Girls' Favorite"
+    avgRating: 0,
+    reviewCount: 0,
+    inStock: true
   }
 ];
 
