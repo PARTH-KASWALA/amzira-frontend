@@ -40,22 +40,34 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const unavailableDepartment = unavailableCategoryDepartments[slug];
   if (unavailableDepartment) redirect(comingSoonPath(unavailableDepartment));
 
-  const [category, products, subcategories] = await Promise.all([
+  const [category, products, subcategories, categoryCatalog] = await Promise.all([
     getCategory(slug),
     getProducts({
       category: slug,
       subcategory: query.subcategory,
       search: query.search,
       occasion: query.occasion,
+      size: query.size,
       min_price: query.min_price,
       max_price: query.max_price,
       sort_by: query.sort_by
     }),
-    getSubcategories(slug)
+    getSubcategories(slug),
+    getProducts({ category: slug })
   ]);
   if (!category) notFound();
   const isKidsCatalog = girlsCategorySlugs.has(category.slug);
   const publicCopy = getPublicCategoryCopy(category);
+  const sizeOptions = Array.from(
+    new Set(
+      categoryCatalog.flatMap((product) =>
+        product.variants
+          .filter((variant) => variant.stockQuantity > 0)
+          .map((variant) => variant.size.trim())
+          .filter(Boolean)
+      )
+    )
+  ).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 
   return (
     <>
@@ -106,6 +118,15 @@ export default async function CategoryPage({ params, searchParams }: Props) {
               </label>
             ) : null}
             <label className="form-field">Occasion<select name="occasion" defaultValue={query.occasion || ""}><option value="">All occasions</option><option value="wedding">Wedding</option><option value="festival">Festival</option><option value="puja">Puja</option><option value="sangeet">Sangeet</option></select></label>
+            {sizeOptions.length ? (
+              <label className="form-field">
+                Size / age band
+                <select name="size" defaultValue={query.size || ""}>
+                  <option value="">All available sizes</option>
+                  {sizeOptions.map((size) => <option key={size} value={size}>{size}</option>)}
+                </select>
+              </label>
+            ) : null}
             <div className="grid grid-cols-2 gap-3">
               <label className="form-field">Min price<input name="min_price" type="number" min="0" step="500" defaultValue={query.min_price} /></label>
               <label className="form-field">Max price<input name="max_price" type="number" min="0" step="500" defaultValue={query.max_price} /></label>

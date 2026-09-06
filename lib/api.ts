@@ -297,11 +297,13 @@ function productMatchesFilters(product: Product, params: Record<string, string |
   const subcategory = normalizeFilterValue(params.subcategory);
   const search = normalizeFilterValue(params.search);
   const occasion = normalizeFilterValue(params.occasion);
+  const size = normalizeFilterValue(params.size);
   const minPrice = numericFilterValue(params.min_price);
   const maxPrice = numericFilterValue(params.max_price);
 
   if (subcategory && product.subcategorySlug !== subcategory) return false;
   if (occasion && !product.occasions.some((item) => normalizeFilterValue(item) === occasion)) return false;
+  if (size && !product.variants.some((variant) => variant.stockQuantity > 0 && normalizeFilterValue(variant.size) === size)) return false;
   if (minPrice !== null && product.salePrice < minPrice) return false;
   if (maxPrice !== null && product.salePrice > maxPrice) return false;
   if (!search) return true;
@@ -389,6 +391,7 @@ export async function getProducts(params: Record<string, string | number | boole
       params.subcategory ||
       params.search ||
       params.occasion ||
+      params.size ||
       params.min_price ||
       params.max_price ||
       params.sort_by)
@@ -396,7 +399,7 @@ export async function getProducts(params: Record<string, string | number | boole
   if (params.limit === undefined) search.set("limit", "100");
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== "") {
-      if (shouldFilterClientSide && ["subcategory", "search", "occasion", "min_price", "max_price", "sort_by"].includes(key)) {
+      if (shouldFilterClientSide && ["subcategory", "search", "occasion", "size", "min_price", "max_price", "sort_by"].includes(key)) {
         return;
       }
       search.set(key, key === "category" ? apiCategorySlug(String(value)) : String(value));
