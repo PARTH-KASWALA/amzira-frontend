@@ -334,6 +334,13 @@ function sortProducts(products: Product[], sortBy: unknown) {
       return [...products].filter((product) => product.isBestseller);
     case "top_rated":
       return [...products].sort((a, b) => (b.avgRating - a.avgRating) || (b.reviewCount - a.reviewCount));
+    case "marketplace":
+      return [...products].sort(
+        (a, b) =>
+          Number(Boolean(b.marketplaceSignal)) - Number(Boolean(a.marketplaceSignal)) ||
+          (b.marketplaceSignal?.observedAt ?? "").localeCompare(a.marketplaceSignal?.observedAt ?? "") ||
+          (b.marketplaceSignal?.units ?? 0) - (a.marketplaceSignal?.units ?? 0)
+      );
     default:
       return products;
   }

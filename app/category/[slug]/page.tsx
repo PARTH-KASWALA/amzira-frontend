@@ -110,7 +110,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
               <label className="form-field">Min price<input name="min_price" type="number" min="0" step="500" defaultValue={query.min_price} /></label>
               <label className="form-field">Max price<input name="max_price" type="number" min="0" step="500" defaultValue={query.max_price} /></label>
             </div>
-            <label className="form-field">Sort<select name="sort_by" defaultValue={query.sort_by || "newest"}><option value="newest">Newest</option><option value="popular">Popular</option><option value="bestseller">Bestsellers</option><option value="top_rated">Top rated</option><option value="price_asc">Price: low to high</option><option value="price_desc">Price: high to low</option></select></label>
+            <label className="form-field">Sort<select name="sort_by" defaultValue={query.sort_by || "newest"}><option value="newest">Newest</option><option value="popular">Popular</option><option value="marketplace">Marketplace signals</option><option value="bestseller">Bestsellers</option><option value="top_rated">Top rated</option><option value="price_asc">Price: low to high</option><option value="price_desc">Price: high to low</option></select></label>
             <button className="btn-primary" type="submit">Apply filters</button>
             <Link className="btn-secondary" href={`/category/${category.slug}`}>Clear filters</Link>
           </form>
