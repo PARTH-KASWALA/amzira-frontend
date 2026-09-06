@@ -12,7 +12,7 @@ The remaining commercial blockers are external or policy-gated:
 1. Checkout and payment activation must be completed before enabling Merchant Center product feeds or presenting payment-method claims.
 2. Marketplace reviews and customer photos require explicit reuse permission and customer/media consent before publication.
 3. The `n.b.f fashion` Flipkart seller account still needs to be opened in the authenticated browser session for evidence review.
-4. The latest category-sort commits are now live on both hosting providers.
+4. The latest category-sort, quick-view, size-filter, and server-authoritative checkout changes are live on both hosting providers.
 
 ## Completed in production
 
@@ -49,7 +49,7 @@ The remaining commercial blockers are external or policy-gated:
 
 ### Checkout and analytics
 
-- When checkout is disabled, the storefront shows an `Orders temporarily paused` state and suppresses payment-method promises.
+- When checkout is disabled, the server-rendered storefront shows an `Orders temporarily paused` state and suppresses payment-method promises, including on a direct checkout request.
 - Funnel events cover product view, size selection, cart, sign-in, checkout, and payment success/failure paths.
 
 ## Seller evidence captured
@@ -78,18 +78,18 @@ The remaining commercial blockers are external or policy-gated:
 - Production API health: healthy.
 - Current production checkout status: disabled; COD disabled.
 - Current production merchant feed behavior: safely paused with a clear explanation.
+- Google Search Console property access and sitemap workflow were verified for `sc-domain:amzira.com`.
 
 ## Latest deployed code
 
 - Backend commit `ff23794`: adds `marketplace` API sorting and regression coverage.
-- Frontend commit `96d7c76`: adds the `Marketplace signals` category sort control and client-side ordering.
+- Frontend commit `807c147`: makes the checkout pause state server-authoritative and keeps payment claims hidden while disabled.
 - Render deployment `dep-daeoq19t0dsc73b502ig`: live.
-- Production verification: API health is healthy; `sort_by=marketplace` returns Anushka, Meera, and Urvi as the first three signal-bearing products; the live kids category contains the `Marketplace signals` option.
+- Production verification: API health is healthy; `sort_by=marketplace` returns Anushka, Meera, and Urvi as the first three signal-bearing products; the live kids category contains the `Marketplace signals` option and in-stock size filter; direct checkout shows the paused state without payment claims.
 
 ## Next actions in order
 
-1. Wait for and verify both hosting deployments; confirm `sort_by=marketplace` returns HTTP 200 and the category select is visible.
-2. Open `n.b.f fashion` in the authenticated Flipkart browser session and repeat only read-only evidence checks.
-3. Obtain written marketplace-content reuse permission and customer consent for any eligible review/photo assets; then import through the moderated admin flow.
-4. Re-enable checkout only after payment, inventory, shipping, and return behavior are tested end to end.
-5. Enable the Merchant Center feed, submit the sitemap in Search Console, and monitor indexing/product enhancements.
+1. Open `n.b.f fashion` in the authenticated Flipkart browser session and repeat only read-only evidence checks.
+2. Obtain written marketplace-content reuse permission and customer consent for any eligible review/photo assets; then import through the moderated admin flow.
+3. Re-enable checkout only after payment, inventory, shipping, and return behavior are tested end to end.
+4. After checkout is enabled, enable the Merchant Center feed and monitor indexing/product enhancements in Search Console.
