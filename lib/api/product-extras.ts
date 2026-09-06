@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { browserApi } from "@/lib/api/browser-client";
+import { API_BASE_URL } from "@/lib/api/config";
 
 const deliverySchema = z.object({
   pincode: z.string(),
@@ -10,7 +11,7 @@ const deliverySchema = z.object({
   estimated_delivery_date_end: z.string()
 });
 
-const reviewSchema = z.object({
+export const reviewSchema = z.object({
   id: z.string(),
   user_id: z.coerce.number().nullable(),
   product_id: z.coerce.number(),
@@ -31,6 +32,21 @@ const reviewSchema = z.object({
 });
 
 export type ProductReview = z.infer<typeof reviewSchema>;
+
+export async function getProductReviewsForSeo(productId: number) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/reviews/product/${productId}?page=1&per_page=20`, {
+      next: { revalidate: 300 },
+      headers: { Accept: "application/json" }
+    });
+    if (!response.ok) return [];
+    const payload = await response.json() as { data?: unknown };
+    const data = z.object({ reviews: z.array(reviewSchema) }).safeParse(payload.data);
+    return data.success ? data.data.reviews : [];
+  } catch {
+    return [];
+  }
+}
 
 export async function getDeliveryEstimate(slug: string, pincode: string) {
   return deliverySchema.parse(

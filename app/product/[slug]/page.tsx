@@ -12,6 +12,7 @@ import { DeliveryEstimate } from "@/components/delivery-estimate";
 import { WishlistButton } from "@/components/wishlist-button";
 import { ProductRecommendations } from "@/components/product-recommendations";
 import { getProduct } from "@/lib/api";
+import { getProductReviewsForSeo } from "@/lib/api/product-extras";
 import { formatMoney } from "@/lib/format";
 import { breadcrumbJsonLd, buildMetadata, productJsonLd } from "@/lib/seo";
 
@@ -33,11 +34,14 @@ export default async function ProductPage({ params }: Props) {
   const { slug } = await params;
   const product = await getProduct(slug);
   if (!product) notFound();
+  const reviews = product.reviewCount > 0 && Number.isInteger(Number(product.id))
+    ? await getProductReviewsForSeo(Number(product.id))
+    : [];
 
   return (
     <>
       <ProductAnalytics product={product} />
-      <JsonLd data={productJsonLd(product)} />
+      <JsonLd data={productJsonLd(product, reviews)} />
       <JsonLd
         data={breadcrumbJsonLd([
           { name: "Home", path: "/" },

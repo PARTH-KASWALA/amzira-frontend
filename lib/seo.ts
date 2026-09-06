@@ -61,7 +61,14 @@ export function organizationJsonLd() {
   };
 }
 
-export function productJsonLd(product: Product) {
+type ProductReviewForSchema = {
+  rating: number;
+  comment?: string | null;
+  user_name: string;
+  created_at: string;
+};
+
+export function productJsonLd(product: Product, reviews: ProductReviewForSchema[] = []) {
   // Google's merchantReturnDays field only accepts whole days. AMZIRA's
   // published 36-hour window cannot be represented exactly, so omit a
   // potentially misleading return-policy node until the policy is converted
@@ -127,6 +134,21 @@ export function productJsonLd(product: Product) {
             reviewCount: product.reviewCount
           }
         : undefined,
+    ...(reviews.length
+      ? {
+          review: reviews.slice(0, 20).map((review) => ({
+            "@type": "Review",
+            reviewRating: {
+              "@type": "Rating",
+              ratingValue: review.rating,
+              bestRating: 5
+            },
+            author: { "@type": "Person", name: review.user_name },
+            datePublished: review.created_at,
+            ...(review.comment ? { reviewBody: review.comment } : {})
+          }))
+        }
+      : {}),
     offers: offerFor(String(product.id), product.inStock),
     ...(variants.length
       ? {
