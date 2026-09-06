@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { ShoppingBag } from "lucide-react";
 import { Product } from "@/lib/catalog";
+import { productAnalyticsPayload, trackCommerceEvent } from "@/lib/analytics";
 import { addAuthenticatedCartItem } from "@/lib/api/cart";
 import { ApiError } from "@/lib/api/browser-client";
 import { CART_KEY, GuestCartItem, readGuestCart, writeGuestCart } from "@/lib/cart";
@@ -48,7 +49,7 @@ export function AddToCartButton({
     product.variants.find((variant) => variant.stockQuantity > 0);
   const canAdd = product.inStock && Boolean(selectedVariant);
 
-  async function addItem() {
+  const addItem = useCallback(async () => {
     if (!selectedVariant) return;
     setStatus("Adding...");
     try {
@@ -63,19 +64,28 @@ export function AddToCartButton({
       } else {
         addToLocalCart(product, selectedVariant.id);
       }
+      trackCommerceEvent("add_to_cart", {
+        ...productAnalyticsPayload(product),
+        selected_size: selectedVariant.size,
+        item_count: 1
+      });
       setStatus("Added to cart");
     } catch (error) {
       setStatus(error instanceof Error ? error.message : "Could not add item");
     }
     window.setTimeout(() => setStatus("Add to cart"), 2400);
-  }
+  }, [product, selectedVariant, sessionStatus]);
+
+  const handleAddItem = useCallback(() => {
+    void addItem();
+  }, [addItem]);
 
   return (
     <button
       type="button"
       className={`btn-primary gap-2 ${className}`}
       disabled={!canAdd || status === "Adding..."}
-      onClick={() => void addItem()}
+      onClick={handleAddItem}
       aria-live="polite"
     >
       <ShoppingBag className="h-4 w-4" aria-hidden="true" />

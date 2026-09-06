@@ -14,6 +14,7 @@ import type { CartSummary } from "@/lib/api/types";
 import { readGuestCart, writeGuestCart, type GuestCartItem } from "@/lib/cart";
 import { formatMoney } from "@/lib/format";
 import { LIVE_CATEGORY_PATH } from "@/lib/storefront";
+import { trackCommerceEvent } from "@/lib/analytics";
 import { useSession } from "@/components/session-provider";
 
 type DisplayItem = {
@@ -46,6 +47,7 @@ export function CartView({ checkout = false }: { checkout?: boolean }) {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const synchronized = useRef(false);
+  const reportedCartState = useRef<string | null>(null);
 
   const load = useCallback(async () => {
     if (sessionStatus === "loading") return;
@@ -120,6 +122,14 @@ export function CartView({ checkout = false }: { checkout?: boolean }) {
   const tax = sessionStatus === "authenticated" ? cart.tax : 0;
   const total = sessionStatus === "authenticated" ? cart.total : guestSubtotal;
 
+  useEffect(() => {
+    if (loading || !displayItems.length) return;
+    const cartState = `${displayItems.map((item) => `${item.key}:${item.quantity}`).join("|")}:${total}`;
+    if (reportedCartState.current === cartState) return;
+    reportedCartState.current = cartState;
+    trackCommerceEvent("view_cart", { item_count: displayItems.length, cart_total: total });
+  }, [displayItems, loading, total]);
+
   async function updateQuantity(item: DisplayItem, nextQuantity: number) {
     if (nextQuantity < 1 || nextQuantity > Math.min(item.stockAvailable, 10)) return;
     setBusyId(item.key);
@@ -135,6 +145,7 @@ export function CartView({ checkout = false }: { checkout?: boolean }) {
         setGuestItems(next);
         writeGuestCart(next);
       }
+      trackCommerceEvent("view_cart", { item_count: displayItems.length, cart_total: total });
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Quantity could not be updated.");
     } finally {
@@ -154,6 +165,7 @@ export function CartView({ checkout = false }: { checkout?: boolean }) {
         setGuestItems(next);
         writeGuestCart(next);
       }
+      trackCommerceEvent("view_cart", { item_count: Math.max(displayItems.length - 1, 0), cart_total: Math.max(total - item.price * item.quantity, 0) });
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "The item could not be removed.");
     } finally {
@@ -249,7 +261,7 @@ export function CartView({ checkout = false }: { checkout?: boolean }) {
         </dl>
 
         <p className="text-center text-xs leading-relaxed text-charcoal/60">
-          Final stock, delivery, tax, and total are verified before payment opens.
+          Final stock, delivery, tax, and total are verified before ordering.
         </p>
       </aside>
     );
@@ -353,16 +365,16 @@ export function CartView({ checkout = false }: { checkout?: boolean }) {
           </div>
         </dl>
         {sessionStatus === "authenticated" ? (
-          <Link href="/checkout" className="btn-primary mt-6 w-full">
-            Secure checkout
+          <Link href="/checkout" className="btn-primary mt-6 w-full" onClick={() => trackCommerceEvent("begin_checkout", { item_count: displayItems.length, cart_total: total })}>
+            Continue to order review
           </Link>
         ) : (
-          <Link href="/login?next=/checkout" className="btn-primary mt-6 w-full">
+          <Link href="/login?next=/checkout" className="btn-primary mt-6 w-full" onClick={() => trackCommerceEvent("sign_in_required", { item_count: displayItems.length, cart_total: total })}>
             Sign in to checkout
           </Link>
         )}
         <p className="mt-4 text-xs leading-6 text-charcoal/70">
-          Final stock, delivery, tax, and total are verified before payment.
+          Final stock, delivery, tax, and total are verified before ordering.
         </p>
       </aside>
     </div>

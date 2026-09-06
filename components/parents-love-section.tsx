@@ -28,8 +28,8 @@ const parentFeatures: TrustFeature[] = [
   },
   {
     kind: "image",
-    title: "Secure Payments",
-    image: "/images/icons/trust/secure-payments.png",
+    title: "Order Support",
+    image: "/images/icons/trust/assured-quality.png",
     imageClassName: "parents-love-feature__image--wide"
   },
   {

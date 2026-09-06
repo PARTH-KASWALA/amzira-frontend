@@ -385,7 +385,7 @@ export default async function HeritagePage() {
                 </Link>
                 <div className="flex items-center gap-3 text-charcoal">
                   <ShieldCheck className="h-9 w-9 shrink-0 text-gold-dark" aria-hidden="true" />
-                  <p className="text-xs leading-5"><strong className="block text-sm">Purchase protection</strong>Secure payments · Easy returns · Order tracking</p>
+                  <p className="text-xs leading-5"><strong className="block text-sm">Purchase support</strong>Fit guidance · Easy returns · Order tracking</p>
                 </div>
               </div>
             </div>

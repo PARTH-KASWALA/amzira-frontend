@@ -40,6 +40,18 @@ function number(value: unknown, fallback = 0) {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function stringList(value: unknown) {
+  return Array.isArray(value) ? value.map((item) => text(item)).filter(Boolean) : [];
+}
+
+function stringRecord(value: unknown): Record<string, string> | null {
+  if (!isRecord(value)) return null;
+  const entries = Object.entries(value)
+    .map(([key, item]) => [key, text(item)] as const)
+    .filter(([, item]) => Boolean(item));
+  return entries.length ? Object.fromEntries(entries) : null;
+}
+
 function boolean(value: unknown, fallback = false) {
   if (typeof value === "boolean") return value;
   if (typeof value === "string") return value.toLowerCase() === "true";
@@ -105,7 +117,8 @@ function toProduct(input: unknown): Product | null {
         color: text(variantRecord.color) || null,
         sku: text(variantRecord.sku) || undefined,
         stockQuantity: number(variantRecord.stock_quantity ?? variantRecord.stockQuantity),
-        additionalPrice: number(variantRecord.additional_price)
+        additionalPrice: number(variantRecord.additional_price),
+        measurements: stringRecord(variantRecord.measurements)
       };
       })
     : isRecord(input.default_variant)
@@ -118,9 +131,16 @@ function toProduct(input: unknown): Product | null {
           }
         ]
       : [];
+  const inStockVariants = variants.filter((variant) => variant.stockQuantity > 0);
+  const listedSizes = Array.isArray(input.sizes)
+    ? input.sizes.map((size) => text(size)).filter(Boolean)
+    : [];
   const backendCategorySlug = text(category.slug || input.category_slug || input.category, LIVE_CATEGORY_SLUG);
   const categorySlug = publicCategorySlug(backendCategorySlug);
   const categoryName = text(category.name || input.category_name, categorySlug);
+  const isBestseller = boolean(input.is_bestseller);
+  const isMostLoved = boolean(input.is_most_loved);
+  const isFeatured = boolean(input.is_featured);
   const salePrice = number(input.sale_price ?? input.salePrice ?? input.price ?? input.base_price);
   const basePrice = number(input.base_price ?? input.basePrice, salePrice);
   const primaryImage =
@@ -154,16 +174,52 @@ function toProduct(input: unknown): Product | null {
     images: images.length ? images : [primaryImage],
     imageDetails: imageDetails.length ? imageDetails : undefined,
     fabric: text(input.fabric) || null,
+    lining: text(input.lining) || null,
+    includedPieces: stringList(input.included_pieces ?? input.includedPieces),
+    ageRecommendation: text(input.age_recommendation ?? input.ageRecommendation) || null,
+    fitNote: text(input.fit_note ?? input.fitNote) || null,
     careInstructions: text(input.care_instructions) || null,
     occasions,
     variants,
     avgRating: number(input.avg_rating || input.rating),
     reviewCount: number(input.review_count || input.reviews),
+    stockQuantity: number(
+      input.stock_quantity ?? input.total_stock,
+      variants.reduce((total, variant) => total + variant.stockQuantity, 0)
+    ),
+    availableSizeCount: listedSizes.length || inStockVariants.length || undefined,
+    color:
+      text(input.color) ||
+      (Array.isArray(input.colors) ? text(input.colors[0]) || null : null),
+    isNewArrival: boolean(input.is_new_arrival),
+    isBestseller,
+    isMostLoved,
+    isFeatured,
+    dispatchDaysMin: input.dispatch_days_min === null || input.dispatch_days_min === undefined
+      ? null
+      : number(input.dispatch_days_min),
+    dispatchDaysMax: input.dispatch_days_max === null || input.dispatch_days_max === undefined
+      ? null
+      : number(input.dispatch_days_max),
+    isExchangeEligible: input.is_exchange_eligible === null || input.is_exchange_eligible === undefined
+      ? null
+      : boolean(input.is_exchange_eligible),
+    isReturnEligible: input.is_return_eligible === null || input.is_return_eligible === undefined
+      ? null
+      : boolean(input.is_return_eligible),
+    returnWindowHours: input.return_window_hours === null || input.return_window_hours === undefined
+      ? null
+      : number(input.return_window_hours),
+    shippingRate: input.shipping_rate === null || input.shipping_rate === undefined
+      ? null
+      : number(input.shipping_rate),
     inStock:
       input.in_stock !== false &&
       input.inStock !== false &&
       (variants.length === 0 || variants.some((variant) => variant.stockQuantity > 0)),
-    badge: text(input.badge) || (input.is_featured ? "Featured" : null),
+    badge:
+      text(input.badge) ||
+      (isBestseller ? "Bestseller" : isMostLoved ? "Most loved" : isFeatured ? "Featured" : null),
     metaTitle: text(input.meta_title) || null,
     metaDescription: text(input.meta_description) || null
   };
@@ -253,7 +309,15 @@ function sortProducts(products: Product[], sortBy: unknown) {
     case "price_desc":
       return [...products].sort((a, b) => b.salePrice - a.salePrice);
     case "popular":
-      return [...products].sort((a, b) => (b.reviewCount + b.avgRating) - (a.reviewCount + a.avgRating));
+      return [...products].sort(
+        (a, b) =>
+          (Number(Boolean(b.isBestseller)) * 100000 + Number(Boolean(b.isMostLoved)) * 10000 + b.reviewCount * b.avgRating) -
+          (Number(Boolean(a.isBestseller)) * 100000 + Number(Boolean(a.isMostLoved)) * 10000 + a.reviewCount * a.avgRating)
+      );
+    case "bestseller":
+      return [...products].filter((product) => product.isBestseller);
+    case "top_rated":
+      return [...products].sort((a, b) => (b.avgRating - a.avgRating) || (b.reviewCount - a.reviewCount));
     default:
       return products;
   }

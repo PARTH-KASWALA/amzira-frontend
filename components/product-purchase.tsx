@@ -1,11 +1,12 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import { CalendarDays, Heart, Ruler, ShieldCheck, Sparkles } from "lucide-react";
+import { CalendarDays, Ruler, ShieldCheck } from "lucide-react";
 import { AddToCartButton } from "@/components/cart-button";
 import { SizeChartDialog } from "@/components/size-chart-dialog";
 import { Product } from "@/lib/catalog";
+import { productAnalyticsPayload, trackCommerceEvent } from "@/lib/analytics";
 
 export function ProductPurchase({ product }: { product: Product }) {
   const variants = useMemo(
@@ -16,7 +17,25 @@ export function ProductPurchase({ product }: { product: Product }) {
   const [selectedVariantId, setSelectedVariantId] = useState<string | number | null>(
     inStockSizes[0]?.id || variants[0]?.id || null
   );
-  const selectedSize = variants.find((variant) => String(variant.id) === String(selectedVariantId))?.size;
+  const selectedVariant = variants.find((variant) => String(variant.id) === String(selectedVariantId));
+  const selectedSize = selectedVariant?.size;
+  const selectedMeasurements = Object.entries(selectedVariant?.measurements || {});
+  const variantsById = useMemo(
+    () => new Map(variants.map((variant) => [String(variant.id), variant])),
+    [variants]
+  );
+  const selectSize = useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      const variant = variantsById.get(event.currentTarget.value);
+      if (!variant) return;
+      setSelectedVariantId(variant.id);
+      trackCommerceEvent("select_size", {
+        ...productAnalyticsPayload(product),
+        selected_size: variant.size
+      });
+    },
+    [product, variantsById]
+  );
 
   return (
     <div className="space-y-6">
@@ -38,6 +57,7 @@ export function ProductPurchase({ product }: { product: Product }) {
                 <button
                   key={String(variant.id)}
                   type="button"
+                  value={String(variant.id)}
                   disabled={disabled}
                   role="radio"
                   aria-label={variant.size}
@@ -47,7 +67,7 @@ export function ProductPurchase({ product }: { product: Product }) {
                       ? "border-2 border-[#580B26] bg-[#580B26] text-white shadow-md scale-[1.02]"
                       : "border-amber-900/15 bg-white text-charcoal hover:border-maroon/50 hover:text-maroon"
                   } disabled:cursor-not-allowed disabled:opacity-35`}
-                  onClick={() => setSelectedVariantId(variant.id)}
+                  onClick={selectSize}
                 >
                   <span className="font-display text-sm font-bold">{variant.size}</span>
                   {!disabled ? (
@@ -74,6 +94,24 @@ export function ProductPurchase({ product }: { product: Product }) {
             </button>
           )}
         </div>
+        {product.ageRecommendation ? (
+          <p className="text-xs leading-5 text-charcoal/65">Recommended fit: {product.ageRecommendation}</p>
+        ) : null}
+        {selectedMeasurements.length ? (
+          <div className="rounded-2xl border border-maroon/15 bg-white px-4 py-3">
+            <p className="text-[10px] font-extrabold uppercase tracking-[0.16em] text-maroon-deep">
+              Exact garment measurements · {selectedSize}
+            </p>
+            <dl className="mt-2 grid grid-cols-2 gap-x-4 gap-y-2 text-xs text-charcoal/70 sm:grid-cols-3">
+              {selectedMeasurements.map(([measurement, value]) => (
+                <div key={measurement}>
+                  <dt className="capitalize">{measurement.replaceAll("_", " ")}</dt>
+                  <dd className="mt-0.5 font-bold text-charcoal">{value}</dd>
+                </div>
+              ))}
+            </dl>
+          </div>
+        ) : null}
       </div>
 
       {/* Action Buttons */}
@@ -84,16 +122,16 @@ export function ProductPurchase({ product }: { product: Product }) {
         </Link>
       </div>
 
-      {/* Royal Fit & Skin Comfort Guarantee */}
-      <div className="rounded-2xl border border-amber-900/10 bg-white p-4 space-y-2 text-xs">
-        <div className="flex items-center gap-2 font-bold text-maroon-deep">
-          <ShieldCheck className="h-4 w-4 text-emerald" />
-          <span>Soft Skin Lining & Alteration Guarantee</span>
+      {product.lining || product.fitNote ? (
+        <div className="rounded-2xl border border-amber-900/10 bg-white p-4 space-y-2 text-xs">
+          <div className="flex items-center gap-2 font-bold text-maroon-deep">
+            <ShieldCheck className="h-4 w-4 text-emerald" />
+            <span>Product-specific fit and comfort details</span>
+          </div>
+          {product.lining ? <p className="text-charcoal/65 leading-relaxed text-[11px]">Lining: {product.lining}</p> : null}
+          {product.fitNote ? <p className="text-charcoal/65 leading-relaxed text-[11px]">{product.fitNote}</p> : null}
         </div>
-        <p className="text-charcoal/65 leading-relaxed text-[11px]">
-          Every AMZIRA lehenga & pattu pavadai features a soft 100% breathable cotton inner lining to ensure zero skin irritation during celebrations, with generous inner seam allowances for easy future alterations.
-        </p>
-      </div>
+      ) : null}
     </div>
   );
 }

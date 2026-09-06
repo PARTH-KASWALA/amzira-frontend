@@ -14,7 +14,7 @@ test.describe('AMZIRA storefront', () => {
     await page.goto(`/product/${productSlug}`);
     await expect(page.getByRole('heading', { name: productName })).toBeVisible();
     await page.getByRole('radio', { name: '6-7Y', exact: true }).click();
-    await page.getByRole('button', { name: /Add to cart/i }).click();
+    await page.getByRole('complementary').getByRole('button', { name: /Add to cart/i }).click();
     await expect(page.getByRole('button', { name: /Added to cart/i })).toBeVisible();
     await page.waitForLoadState('networkidle');
 
@@ -26,10 +26,37 @@ test.describe('AMZIRA storefront', () => {
     await expect(page.getByRole('heading', { name: /Sign in to AMZIRA/i })).toBeVisible();
   });
 
+  test('emits privacy-safe product, size, and cart funnel events', async ({ page }) => {
+    await page.addInitScript(() => {
+      window.__amziraCommerceEvents = [];
+      window.addEventListener('amzira-commerce-event', (event) => {
+        window.__amziraCommerceEvents.push(event.detail);
+      });
+    });
+
+    await page.goto(`/product/${productSlug}`);
+    await expect.poll(() => page.evaluate(() => window.__amziraCommerceEvents)).toContainEqual(
+      expect.objectContaining({ event: 'view_item', product_slug: productSlug, currency: 'INR' })
+    );
+
+    await page.getByRole('radio', { name: '6-7Y', exact: true }).click();
+    await expect.poll(() => page.evaluate(() => window.__amziraCommerceEvents)).toContainEqual(
+      expect.objectContaining({ event: 'select_size', selected_size: '6-7Y', product_slug: productSlug })
+    );
+
+    await page.getByRole('complementary').getByRole('button', { name: /Add to cart/i }).click();
+    await expect.poll(() => page.evaluate(() => window.__amziraCommerceEvents)).toContainEqual(
+      expect.objectContaining({ event: 'add_to_cart', selected_size: '6-7Y', product_slug: productSlug })
+    );
+
+    const analyticsPayloads = await page.evaluate(() => window.__amziraCommerceEvents);
+    expect(JSON.stringify(analyticsPayloads)).not.toMatch(/pincode|phone|email|address|razorpay/i);
+  });
+
   test('guest checkout and account show complete authentication recovery states', async ({ page }) => {
     await page.goto('/checkout');
-    await expect(page.getByRole('heading', { name: 'Secure checkout', exact: true })).toBeVisible();
-    await expect(page.getByRole('heading', { name: /Sign in for secure checkout/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Order review', exact: true })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /Orders temporarily paused/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /Place order|Simulate payment/i })).toHaveCount(0);
     await page.waitForLoadState('networkidle');
 
@@ -97,9 +124,9 @@ test.describe('AMZIRA storefront', () => {
     await expect(page.locator('#kids-mega-menu')).not.toContainText(/Debli|Piramit|Black V|Satin Jacquard/);
 
     for (const category of [
-      { slug: 'kids-pattu-pavadai', heading: 'Kids', count: 110 },
-      { slug: 'girls-lehenga-choli', heading: 'Girls Lehenga Choli', count: 33 },
-      { slug: 'pattu-pavadai', heading: 'Pattu Pavadai', count: 77 }
+      { slug: 'kids-pattu-pavadai', heading: 'Girls’ Pattu Pavadai & South Indian Lehenga Choli', count: 110 },
+      { slug: 'girls-lehenga-choli', heading: 'Girls’ Pattu Pavadai & South Indian Lehenga Choli', count: 33 },
+      { slug: 'pattu-pavadai', heading: 'Girls’ Pattu Pavadai & South Indian Lehenga Choli', count: 77 }
     ]) {
       await page.goto(`/category/${category.slug}`);
       await expect(page.getByRole('heading', { level: 1, name: category.heading })).toBeVisible();

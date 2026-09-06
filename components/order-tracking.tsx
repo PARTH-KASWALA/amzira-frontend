@@ -280,8 +280,8 @@ export function OrderTracking() {
             <ShieldCheck className="h-6 w-6 text-maroon" aria-hidden="true" />
           </div>
           <div>
-            <h4 className="font-display text-sm font-bold text-maroon-deep">Secure & Trusted</h4>
-            <p className="text-xs text-charcoal/65">100% secure payments</p>
+            <h4 className="font-display text-sm font-bold text-maroon-deep">Trusted order support</h4>
+            <p className="text-xs text-charcoal/65">Clear delivery updates</p>
           </div>
         </div>
 

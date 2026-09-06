@@ -4,6 +4,8 @@ import { notFound } from "next/navigation";
 import { Ruler, ShieldCheck, Truck } from "lucide-react";
 import { JsonLd } from "@/components/json-ld";
 import { ProductPurchase } from "@/components/product-purchase";
+import { ProductConfidence } from "@/components/product-confidence";
+import { ProductAnalytics } from "@/components/product-analytics";
 import { ProductGallery } from "@/components/product-gallery";
 import { ProductReviews } from "@/components/product-reviews";
 import { DeliveryEstimate } from "@/components/delivery-estimate";
@@ -34,6 +36,7 @@ export default async function ProductPage({ params }: Props) {
 
   return (
     <>
+      <ProductAnalytics product={product} />
       <JsonLd data={productJsonLd(product)} />
       <JsonLd
         data={breadcrumbJsonLd([
@@ -67,12 +70,13 @@ export default async function ProductPage({ params }: Props) {
           </div>
 
           <ProductPurchase product={product} />
-          <DeliveryEstimate slug={product.slug} />
+          <ProductConfidence product={product} />
+          <DeliveryEstimate product={product} />
 
           <div className="mt-8 grid gap-3 border-t border-charcoal/10 pt-6 text-sm text-charcoal/70">
             {[
               [Truck, "Delivery estimate available by pincode"],
-              [ShieldCheck, "Secure Razorpay checkout"],
+              [ShieldCheck, "Order availability and delivery details before ordering"],
               [Ruler, "Size guidance for growing kids"]
             ].map(([Icon, text]) => (
               <p key={String(text)} className="flex items-center gap-3">
@@ -83,18 +87,22 @@ export default async function ProductPage({ params }: Props) {
           </div>
 
           <dl className="mt-8 grid gap-4 border-t border-charcoal/10 pt-6 text-sm">
-            <div>
+            {product.fabric ? <div>
               <dt className="font-bold text-charcoal">Fabric</dt>
-              <dd className="mt-1 text-charcoal/65">{product.fabric || "Premium silk blend"}</dd>
-            </div>
-            <div>
+              <dd className="mt-1 text-charcoal/65">{product.fabric}</dd>
+            </div> : null}
+            {product.lining ? <div>
+              <dt className="font-bold text-charcoal">Lining</dt>
+              <dd className="mt-1 text-charcoal/65">{product.lining}</dd>
+            </div> : null}
+            {product.occasions.length ? <div>
               <dt className="font-bold text-charcoal">Occasions</dt>
-              <dd className="mt-1 text-charcoal/65">{product.occasions.join(", ") || "Wedding, festive, ceremony"}</dd>
-            </div>
-            <div>
+              <dd className="mt-1 text-charcoal/65">{product.occasions.join(", ")}</dd>
+            </div> : null}
+            {product.careInstructions ? <div>
               <dt className="font-bold text-charcoal">Care</dt>
-              <dd className="mt-1 text-charcoal/65">{product.careInstructions || "Dry clean recommended."}</dd>
-            </div>
+              <dd className="mt-1 text-charcoal/65">{product.careInstructions}</dd>
+            </div> : null}
           </dl>
           </aside>
         </div>

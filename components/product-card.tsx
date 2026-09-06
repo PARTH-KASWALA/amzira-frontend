@@ -41,11 +41,27 @@ export function ProductCard({ product, priority = false }: { product: Product; p
             </Link>
           </h3>
         </div>
-        <div className="flex items-center gap-2 text-xs text-charcoal/65">
-          <Star className="h-4 w-4 fill-gold text-gold" aria-hidden="true" />
-          <span>{product.avgRating ? product.avgRating.toFixed(1) : "New"}</span>
-          <span>({product.reviewCount})</span>
-        </div>
+        {product.reviewCount > 0 ? (
+          <div className="flex items-center gap-2 text-xs text-charcoal/65">
+            <Star className="h-4 w-4 fill-gold text-gold" aria-hidden="true" />
+            <span>{product.avgRating.toFixed(1)}</span>
+            <span>({product.reviewCount})</span>
+          </div>
+        ) : (
+          <p className="text-xs text-charcoal/60">{product.isNewArrival ? "New arrival" : "No reviews yet"}</p>
+        )}
+        {product.inStock ? (
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-semibold text-charcoal/60">
+            {product.availableSizeCount ? <span>{product.availableSizeCount} sizes available</span> : null}
+            {product.stockQuantity !== undefined && product.stockQuantity <= 5 ? (
+              <span className="text-maroon">Only {product.stockQuantity} left</span>
+            ) : (
+              <span className="text-emerald">In stock</span>
+            )}
+          </div>
+        ) : (
+          <p className="text-[11px] font-semibold text-maroon">Currently sold out</p>
+        )}
         <div className="flex flex-wrap items-baseline gap-2">
           <span className="text-lg font-bold text-maroon">{formatMoney(product.salePrice)}</span>
           {product.basePrice > product.salePrice ? (

@@ -3,9 +3,11 @@
 import { FormEvent, useState } from "react";
 import { Truck } from "lucide-react";
 import { getDeliveryEstimate } from "@/lib/api/product-extras";
+import type { Product } from "@/lib/catalog";
+import { productAnalyticsPayload, trackCommerceEvent } from "@/lib/analytics";
 import { formatMoney } from "@/lib/format";
 
-export function DeliveryEstimate({ slug }: { slug: string }) {
+export function DeliveryEstimate({ product }: { product: Product }) {
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -15,9 +17,15 @@ export function DeliveryEstimate({ slug }: { slug: string }) {
     setLoading(true);
     setMessage("");
     try {
-      const estimate = await getDeliveryEstimate(slug, pincode);
+      const estimate = await getDeliveryEstimate(product.slug, pincode);
       const start = new Date(estimate.estimated_delivery_date_start).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
       const end = new Date(estimate.estimated_delivery_date_end).toLocaleDateString("en-IN", { day: "numeric", month: "short" });
+      trackCommerceEvent("check_pincode", {
+        ...productAnalyticsPayload(product),
+        delivery_days_min: estimate.delivery_days_min,
+        delivery_days_max: estimate.delivery_days_max,
+        has_shipping_charge: estimate.shipping_cost > 0
+      });
       setMessage(`Estimated ${start} to ${end}. ${estimate.shipping_cost ? `${formatMoney(estimate.shipping_cost)} shipping.` : "Free shipping."}`);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "Delivery could not be checked.");

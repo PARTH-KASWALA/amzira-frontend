@@ -5,8 +5,8 @@ import { buildMetadata } from "@/lib/seo";
 import { Award, CheckCircle2, Lock, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 
 export const metadata: Metadata = buildMetadata({
-  title: "Secure Checkout",
-  description: "Complete your AMZIRA checkout with delivery address, contact details, and secure payment.",
+  title: "Order Review",
+  description: "Review your AMZIRA cart, delivery address, and estimated total before ordering.",
   path: "/checkout",
   noIndex: true
 });
@@ -51,10 +51,10 @@ export default function CheckoutPage() {
         {/* Royal Page Header & Lotus Ornament */}
         <div className="flex flex-col items-center text-center max-w-2xl mx-auto">
           <div className="inline-flex items-center gap-2 rounded-full border border-amber-900/15 bg-amber-500/10 px-3.5 py-1 text-xs font-bold text-amber-900 mb-2">
-            <ShieldCheck className="h-3.5 w-3.5 text-amber-800" /> AMZIRA Royal Atelier Checkout
+            <ShieldCheck className="h-3.5 w-3.5 text-amber-800" /> AMZIRA Royal Atelier Order Review
           </div>
           <h1 className="font-display text-4xl font-semibold text-maroon-deep sm:text-5xl lg:text-6xl tracking-tight">
-            Secure checkout
+            Order review
           </h1>
 
           {/* Lotus Line Art Ornament Divider */}
@@ -85,7 +85,7 @@ export default function CheckoutPage() {
           </div>
 
           <p className="text-sm sm:text-base leading-6 text-charcoal/70">
-            Handcrafted South Indian Silk & Zari for your little princess. Verified stock & instant secure payment.
+            Handcrafted South Indian silk and zari for your little princess. Review stock, delivery, and order availability before continuing.
           </p>
         </div>
 

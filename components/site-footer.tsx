@@ -114,7 +114,7 @@ export function SiteFooter() {
         <p>© 2026 AMZIRA Atelier. All Rights Reserved.</p>
         <p className="flex items-center gap-2">
           <ShieldAlert className="h-4 w-4 text-[#df7778]" aria-hidden="true" />
-          Secure checkout · Fast support
+          Fit guidance · Fast support
         </p>
       </div>
 

@@ -15,6 +15,7 @@ export type ProductVariant = {
   sku?: string;
   stockQuantity: number;
   additionalPrice?: number;
+  measurements?: Record<string, string> | null;
 };
 
 export type ProductImage = {
@@ -40,12 +41,29 @@ export type Product = {
   images: string[];
   imageDetails?: ProductImage[];
   fabric?: string | null;
+  lining?: string | null;
+  includedPieces?: string[];
+  ageRecommendation?: string | null;
+  fitNote?: string | null;
   careInstructions?: string | null;
   occasions: string[];
   variants: ProductVariant[];
   avgRating: number;
   reviewCount: number;
   inStock: boolean;
+  stockQuantity?: number;
+  availableSizeCount?: number;
+  color?: string | null;
+  isNewArrival?: boolean;
+  isBestseller?: boolean;
+  isMostLoved?: boolean;
+  isFeatured?: boolean;
+  dispatchDaysMin?: number | null;
+  dispatchDaysMax?: number | null;
+  isExchangeEligible?: boolean | null;
+  isReturnEligible?: boolean | null;
+  returnWindowHours?: number | null;
+  shippingRate?: number | null;
   badge?: string | null;
   metaTitle?: string | null;
   metaDescription?: string | null;

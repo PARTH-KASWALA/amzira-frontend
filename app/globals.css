@@ -1922,6 +1922,16 @@ a {
   line-height: 0.92;
 }
 
+.kids-catalog-hero__description {
+  position: relative;
+  z-index: 2;
+  max-width: 48rem;
+  margin-top: 1rem;
+  color: rgba(46, 38, 34, 0.72);
+  font-size: 0.98rem;
+  line-height: 1.75;
+}
+
 .kids-catalog-hero__rule {
   position: absolute;
   z-index: 3;

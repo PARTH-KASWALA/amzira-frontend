@@ -2,13 +2,14 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { Check, CreditCard, LockKeyhole, MapPin, Plus, ShieldCheck, Tag } from "lucide-react";
 import { useSession } from "@/components/session-provider";
 import { createPaymentOrder, getCommerceStatus, validateCheckout, verifyPayment } from "@/lib/api/checkout";
 import { createAddress, getAddresses } from "@/lib/api/customer";
 import type { Address, AddressInput, CheckoutPreview } from "@/lib/api/types";
 import { formatMoney } from "@/lib/format";
+import { trackCommerceEvent } from "@/lib/analytics";
 
 const emptyAddress: AddressInput = {
   fullName: "",
@@ -51,6 +52,7 @@ export function CheckoutForm() {
   const [stage, setStage] = useState<"loading" | "ready" | "validating" | "paying" | "verifying">("loading");
   const [message, setMessage] = useState("");
   const [checkoutEnabled, setCheckoutEnabled] = useState<boolean | null>(null);
+  const reportedEntryState = useRef<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -92,6 +94,19 @@ export function CheckoutForm() {
     return "PAY SECURELY";
   }, [stage]);
 
+  useEffect(() => {
+    if (checkoutEnabled === null) return;
+    const entryState = !checkoutEnabled ? "paused" : sessionStatus === "guest" ? "guest" : "ready";
+    if (reportedEntryState.current === entryState) return;
+    reportedEntryState.current = entryState;
+
+    if (!checkoutEnabled) {
+      trackCommerceEvent("checkout_paused_view");
+    } else if (sessionStatus === "guest") {
+      trackCommerceEvent("sign_in_required");
+    }
+  }, [checkoutEnabled, sessionStatus]);
+
   async function saveAddress(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setMessage("");
@@ -114,6 +129,7 @@ export function CheckoutForm() {
     if (!customer || !selectedAddressId || isBusy || !checkoutEnabled) return;
     setMessage("");
     try {
+      trackCommerceEvent("begin_checkout");
       setStage("validating");
       const nextPreview = await validateCheckout(customer.id, selectedAddressId);
       setPreview(nextPreview);
@@ -134,6 +150,7 @@ export function CheckoutForm() {
       if (!window.Razorpay || !paymentOrder.razorpayOrderId || !paymentOrder.razorpayKeyId) {
         throw new Error("Secure payment is unavailable. Please try again.");
       }
+      trackCommerceEvent("payment_started");
       const razorpay = new window.Razorpay({
         key: paymentOrder.razorpayKeyId,
         amount: paymentOrder.amount,
@@ -166,6 +183,7 @@ export function CheckoutForm() {
               addressId: selectedAddressId
             });
             const orderNumber = typeof result.order_number === "string" ? result.order_number : "";
+            trackCommerceEvent("payment_succeeded");
             window.dispatchEvent(new CustomEvent("amzira-cart-updated"));
             router.push(`/order-success${orderNumber ? `?order=${encodeURIComponent(orderNumber)}` : ""}`);
           } catch (error) {
@@ -179,6 +197,7 @@ export function CheckoutForm() {
         }
       });
       razorpay.on("payment.failed", () => {
+        trackCommerceEvent("payment_failed");
         setStage("ready");
         setMessage("Payment did not complete. No new order was created and your cart is unchanged.");
       });
@@ -193,30 +212,30 @@ export function CheckoutForm() {
     return <div className="h-96 animate-pulse rounded-3xl bg-amber-900/5 border border-amber-900/10" aria-label="Loading checkout" />;
   }
 
-  if (sessionStatus === "guest") {
-    return (
-      <div className="rounded-3xl border border-amber-900/10 bg-[#FAF7F2] p-8 text-center shadow-xs">
-        <LockKeyhole className="mx-auto h-8 w-8 text-maroon" aria-hidden="true" />
-        <h2 className="mt-4 font-display text-3xl font-semibold text-maroon-deep">Sign in for secure checkout</h2>
-        <p className="mt-3 max-w-lg mx-auto leading-7 text-charcoal/65">
-          Your guest cart stays on this device and will move into your account automatically after sign in.
-        </p>
-        <Link className="btn-primary mt-6 rounded-xl bg-[#580B26] px-8 py-3.5 text-xs uppercase font-bold tracking-wider" href="/login?next=/checkout">
-          Sign in to checkout
-        </Link>
-      </div>
-    );
-  }
-
   if (!checkoutEnabled) {
     return (
       <div className="rounded-3xl border border-amber-900/10 bg-[#FAF7F2] p-8 text-center shadow-xs">
         <LockKeyhole className="mx-auto h-8 w-8 text-maroon" aria-hidden="true" />
-        <h2 className="mt-4 font-display text-3xl font-semibold text-maroon-deep">Checkout is temporarily paused</h2>
+        <h2 className="mt-4 font-display text-3xl font-semibold text-maroon-deep">Orders temporarily paused</h2>
         <p className="mx-auto mt-3 max-w-lg leading-7 text-charcoal/65">
-          We are completing final payment checks. Your cart is safe, and no payment can be started while checkout is paused.
+          We’re completing final payment and fulfilment checks. Your cart is safe, and no order or payment can be started while ordering is paused.
         </p>
         <Link className="btn-secondary mt-6" href="/cart">Return to cart</Link>
+      </div>
+    );
+  }
+
+  if (sessionStatus === "guest") {
+    return (
+      <div className="rounded-3xl border border-amber-900/10 bg-[#FAF7F2] p-8 text-center shadow-xs">
+        <LockKeyhole className="mx-auto h-8 w-8 text-maroon" aria-hidden="true" />
+        <h2 className="mt-4 font-display text-3xl font-semibold text-maroon-deep">Sign in to continue</h2>
+        <p className="mt-3 max-w-lg mx-auto leading-7 text-charcoal/65">
+          Your guest cart stays on this device and will move into your account automatically after sign in.
+        </p>
+        <Link className="btn-primary mt-6 rounded-xl bg-[#580B26] px-8 py-3.5 text-xs uppercase font-bold tracking-wider" href="/login?next=/checkout">
+          Sign in to order
+        </Link>
       </div>
     );
   }
@@ -323,7 +342,7 @@ export function CheckoutForm() {
 
       <hr className="border-amber-900/10" />
 
-      {/* 2. Secure Online Payment Section */}
+      {/* 2. Payment Section — rendered only after the commerce flag is enabled. */}
       <div>
         <div className="flex items-center gap-3">
           <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white text-maroon shadow-xs border border-amber-900/10">

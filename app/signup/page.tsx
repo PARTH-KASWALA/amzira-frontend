@@ -17,7 +17,7 @@ export default function SignupPage() {
           <p className="section-kicker">Join AMZIRA</p>
           <h1 className="mt-3 font-display text-6xl text-maroon-deep">Create your account</h1>
           <p className="mt-5 leading-8 text-charcoal/70">
-            Keep your wedding and festive shopping details together with secure checkout and order support.
+            Keep your wedding and festive shopping details together with order support and saved delivery details.
           </p>
         </div>
         <AuthForm mode="signup" />

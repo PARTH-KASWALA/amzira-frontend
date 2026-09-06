@@ -11,11 +11,13 @@ import {
   UsersRound
 } from "lucide-react";
 import { CategoryShowcase } from "@/components/category-showcase";
-import { CinematicSection } from "@/components/cinematic-section";
 import { HeroCarousel } from "@/components/hero-carousel";
-import { LuxuryCardGrid } from "@/components/luxury-card-grid";
+import {
+  DeferredCinematicSection,
+  DeferredLuxuryCardGrid,
+  DeferredProcessionGifSection
+} from "@/components/home-deferred-experience";
 import { ParentsLoveSection } from "@/components/parents-love-section";
-import { ProcessionGifSection } from "@/components/procession-gif-section";
 import { ProductGrid } from "@/components/product-grid";
 import { type HeroProduct } from "@/components/product-slide";
 import { type LuxuryCard } from "@/components/luxury-card-grid";
@@ -335,15 +337,19 @@ export default async function HomePage() {
   const collectionProduct = inventoryProducts[7] || inventoryProducts[0];
   const craftProduct = inventoryProducts[8] || inventoryProducts[0];
   const occasionEdits = buildOccasionEdits(inventoryProducts.slice(9));
-  const bestsellerProducts = diversifyInventory(inventoryProducts).slice(0, 8);
+  const bestsellerProducts = diversifyInventory(inventoryProducts.filter((product) => product.isBestseller)).slice(0, 8);
+  const featuredMerchandisingProducts = diversifyInventory(inventoryProducts.filter((product) => product.isFeatured)).slice(0, 8);
+  const merchandisingProducts = bestsellerProducts.length ? bestsellerProducts : featuredMerchandisingProducts;
+  const merchandisingLabel = bestsellerProducts.length ? "Bestsellers" : "Featured styles";
+  const merchandisingTitle = bestsellerProducts.length ? "Girls’ celebration favorites" : "Featured girls’ celebration styles";
 
   return (
     <>
       <HeroCarousel products={buildHeroSlides(heroProducts.length ? heroProducts : inventoryProducts)} />
 
-      <LuxuryCardGrid cards={buildLuxuryCards(luxuryProducts.length >= 3 ? luxuryProducts : inventoryProducts)} />
+      <DeferredLuxuryCardGrid cards={buildLuxuryCards(luxuryProducts.length >= 3 ? luxuryProducts : inventoryProducts)} />
 
-      <CinematicSection />
+      <DeferredCinematicSection />
 
       <section className="pattern-section py-16 lg:py-24">
         <div className="container-page pattern-section__content">
@@ -433,7 +439,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <ProcessionGifSection />
+      <DeferredProcessionGifSection />
 
       <section className="occasion-section pattern-section py-16 lg:py-24">
         <div className="container-page pattern-section__content">
@@ -488,20 +494,20 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="pattern-section py-16 lg:py-24">
+      {merchandisingProducts.length ? <section className="pattern-section py-16 lg:py-24">
         <div className="container-page pattern-section__content">
           <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
-              <p className="section-kicker">Bestsellers</p>
-              <h2 className="mt-2 font-display text-5xl font-semibold text-maroon-deep">Girls&apos; celebration favorites</h2>
+              <p className="section-kicker">{merchandisingLabel}</p>
+              <h2 className="mt-2 font-display text-5xl font-semibold text-maroon-deep">{merchandisingTitle}</h2>
             </div>
             <Link className="btn-secondary w-fit bg-white" href={LIVE_CATEGORY_PATH}>
               Girls&apos; collection
             </Link>
           </div>
-          <ProductGrid products={bestsellerProducts} />
+          <ProductGrid products={merchandisingProducts} />
         </div>
-      </section>
+      </section> : null}
 
       <ParentsLoveSection />
 

@@ -10,13 +10,26 @@ import { comingSoonPath, unavailableCategoryDepartments } from "@/lib/storefront
 
 type Props = { params: Promise<{ slug: string }>; searchParams: Promise<Record<string, string | undefined>> };
 
+const girlsCategorySlugs = new Set(["kids-pattu-pavadai", "girls-lehenga-choli", "pattu-pavadai"]);
+const girlsCategoryName = "Girls’ Pattu Pavadai & South Indian Lehenga Choli";
+const girlsCategoryDescription =
+  "Shop South Indian girls’ pattu pavadai and lehenga choli for weddings, Pongal, Navratri, puja, and festive family celebrations. Explore temple borders, silk textures, zari work, and comfortable age-led fits.";
+
+function getPublicCategoryCopy(category: { name: string; slug: string; description: string }) {
+  if (girlsCategorySlugs.has(category.slug)) {
+    return { name: girlsCategoryName, description: girlsCategoryDescription };
+  }
+  return { name: category.name, description: category.description };
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
   const category = await getCategory(slug);
   if (!category) return buildMetadata({ title: "Category not found", path: `/category/${slug}` });
+  const publicCopy = getPublicCategoryCopy(category);
   return buildMetadata({
-    title: `${category.name} Online`,
-    description: category.description,
+    title: publicCopy.name,
+    description: publicCopy.description,
     path: `/category/${category.slug}`,
     image: category.imageUrl
   });
@@ -41,7 +54,8 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     getSubcategories(slug)
   ]);
   if (!category) notFound();
-  const isKidsCatalog = ["kids-pattu-pavadai", "girls-lehenga-choli", "pattu-pavadai"].includes(category.slug);
+  const isKidsCatalog = girlsCategorySlugs.has(category.slug);
+  const publicCopy = getPublicCategoryCopy(category);
 
   return (
     <>
@@ -56,9 +70,9 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           <div className={isKidsCatalog ? "kids-catalog-hero__copy" : undefined}>
           <p className="section-kicker">Category</p>
           <h1 className={isKidsCatalog ? "kids-catalog-hero__title" : "mt-3 max-w-4xl font-display text-6xl font-semibold leading-none text-maroon-deep"}>
-            {category.name}
+            {publicCopy.name}
           </h1>
-          {!isKidsCatalog ? <p className="mt-5 max-w-3xl text-base leading-8 text-charcoal/70">{category.description}</p> : null}
+          <p className={isKidsCatalog ? "kids-catalog-hero__description" : "mt-5 max-w-3xl text-base leading-8 text-charcoal/70"}>{publicCopy.description}</p>
           </div>
           {isKidsCatalog ? (
             <div className="kids-catalog-hero__rule" aria-hidden="true">
@@ -96,7 +110,7 @@ export default async function CategoryPage({ params, searchParams }: Props) {
               <label className="form-field">Min price<input name="min_price" type="number" min="0" step="500" defaultValue={query.min_price} /></label>
               <label className="form-field">Max price<input name="max_price" type="number" min="0" step="500" defaultValue={query.max_price} /></label>
             </div>
-            <label className="form-field">Sort<select name="sort_by" defaultValue={query.sort_by || "newest"}><option value="newest">Newest</option><option value="price_asc">Price: low to high</option><option value="price_desc">Price: high to low</option><option value="popular">Popular</option></select></label>
+            <label className="form-field">Sort<select name="sort_by" defaultValue={query.sort_by || "newest"}><option value="newest">Newest</option><option value="popular">Popular</option><option value="bestseller">Bestsellers</option><option value="top_rated">Top rated</option><option value="price_asc">Price: low to high</option><option value="price_desc">Price: high to low</option></select></label>
             <button className="btn-primary" type="submit">Apply filters</button>
             <Link className="btn-secondary" href={`/category/${category.slug}`}>Clear filters</Link>
           </form>
@@ -108,9 +122,9 @@ export default async function CategoryPage({ params, searchParams }: Props) {
           </div>
           <ProductGrid products={products} className={isKidsCatalog ? "kids-catalog-grid" : undefined} />
           <article className="mt-12 border-t border-charcoal/10 pt-8 leading-8 text-charcoal/70">
-            <h2 className="font-display text-4xl text-maroon-deep">Shop {category.name} at AMZIRA</h2>
+            <h2 className="font-display text-4xl text-maroon-deep">Shop {publicCopy.name} at AMZIRA</h2>
             <p className="mt-4">
-              AMZIRA curates {category.name.toLowerCase()} for South Indian weddings, festive gatherings,
+              AMZIRA curates {publicCopy.name.toLowerCase()} for South Indian weddings, festive gatherings,
               pujas, and family ceremonies. Each product page includes fabric notes, size options,
               delivery guidance, and styling support for confident family shopping.
             </p>

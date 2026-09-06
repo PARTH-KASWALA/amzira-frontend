@@ -12,13 +12,21 @@ const deliverySchema = z.object({
 
 const reviewSchema = z.object({
   id: z.string(),
-  user_id: z.coerce.number(),
+  user_id: z.coerce.number().nullable(),
   product_id: z.coerce.number(),
   rating: z.coerce.number(),
   comment: z.string().nullish(),
   verified_purchase: z.boolean(),
+  marketplace_verified_purchase: z.boolean().optional().default(false),
+  source: z.string().optional().default("amzira"),
   created_at: z.string(),
-  user_name: z.string()
+  user_name: z.string(),
+  media: z.array(z.object({
+    id: z.coerce.number(),
+    media_url: z.string(),
+    alt_text: z.string().nullish(),
+    display_order: z.coerce.number()
+  })).optional().default([])
 });
 
 export type ProductReview = z.infer<typeof reviewSchema>;
@@ -29,9 +37,10 @@ export async function getDeliveryEstimate(slug: string, pincode: string) {
   );
 }
 
-export async function getProductReviews(productId: number) {
+export async function getProductReviews(productId: number, rating?: number) {
+  const suffix = rating ? `&rating=${rating}` : "";
   const value = z.object({ reviews: z.array(reviewSchema), total: z.coerce.number() }).parse(
-    await browserApi<unknown>(`/reviews/product/${productId}?page=1&per_page=12`)
+    await browserApi<unknown>(`/reviews/product/${productId}?page=1&per_page=12${suffix}`)
   );
   return value;
 }
