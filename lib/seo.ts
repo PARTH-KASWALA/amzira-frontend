@@ -50,6 +50,23 @@ export function organizationJsonLd() {
     name: siteName,
     url: absoluteUrl("/"),
     logo: absoluteUrl("/images/logo/amzira_logo.webp"),
+    contactPoint: {
+      "@type": "ContactPoint",
+      contactType: "customer service",
+      email: "amziracare@gmail.com",
+      telephone: "+91-9726366000",
+      availableLanguage: ["en", "hi"]
+    },
+    hasMerchantReturnPolicy: {
+      "@type": "MerchantReturnPolicy",
+      applicableCountry: "IN",
+      returnPolicyCountry: "IN",
+      returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+      // AMZIRA's published 36-hour window is 1.5 days. Preserve the exact
+      // policy rather than rounding it up in search data.
+      merchantReturnDays: 1.5,
+      returnMethod: "https://schema.org/ReturnByMail"
+    },
     sameAs: []
   };
 }
@@ -72,7 +89,14 @@ export function productJsonLd(product: Product) {
     : {
         "@type": "OfferShippingDetails",
         shippingDestination: { "@type": "DefinedRegion", addressCountry: "IN" },
-        shippingRate: { "@type": "MonetaryAmount", value: product.shippingRate, currency: "INR" }
+        shippingRate: { "@type": "MonetaryAmount", value: product.shippingRate, currency: "INR" },
+        deliveryTime: {
+          "@type": "ShippingDeliveryTime",
+          // These ranges match the published shipping policy and pincode
+          // estimator; they are not a guaranteed arrival promise.
+          handlingTime: { "@type": "QuantitativeValue", minValue: 1, maxValue: 3, unitCode: "DAY" },
+          transitTime: { "@type": "QuantitativeValue", minValue: 2, maxValue: 8, unitCode: "DAY" }
+        }
       };
   const offerFor = (sku: string, available: boolean) => ({
     "@type": "Offer",
