@@ -338,7 +338,7 @@ export default async function HomePage() {
   const craftProduct = inventoryProducts[8] || inventoryProducts[0];
   const occasionEdits = buildOccasionEdits(inventoryProducts.slice(9));
   const bestsellerProducts = diversifyInventory(inventoryProducts.filter((product) => product.isBestseller)).slice(0, 8);
-  const featuredMerchandisingProducts = diversifyInventory(inventoryProducts.filter((product) => product.isFeatured)).slice(0, 8);
+  const featuredMerchandisingProducts = diversifyInventory(inventoryProducts.filter((product) => product.isFeatured)).slice(0, 12);
   const merchandisingProducts = bestsellerProducts.length ? bestsellerProducts : featuredMerchandisingProducts;
   const merchandisingLabel = bestsellerProducts.length ? "Bestsellers" : "Featured styles";
   const merchandisingTitle = bestsellerProducts.length ? "Girls’ celebration favorites" : "Featured girls’ celebration styles";

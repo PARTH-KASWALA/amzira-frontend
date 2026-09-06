@@ -52,6 +52,20 @@ function stringRecord(value: unknown): Record<string, string> | null {
   return entries.length ? Object.fromEntries(entries) : null;
 }
 
+function marketplaceSignal(value: unknown) {
+  const signal = record(value);
+  const label = text(signal.label);
+  const source = text(signal.source);
+  if (!label || !source) return null;
+
+  return {
+    label,
+    source,
+    observedAt: text(signal.observed_at ?? signal.observedAt) || null,
+    units: signal.units === null || signal.units === undefined ? null : number(signal.units)
+  };
+}
+
 function boolean(value: unknown, fallback = false) {
   if (typeof value === "boolean") return value;
   if (typeof value === "string") return value.toLowerCase() === "true";
@@ -141,6 +155,7 @@ function toProduct(input: unknown): Product | null {
   const isBestseller = boolean(input.is_bestseller);
   const isMostLoved = boolean(input.is_most_loved);
   const isFeatured = boolean(input.is_featured);
+  const signal = marketplaceSignal(input.marketplace_signal ?? input.marketplaceSignal);
   const salePrice = number(input.sale_price ?? input.salePrice ?? input.price ?? input.base_price);
   const basePrice = number(input.base_price ?? input.basePrice, salePrice);
   const primaryImage =
@@ -195,6 +210,7 @@ function toProduct(input: unknown): Product | null {
     isBestseller,
     isMostLoved,
     isFeatured,
+    marketplaceSignal: signal,
     dispatchDaysMin: input.dispatch_days_min === null || input.dispatch_days_min === undefined
       ? null
       : number(input.dispatch_days_min),
@@ -219,7 +235,7 @@ function toProduct(input: unknown): Product | null {
       (variants.length === 0 || variants.some((variant) => variant.stockQuantity > 0)),
     badge:
       text(input.badge) ||
-      (isBestseller ? "Bestseller" : isMostLoved ? "Most loved" : isFeatured ? "Featured" : null),
+      (isBestseller ? "Bestseller" : isMostLoved ? "Most loved" : signal?.label || (isFeatured ? "Featured" : null)),
     metaTitle: text(input.meta_title) || null,
     metaDescription: text(input.meta_description) || null
   };
@@ -545,6 +561,6 @@ export async function getRecommendedProducts(source: Product, limit = 4): Promis
 }
 
 export async function getFeaturedProducts() {
-  const products = await getProducts({ featured: true, limit: 8 });
+  const products = await getProducts({ featured: true, limit: 14 });
   return products.length || !CATALOG_FALLBACK_ENABLED ? products : fallbackProducts.slice(0, 6);
 }

@@ -6,6 +6,14 @@ import { formatMoney } from "@/lib/format";
 import { AddToCartButton } from "@/components/cart-button";
 import { WishlistButton } from "@/components/wishlist-button";
 
+function observedDate(value: string | null | undefined) {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime())
+    ? null
+    : new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" }).format(date);
+}
+
 export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
   return (
     <article className="group rounded-md border border-charcoal/10 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-sari">
@@ -35,6 +43,11 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-maroon">
             {product.subcategoryName || product.categoryName}
           </p>
+          {product.marketplaceSignal ? (
+            <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-charcoal/55">
+              Marketplace sales signal{observedDate(product.marketplaceSignal.observedAt) ? ` · observed ${observedDate(product.marketplaceSignal.observedAt)}` : ""}
+            </p>
+          ) : null}
           <h3 className="mt-2 min-h-[3.2rem] font-display text-xl font-semibold leading-tight text-charcoal">
             <Link className="focus-ring rounded-sm hover:text-maroon" href={`/product/${product.slug}`}>
               {product.name}

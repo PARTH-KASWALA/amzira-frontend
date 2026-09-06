@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { CheckCircle2, Clock3, PackageCheck, RotateCcw, Star } from "lucide-react";
+import { CheckCircle2, Clock3, PackageCheck, RotateCcw, Star, Store } from "lucide-react";
 import type { Product } from "@/lib/catalog";
 
 function dispatchCopy(product: Product) {
@@ -19,10 +19,24 @@ function returnCopy(product: Product) {
     : "Return eligibility shown before ordering";
 }
 
+function marketplaceSignalCopy(product: Product) {
+  const signal = product.marketplaceSignal;
+  if (!signal) return null;
+  const date = signal.observedAt ? new Date(signal.observedAt) : null;
+  const observed = date && !Number.isNaN(date.getTime())
+    ? new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" }).format(date)
+    : "the recorded snapshot date";
+  const units = signal.units && signal.units > 0 ? `: ${signal.units} unit${signal.units === 1 ? "" : "s"} recorded` : "";
+  return `${signal.label}${units} in AMZIRA’s ${signal.source}, observed ${observed}. This is not a customer rating or review.`;
+}
+
 export function ProductConfidence({ product }: { product: Product }) {
   const facts = [
     product.reviewCount > 0
       ? { icon: Star, title: `${product.avgRating.toFixed(1)} / 5 from ${product.reviewCount} customer review${product.reviewCount === 1 ? "" : "s"}` }
+      : null,
+    marketplaceSignalCopy(product)
+      ? { icon: Store, title: marketplaceSignalCopy(product)! }
       : null,
     product.includedPieces?.length
       ? { icon: PackageCheck, title: `Included: ${product.includedPieces.join(", ")}` }

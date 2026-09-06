@@ -25,6 +25,13 @@ export type ProductImage = {
   isPrimary: boolean;
 };
 
+export type MarketplaceSignal = {
+  label: string;
+  source: string;
+  observedAt?: string | null;
+  units?: number | null;
+};
+
 export type Product = {
   id: string | number;
   name: string;
@@ -58,6 +65,7 @@ export type Product = {
   isBestseller?: boolean;
   isMostLoved?: boolean;
   isFeatured?: boolean;
+  marketplaceSignal?: MarketplaceSignal | null;
   dispatchDaysMin?: number | null;
   dispatchDaysMax?: number | null;
   isExchangeEligible?: boolean | null;
