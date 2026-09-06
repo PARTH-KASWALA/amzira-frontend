@@ -5,6 +5,7 @@ import { Product } from "@/lib/catalog";
 import { formatMoney } from "@/lib/format";
 import { AddToCartButton } from "@/components/cart-button";
 import { WishlistButton } from "@/components/wishlist-button";
+import { ProductQuickView } from "@/components/product-quick-view";
 
 function observedDate(value: string | null | undefined) {
   if (!value) return null;
@@ -36,6 +37,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           ) : null}
           </div>
         </Link>
+        <ProductQuickView product={product} />
         <WishlistButton productId={product.id} productName={product.name} className="absolute right-3 top-3" />
       </div>
       <div className="space-y-3 p-4">

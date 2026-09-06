@@ -19,6 +19,8 @@ The remaining commercial blockers are external or policy-gated:
 ### Catalog and category positioning
 
 - Public kids category copy uses `Girls’ Pattu Pavadai` language and South Indian occasion terminology.
+- Category browsing now includes an inventory-backed `Size / age band` filter, with only in-stock variant sizes offered.
+- Product cards now include an accessible quick-view panel with live price, available sizes, age recommendation, fabric, included pieces, and stock before the full detail page.
 - Indexable collection pages exist for girls’ pattu pavadai, South Indian girls’ lehenga choli, wedding outfits for girls, and festival/puja journeys.
 - Size and fit guides, shipping, returns, FAQs, and support links are publicly accessible.
 - Product pages expose fabric, lining, included pieces, age recommendation, garment measurements, dispatch timing, delivery guidance, exchange/return eligibility, stock, and available sizes.
