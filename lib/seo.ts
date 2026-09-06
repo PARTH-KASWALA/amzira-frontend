@@ -69,17 +69,29 @@ type ProductReviewForSchema = {
 };
 
 export function productJsonLd(product: Product, reviews: ProductReviewForSchema[] = []) {
-  // Google's merchantReturnDays field only accepts whole days. AMZIRA's
-  // published 36-hour window cannot be represented exactly, so omit a
-  // potentially misleading return-policy node until the policy is converted
-  // to a whole-day window or configured directly in Merchant Center.
-  const returnPolicy = product.isReturnEligible === false
-    ? {
-        "@type": "MerchantReturnPolicy",
-        applicableCountry: "IN",
-        returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted"
-      }
-    : undefined;
+  // AMZIRA publishes a 36-hour return window. Google's merchantReturnDays
+  // field only accepts whole days, so preserve the exact policy in a
+  // PropertyValue rather than rounding it to a misleading 1 or 2 days.
+  const returnWindowHours = product.returnWindowHours ?? 36;
+  const returnPolicy = {
+    "@type": "MerchantReturnPolicy",
+    applicableCountry: "IN",
+    returnPolicyCategory: product.isReturnEligible === false
+      ? "https://schema.org/MerchantReturnNotPermitted"
+      : "https://schema.org/MerchantReturnFiniteReturnWindow",
+    returnMethod: "https://schema.org/ReturnByMail",
+    ...(product.isReturnEligible === false
+      ? {}
+      : {
+          description: "Eligible ready-to-ship garments may be returned within 36 hours of recorded delivery; product-specific exceptions apply.",
+          additionalProperty: {
+            "@type": "PropertyValue",
+            name: "returnWindowHours",
+            value: returnWindowHours,
+            unitText: "hours"
+          }
+        })
+  };
   const shippingDetails = product.shippingRate === null || product.shippingRate === undefined
     ? undefined
     : {

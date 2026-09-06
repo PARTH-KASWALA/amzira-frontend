@@ -4,7 +4,7 @@ import type { Product } from "@/lib/catalog";
 
 function dispatchCopy(product: Product) {
   if (product.dispatchDaysMin === null || product.dispatchDaysMin === undefined || product.dispatchDaysMax === null || product.dispatchDaysMax === undefined) {
-    return null;
+    return "Ready-to-ship orders are normally dispatched in 1-3 business days";
   }
   return product.dispatchDaysMin === product.dispatchDaysMax
     ? `Dispatches in ${product.dispatchDaysMin} day${product.dispatchDaysMin === 1 ? "" : "s"}`
@@ -12,7 +12,9 @@ function dispatchCopy(product: Product) {
 }
 
 function returnCopy(product: Product) {
-  if (product.isReturnEligible === null || product.isReturnEligible === undefined) return null;
+  if (product.isReturnEligible === null || product.isReturnEligible === undefined) {
+    return "Standard 36-hour return window from recorded delivery; product exceptions apply";
+  }
   if (!product.isReturnEligible) return "This style is not eligible for return";
   return product.returnWindowHours
     ? `Return eligible within ${product.returnWindowHours} hours of delivery`
