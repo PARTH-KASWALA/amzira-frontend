@@ -57,33 +57,22 @@ export function organizationJsonLd() {
       telephone: "+91-9726366000",
       availableLanguage: ["en", "hi"]
     },
-    hasMerchantReturnPolicy: {
-      "@type": "MerchantReturnPolicy",
-      applicableCountry: "IN",
-      returnPolicyCountry: "IN",
-      returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
-      // AMZIRA's published 36-hour window is 1.5 days. Preserve the exact
-      // policy rather than rounding it up in search data.
-      merchantReturnDays: 1.5,
-      returnMethod: "https://schema.org/ReturnByMail"
-    },
     sameAs: []
   };
 }
 
 export function productJsonLd(product: Product) {
-  const returnPolicy = product.isReturnEligible === null || product.isReturnEligible === undefined
-    ? undefined
-    : {
+  // Google's merchantReturnDays field only accepts whole days. AMZIRA's
+  // published 36-hour window cannot be represented exactly, so omit a
+  // potentially misleading return-policy node until the policy is converted
+  // to a whole-day window or configured directly in Merchant Center.
+  const returnPolicy = product.isReturnEligible === false
+    ? {
         "@type": "MerchantReturnPolicy",
         applicableCountry: "IN",
-        returnPolicyCategory: product.isReturnEligible
-          ? "https://schema.org/MerchantReturnFiniteReturnWindow"
-          : "https://schema.org/MerchantReturnNotPermitted",
-        ...(product.isReturnEligible && product.returnWindowHours
-          ? { merchantReturnDays: Math.ceil(product.returnWindowHours / 24) }
-          : {})
-      };
+        returnPolicyCategory: "https://schema.org/MerchantReturnNotPermitted"
+      }
+    : undefined;
   const shippingDetails = product.shippingRate === null || product.shippingRate === undefined
     ? undefined
     : {
