@@ -42,6 +42,7 @@ The remaining commercial blockers are external or policy-gated:
 ### SEO and performance
 
 - Product, ProductGroup/variant, Offer, shipping, and truthful return-policy structured data are implemented.
+- Product pages now fall back to the published 1–3 business-day dispatch policy and 36-hour return policy when product-specific fields are unset; JSON-LD preserves the exact 36-hour window without rounding it to a misleading whole day.
 - Review structured data is conditional on real public reviews.
 - Merchant feed is checkout-aware and returns a no-index 503 response while checkout is paused.
 - Sitemap and robots routes are live; Google Search Console access was verified for `sc-domain:amzira.com`.
@@ -84,8 +85,11 @@ The remaining commercial blockers are external or policy-gated:
 
 - Backend commit `ff23794`: adds `marketplace` API sorting and regression coverage.
 - Frontend commit `807c147`: makes the checkout pause state server-authoritative and keeps payment claims hidden while disabled.
+- Frontend commit `7970080`: exposes the published dispatch and return policy in purchase-confidence content and product structured data.
 - Render deployment `dep-daeoq19t0dsc73b502ig`: live.
+- Vercel deployment `dpl_DLNkRX5udVS2gucRYpefC5eP3fup`: live on `amzira.com` and `www.amzira.com`.
 - Production verification: API health is healthy; `sort_by=marketplace` returns Anushka, Meera, and Urvi as the first three signal-bearing products; the live kids category contains the `Marketplace signals` option and in-stock size filter; direct checkout shows the paused state without payment claims.
+- Product-page verification: live JSON-LD includes `MerchantReturnPolicy` and the exact 36-hour window; the purchase-confidence block includes dispatch and return messaging.
 
 ## Next actions in order
 
