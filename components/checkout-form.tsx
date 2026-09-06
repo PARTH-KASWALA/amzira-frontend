@@ -40,7 +40,7 @@ function loadRazorpay() {
   return razorpayLoader;
 }
 
-export function CheckoutForm() {
+export function CheckoutForm({ initialCheckoutEnabled }: { initialCheckoutEnabled: boolean | null }) {
   const router = useRouter();
   const { customer, status: sessionStatus } = useSession();
   const [addresses, setAddresses] = useState<Address[]>([]);
@@ -49,12 +49,13 @@ export function CheckoutForm() {
   const [showAddressForm, setShowAddressForm] = useState(false);
   const [preview, setPreview] = useState<CheckoutPreview | null>(null);
   const [couponCode, setCouponCode] = useState("");
-  const [stage, setStage] = useState<"loading" | "ready" | "validating" | "paying" | "verifying">("loading");
+  const [stage, setStage] = useState<"loading" | "ready" | "validating" | "paying" | "verifying">(initialCheckoutEnabled === false ? "ready" : "loading");
   const [message, setMessage] = useState("");
-  const [checkoutEnabled, setCheckoutEnabled] = useState<boolean | null>(null);
+  const [checkoutEnabled, setCheckoutEnabled] = useState<boolean | null>(initialCheckoutEnabled);
   const reportedEntryState = useRef<string | null>(null);
 
   useEffect(() => {
+    if (initialCheckoutEnabled === false) return;
     let active = true;
     getCommerceStatus()
       .then((value) => {
@@ -69,9 +70,10 @@ export function CheckoutForm() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [initialCheckoutEnabled]);
 
   useEffect(() => {
+    if (initialCheckoutEnabled === false) return;
     if (sessionStatus !== "authenticated") {
       setStage("ready");
       return;
@@ -84,7 +86,7 @@ export function CheckoutForm() {
       })
       .catch((error) => setMessage(error instanceof Error ? error.message : "Addresses could not be loaded."))
       .finally(() => setStage("ready"));
-  }, [sessionStatus]);
+  }, [initialCheckoutEnabled, sessionStatus]);
 
   const isBusy = ["validating", "paying", "verifying"].includes(stage);
   const stageLabel = useMemo(() => {
@@ -208,11 +210,7 @@ export function CheckoutForm() {
     }
   }
 
-  if (sessionStatus === "loading" || stage === "loading" || checkoutEnabled === null) {
-    return <div className="h-96 animate-pulse rounded-3xl bg-amber-900/5 border border-amber-900/10" aria-label="Loading checkout" />;
-  }
-
-  if (!checkoutEnabled) {
+  if (checkoutEnabled === false) {
     return (
       <div className="rounded-3xl border border-amber-900/10 bg-[#FAF7F2] p-8 text-center shadow-xs">
         <LockKeyhole className="mx-auto h-8 w-8 text-maroon" aria-hidden="true" />
@@ -223,6 +221,10 @@ export function CheckoutForm() {
         <Link className="btn-secondary mt-6" href="/cart">Return to cart</Link>
       </div>
     );
+  }
+
+  if (sessionStatus === "loading" || stage === "loading" || checkoutEnabled === null) {
+    return <div className="h-96 animate-pulse rounded-3xl bg-amber-900/5 border border-amber-900/10" aria-label="Loading checkout" />;
   }
 
   if (sessionStatus === "guest") {

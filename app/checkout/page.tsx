@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CheckoutForm } from "@/components/checkout-form";
 import { CartView } from "@/components/cart-view";
+import { API_BASE_URL } from "@/lib/api/config";
 import { buildMetadata } from "@/lib/seo";
 import { Award, CheckCircle2, Lock, ShieldCheck, ShoppingBag, Truck } from "lucide-react";
 
@@ -11,7 +12,22 @@ export const metadata: Metadata = buildMetadata({
   noIndex: true
 });
 
-export default function CheckoutPage() {
+export const dynamic = "force-dynamic";
+
+async function getInitialCheckoutEnabled() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/commerce/status`, { cache: "no-store" });
+    if (!response.ok) return false;
+    const payload = (await response.json()) as { data?: { checkout_enabled?: unknown } };
+    return payload.data?.checkout_enabled === true;
+  } catch {
+    return false;
+  }
+}
+
+export default async function CheckoutPage() {
+  const initialCheckoutEnabled = await getInitialCheckoutEnabled();
+
   return (
     <div className="bg-[#FDFAF5] py-8 sm:py-12 min-h-[calc(100vh-200px)]">
       <section className="container-page space-y-8">
@@ -107,7 +123,7 @@ export default function CheckoutPage() {
 
         {/* Main Checkout Form & Summary Grid */}
         <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-start">
-          <CheckoutForm />
+          <CheckoutForm initialCheckoutEnabled={initialCheckoutEnabled} />
           <CartView checkout />
         </div>
       </section>
