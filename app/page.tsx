@@ -338,10 +338,29 @@ export default async function HomePage() {
   const craftProduct = inventoryProducts[8] || inventoryProducts[0];
   const occasionEdits = buildOccasionEdits(inventoryProducts.slice(9));
   const bestsellerProducts = diversifyInventory(inventoryProducts.filter((product) => product.isBestseller)).slice(0, 8);
+  const marketplaceProducts = [...inventoryProducts]
+    .filter((product) => product.marketplaceSignal)
+    .sort((left, right) =>
+      (right.marketplaceSignal?.units || 0) - (left.marketplaceSignal?.units || 0) ||
+      (right.marketplaceSignal?.observedAt || "").localeCompare(left.marketplaceSignal?.observedAt || "")
+    )
+    .slice(0, 12);
   const featuredMerchandisingProducts = diversifyInventory(inventoryProducts.filter((product) => product.isFeatured)).slice(0, 12);
-  const merchandisingProducts = bestsellerProducts.length ? bestsellerProducts : featuredMerchandisingProducts;
-  const merchandisingLabel = bestsellerProducts.length ? "Bestsellers" : "Featured styles";
-  const merchandisingTitle = bestsellerProducts.length ? "Girls’ celebration favorites" : "Featured girls’ celebration styles";
+  const merchandisingProducts = bestsellerProducts.length
+    ? bestsellerProducts
+    : marketplaceProducts.length
+      ? marketplaceProducts
+      : featuredMerchandisingProducts;
+  const merchandisingLabel = bestsellerProducts.length
+    ? "Bestsellers"
+    : marketplaceProducts.length
+      ? "Marketplace signals"
+      : "Featured styles";
+  const merchandisingTitle = bestsellerProducts.length
+    ? "Girls’ celebration favorites"
+    : marketplaceProducts.length
+      ? "Styles performing across seller channels"
+      : "Featured girls’ celebration styles";
 
   return (
     <>
@@ -500,6 +519,11 @@ export default async function HomePage() {
             <div>
               <p className="section-kicker">{merchandisingLabel}</p>
               <h2 className="mt-2 font-display text-5xl font-semibold text-maroon-deep">{merchandisingTitle}</h2>
+              {marketplaceProducts.length && !bestsellerProducts.length ? (
+                <p className="mt-3 max-w-2xl text-sm leading-6 text-charcoal/65">
+                  Observed seller-channel performance signals are shown transparently here; they are not AMZIRA customer ratings or reviews.
+                </p>
+              ) : null}
             </div>
             <Link className="btn-secondary w-fit bg-white" href={LIVE_CATEGORY_PATH}>
               Girls&apos; collection
