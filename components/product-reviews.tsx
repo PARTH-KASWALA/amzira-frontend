@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { CheckCircle2, Images, Star } from "lucide-react";
+import { CheckCircle2, ExternalLink, Images, Star } from "lucide-react";
 import { useSession } from "@/components/session-provider";
 import {
   createProductReview,
@@ -105,6 +105,11 @@ export function ProductReviews({ productId }: { productId: string | number }) {
                   {review.verified_purchase ? <><CheckCircle2 className="h-4 w-4 text-emerald" aria-hidden="true" /> Verified AMZIRA purchase</> : null}
                   {review.marketplace_verified_purchase ? <><CheckCircle2 className="h-4 w-4 text-emerald" aria-hidden="true" /> Verified {review.source === "myntra" ? "Myntra" : "Flipkart"} purchase</> : null}
                 </p>
+                {review.marketplace_verified_purchase && review.source_listing_url ? (
+                  <a className="focus-ring mt-2 inline-flex items-center gap-1 rounded-sm text-xs font-semibold text-maroon hover:underline" href={review.source_listing_url} rel="noreferrer" target="_blank">
+                    View source listing <ExternalLink className="h-3.5 w-3.5" aria-hidden="true" />
+                  </a>
+                ) : null}
                 {review.media.length ? (
                   <div className="mt-4 grid max-w-xl grid-cols-2 gap-3 sm:grid-cols-3">
                     {review.media.map((media) => (

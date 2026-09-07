@@ -20,6 +20,7 @@ export const reviewSchema = z.object({
   verified_purchase: z.boolean(),
   marketplace_verified_purchase: z.boolean().optional().default(false),
   source: z.string().optional().default("amzira"),
+  source_listing_url: z.string().url().nullable().optional().default(null),
   created_at: z.string(),
   user_name: z.string(),
   media: z.array(z.object({
