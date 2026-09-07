@@ -32,6 +32,7 @@ The remaining commercial blockers are external or policy-gated:
 - Exact seller-SKU matches currently support three transparent signals: one marketplace top seller and two marketplace picks.
 - No synthetic bestseller, most-loved, rating, review, or customer-photo claims were created.
 - A category sort named `Marketplace signals` is now implemented in both API and storefront code.
+- When native AMZIRA bestseller records are absent, the homepage surfaces these verified marketplace-signal styles with an explicit non-review disclaimer.
 
 ### Reviews and customer media
 
@@ -86,10 +87,13 @@ The remaining commercial blockers are external or policy-gated:
 - Backend commit `ff23794`: adds `marketplace` API sorting and regression coverage.
 - Frontend commit `807c147`: makes the checkout pause state server-authoritative and keeps payment claims hidden while disabled.
 - Frontend commit `7970080`: exposes the published dispatch and return policy in purchase-confidence content and product structured data.
+- Frontend commit `46ea966`: surfaces verified marketplace-signal styles on the homepage when native bestseller data is unavailable.
 - Render deployment `dep-daeoq19t0dsc73b502ig`: live.
 - Vercel deployment `dpl_DLNkRX5udVS2gucRYpefC5eP3fup`: live on `amzira.com` and `www.amzira.com`.
+- Vercel deployment `dpl_6ioPh4GW7hKQuskDDyzge5nErHeW`: live on `amzira.com` and `www.amzira.com`.
 - Production verification: API health is healthy; `sort_by=marketplace` returns Anushka, Meera, and Urvi as the first three signal-bearing products; the live kids category contains the `Marketplace signals` option and in-stock size filter; direct checkout shows the paused state without payment claims.
 - Product-page verification: live JSON-LD includes `MerchantReturnPolicy` and the exact 36-hour window; the purchase-confidence block includes dispatch and return messaging.
+- Homepage verification: both custom domains render `Styles performing across seller channels` and the non-review disclaimer.
 
 ## Next actions in order
 
