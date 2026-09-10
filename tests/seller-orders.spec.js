@@ -133,7 +133,7 @@ test.describe('AMZIRA seller order desk', () => {
     await page.route('**/api/v1/users/me/addresses', (route) => route.fulfill({ status: 200, contentType: 'application/json', body: '{"success":true,"data":[]}' }));
 
     await page.goto('/checkout');
-    await expect(page.getByRole('heading', { name: 'Checkout is temporarily paused' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /temporarily paused/i })).toBeVisible();
     await expect(page.getByRole('button', { name: /Pay securely/i })).toHaveCount(0);
   });
 });

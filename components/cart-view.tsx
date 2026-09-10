@@ -11,7 +11,7 @@ import {
   updateAuthenticatedCartItem
 } from "@/lib/api/cart";
 import type { CartSummary } from "@/lib/api/types";
-import { readGuestCart, writeGuestCart, type GuestCartItem } from "@/lib/cart";
+import { normalizeCartImage, readGuestCart, writeGuestCart, type GuestCartItem } from "@/lib/cart";
 import { formatMoney } from "@/lib/format";
 import { LIVE_CATEGORY_PATH } from "@/lib/storefront";
 import { trackCommerceEvent } from "@/lib/analytics";
@@ -93,7 +93,7 @@ export function CartView({ checkout = false }: { checkout?: boolean }) {
         itemId: item.id,
         slug: item.productSlug,
         name: item.productName,
-        image: item.productImage,
+        image: normalizeCartImage(item.productImage),
         price: item.unitPrice,
         size: item.variantDetails.replace(/^Size:\s*/i, ""),
         quantity: item.quantity,
@@ -104,7 +104,7 @@ export function CartView({ checkout = false }: { checkout?: boolean }) {
       key: `${item.slug}-${item.variantId}`,
       slug: item.slug,
       name: item.name,
-      image: item.image,
+      image: normalizeCartImage(item.image),
       price: item.price,
       size: item.size,
       quantity: item.quantity,

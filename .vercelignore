@@ -1,0 +1,8 @@
+# Local output and developer-only material are rebuilt by Vercel.
+.next
+.next-*
+node_modules
+test-results
+playwright-report
+coverage
+*.log

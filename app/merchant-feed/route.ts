@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getProducts } from "@/lib/api";
 import { API_BASE_URL } from "@/lib/api/config";
+import type { Product, ProductVariant } from "@/lib/catalog";
 import { absoluteUrl } from "@/lib/format";
 
 export const dynamic = "force-dynamic";
@@ -8,8 +9,29 @@ export const revalidate = 0;
 
 type CommerceStatus = { checkout_enabled?: boolean };
 
+// Keep these values aligned with the backend commerce settings. The detail
+// API supplies the product-specific rate for schema.org; list responses used
+// by this feed do not, so the feed uses the published store-wide rule.
+const FREE_SHIPPING_THRESHOLD = 2000;
+const DEFAULT_SHIPPING_CHARGE = 100;
+const merchantReturnPolicyLabel = process.env.MERCHANT_CENTER_RETURN_POLICY_LABEL?.trim();
+
 function tsv(value: string | number | null | undefined) {
   return String(value ?? "").replace(/[\t\r\n]+/g, " ").trim();
+}
+
+function variantPrice(product: Product, variant: ProductVariant) {
+  return product.salePrice + (variant.additionalPrice || 0);
+}
+
+function productDescription(product: Product) {
+  const description = product.description?.trim();
+  return description || `${product.name}. Shop this AMZIRA South Indian occasionwear style online with current size, price, availability, shipping, and return details.`;
+}
+
+function shippingValue(price: number) {
+  const shippingRate = price >= FREE_SHIPPING_THRESHOLD ? 0 : DEFAULT_SHIPPING_CHARGE;
+  return `IN::Standard:${shippingRate.toFixed(2)} INR:1:3:2:8`;
 }
 
 async function checkoutIsEnabled() {
@@ -62,12 +84,14 @@ export async function GET() {
     "price",
     "condition",
     "brand",
-    "mpn",
     "identifier_exists",
+    "google_product_category",
     "gender",
     "age_group",
     "color",
-    "size"
+    "size",
+    "shipping(country:region:service:price:min_handling_time:max_handling_time:min_transit_time:max_transit_time)",
+    ...(merchantReturnPolicyLabel ? ["return_policy_label"] : [])
   ];
   const rows = products.flatMap((product) => {
     const variants = product.variants.length ? product.variants : [{
@@ -81,19 +105,21 @@ export async function GET() {
       variant.sku || `${product.id}-${variant.id}`,
       product.id,
       variant.size ? `${product.name} – ${variant.size}` : product.name,
-      product.description,
+      productDescription(product),
       absoluteUrl(`/product/${product.slug}`),
       absoluteUrl(product.primaryImage),
       variant.stockQuantity > 0 ? "in_stock" : "out_of_stock",
-      `${product.salePrice.toFixed(2)} INR`,
+      `${variantPrice(product, variant).toFixed(2)} INR`,
       "new",
       "AMZIRA",
-      variant.sku || `${product.id}-${variant.id}`,
       "no",
+      "Apparel & Accessories > Clothing > Dresses",
       "female",
       "kids",
       variant.color || product.color || "",
-      variant.size
+      variant.size,
+      shippingValue(variantPrice(product, variant)),
+      ...(merchantReturnPolicyLabel ? [merchantReturnPolicyLabel] : [])
     ].map(tsv).join("\t"));
   });
 

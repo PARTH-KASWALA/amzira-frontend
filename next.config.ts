@@ -25,6 +25,7 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "api.amzira.com" },
       { protocol: "https", hostname: "api-staging.amzira.com" },
       { protocol: "https", hostname: "cdn.amzira.com" },
+      { protocol: "https", hostname: "rukminim2.flixcart.com" },
       { protocol: "https", hostname: "*.r2.dev" },
       { protocol: "https", hostname: "*.cloudflarestorage.com" },
       { protocol: "http", hostname: "localhost", port: "8000" },

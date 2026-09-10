@@ -4,7 +4,7 @@ import { notFound, redirect } from "next/navigation";
 import { Flower2, Search, SlidersHorizontal } from "lucide-react";
 import { JsonLd } from "@/components/json-ld";
 import { ProductGrid } from "@/components/product-grid";
-import { getCategory, getProducts, getSubcategories } from "@/lib/api";
+import { getCategories, getCategory, getProducts, getSubcategories } from "@/lib/api";
 import { buildMetadata, breadcrumbJsonLd } from "@/lib/seo";
 import { comingSoonPath, unavailableCategoryDepartments } from "@/lib/storefront";
 
@@ -14,6 +14,13 @@ const girlsCategorySlugs = new Set(["kids-pattu-pavadai", "girls-lehenga-choli",
 const girlsCategoryName = "Girls’ Pattu Pavadai & South Indian Lehenga Choli";
 const girlsCategoryDescription =
   "Shop South Indian girls’ pattu pavadai and lehenga choli for weddings, Pongal, Navratri, puja, and festive family celebrations. Explore temple borders, silk textures, zari work, and comfortable age-led fits.";
+
+export const revalidate = 300;
+
+export async function generateStaticParams() {
+  const categories = await getCategories();
+  return categories.map((category) => ({ slug: category.slug }));
+}
 
 function getPublicCategoryCopy(category: { name: string; slug: string; description: string }) {
   if (girlsCategorySlugs.has(category.slug)) {
@@ -40,20 +47,28 @@ export default async function CategoryPage({ params, searchParams }: Props) {
   const unavailableDepartment = unavailableCategoryDepartments[slug];
   if (unavailableDepartment) redirect(comingSoonPath(unavailableDepartment));
 
+  const catalogParams = {
+    category: slug,
+    subcategory: query.subcategory,
+    search: query.search,
+    occasion: query.occasion,
+    size: query.size,
+    min_price: query.min_price,
+    max_price: query.max_price,
+    sort_by: query.sort_by
+  };
+  const productsPromise = getProducts(catalogParams);
+  const hasActiveFilter = Object.entries(catalogParams).some(
+    ([key, value]) => key !== "category" && value !== undefined && value !== ""
+  );
+  // The unfiltered result is also the source for the size options. Reusing
+  // the same promise prevents a second identical catalog read on first load.
+  const categoryCatalogPromise = hasActiveFilter ? getProducts({ category: slug }) : productsPromise;
   const [category, products, subcategories, categoryCatalog] = await Promise.all([
     getCategory(slug),
-    getProducts({
-      category: slug,
-      subcategory: query.subcategory,
-      search: query.search,
-      occasion: query.occasion,
-      size: query.size,
-      min_price: query.min_price,
-      max_price: query.max_price,
-      sort_by: query.sort_by
-    }),
+    productsPromise,
     getSubcategories(slug),
-    getProducts({ category: slug })
+    categoryCatalogPromise
   ]);
   if (!category) notFound();
   const isKidsCatalog = girlsCategorySlugs.has(category.slug);

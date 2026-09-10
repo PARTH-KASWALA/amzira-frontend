@@ -2069,6 +2069,10 @@ a {
 
 .kids-catalog-grid > article {
   box-shadow: none;
+  /* Keep the all-products catalog available to crawlers and keyboard users,
+     while avoiding layout and paint work for cards below the initial viewport. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 35rem;
 }
 
 .kids-catalog-grid > article > div:last-child {

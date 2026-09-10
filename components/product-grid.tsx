@@ -16,7 +16,7 @@ export function ProductGrid({ products, className }: { products: Product[]; clas
   return (
     <div className={["grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4", className].filter(Boolean).join(" ")}>
       {products.map((product, index) => (
-        <ProductCard key={product.slug} product={product} priority={index < 4} />
+        <ProductCard key={product.slug} product={product} priority={index === 0} />
       ))}
     </div>
   );

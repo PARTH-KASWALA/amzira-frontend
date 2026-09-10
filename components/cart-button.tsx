@@ -9,7 +9,12 @@ import { ApiError } from "@/lib/api/browser-client";
 import { CART_KEY, GuestCartItem, readGuestCart, writeGuestCart } from "@/lib/cart";
 import { useSession } from "@/components/session-provider";
 
-export function addToLocalCart(product: Product, variantId: string | number, quantity = 1) {
+export type CartProduct = Pick<
+  Product,
+  "id" | "slug" | "name" | "primaryImage" | "salePrice" | "inStock" | "stockQuantity" | "categorySlug" | "subcategorySlug" | "variants"
+>;
+
+export function addToLocalCart(product: CartProduct, variantId: string | number, quantity = 1) {
   const variant = product.variants.find((entry) => String(entry.id) === String(variantId));
   const size = variant?.size || "Free";
   const cart = readGuestCart();
@@ -36,10 +41,12 @@ export function addToLocalCart(product: Product, variantId: string | number, qua
 export function AddToCartButton({
   product,
   variantId,
+  requireVariantSelection = false,
   className = ""
 }: {
-  product: Product;
+  product: CartProduct;
   variantId?: string | number;
+  requireVariantSelection?: boolean;
   className?: string;
 }) {
   const { status: sessionStatus } = useSession();
@@ -47,7 +54,12 @@ export function AddToCartButton({
   const selectedVariant =
     product.variants.find((variant) => String(variant.id) === String(variantId)) ||
     product.variants.find((variant) => variant.stockQuantity > 0);
-  const canAdd = product.inStock && Boolean(selectedVariant);
+  const canAdd = product.inStock && Boolean(selectedVariant) && (!requireVariantSelection || variantId !== undefined);
+  const buttonLabel = !product.inStock || !selectedVariant
+    ? "Sold out"
+    : requireVariantSelection && variantId === undefined
+      ? "Select a size"
+      : status;
 
   const addItem = useCallback(async () => {
     if (!selectedVariant) return;
@@ -89,7 +101,7 @@ export function AddToCartButton({
       aria-live="polite"
     >
       <ShoppingBag className="h-4 w-4" aria-hidden="true" />
-      {canAdd ? status : "Sold out"}
+      {buttonLabel}
     </button>
   );
 }

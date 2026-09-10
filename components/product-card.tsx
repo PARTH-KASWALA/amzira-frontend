@@ -1,11 +1,11 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Star } from "lucide-react";
-import { Product } from "@/lib/catalog";
+import { Product, ProductImage } from "@/lib/catalog";
 import { formatMoney } from "@/lib/format";
-import { AddToCartButton } from "@/components/cart-button";
+import { AddToCartButton, type CartProduct } from "@/components/cart-button";
 import { WishlistButton } from "@/components/wishlist-button";
-import { ProductQuickView } from "@/components/product-quick-view";
+import { ProductQuickViewLoader } from "@/components/product-quick-view-loader";
 
 function observedDate(value: string | null | undefined) {
   if (!value) return null;
@@ -15,7 +15,47 @@ function observedDate(value: string | null | undefined) {
     : new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" }).format(date);
 }
 
+function isBackView(image: ProductImage) {
+  return /(?:^|[^a-z])back(?:[^a-z]|$)/.test(`${image.altText || ""} ${image.url}`.toLowerCase());
+}
+
+function hoverImageFor(product: Product) {
+  return product.imageDetails?.find((image) => image.url !== product.primaryImage && isBackView(image)) || null;
+}
+
+function quickViewProduct(product: Product) {
+  return {
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    basePrice: product.basePrice,
+    salePrice: product.salePrice,
+    primaryImage: product.primaryImage,
+    inStock: product.inStock
+  };
+}
+
+function productCardCartItem(product: Product): CartProduct {
+  const defaultVariant = product.variants.find((variant) => variant.stockQuantity > 0);
+  return {
+    id: product.id,
+    name: product.name,
+    slug: product.slug,
+    categorySlug: product.categorySlug,
+    subcategorySlug: product.subcategorySlug,
+    primaryImage: product.primaryImage,
+    salePrice: product.salePrice,
+    inStock: product.inStock,
+    stockQuantity: product.stockQuantity,
+    variants: defaultVariant ? [defaultVariant] : []
+  };
+}
+
 export function ProductCard({ product, priority = false }: { product: Product; priority?: boolean }) {
+  const hoverImage = hoverImageFor(product);
+  const quickView = quickViewProduct(product);
+  const cartItem = productCardCartItem(product);
+
   return (
     <article className="group rounded-md border border-charcoal/10 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-sari">
       <div className="relative">
@@ -25,11 +65,27 @@ export function ProductCard({ product, priority = false }: { product: Product; p
             src={product.primaryImage}
             alt={product.name}
             fill
-            priority={priority}
             unoptimized={product.primaryImage.startsWith("/images/") || product.primaryImage.startsWith("https://cdn.amzira.com/")}
+            priority={priority}
             sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
             className="object-cover transition duration-500 group-hover:scale-105"
           />
+          {hoverImage ? (
+            <>
+              <Image
+                src={hoverImage.url}
+                alt=""
+                aria-hidden="true"
+                fill
+                unoptimized={hoverImage.url.startsWith("/images/") || hoverImage.url.startsWith("https://cdn.amzira.com/")}
+                sizes="(max-width: 768px) 50vw, (max-width: 1280px) 33vw, 25vw"
+                className="object-cover opacity-0 transition duration-500 group-hover:scale-105 group-hover:opacity-100 group-focus-within:opacity-100"
+              />
+              <span className="pointer-events-none absolute bottom-3 right-3 rounded-full bg-charcoal/75 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.14em] text-white opacity-0 transition group-hover:opacity-100 group-focus-within:opacity-100">
+                Back view
+              </span>
+            </>
+          ) : null}
           {product.badge ? (
             <span className="absolute left-3 top-3 rounded-full bg-white/92 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.16em] text-maroon">
               {product.badge}
@@ -37,7 +93,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
           ) : null}
           </div>
         </Link>
-        <ProductQuickView product={product} />
+        <ProductQuickViewLoader product={quickView} />
         <WishlistButton productId={product.id} productName={product.name} className="absolute right-3 top-3" />
       </div>
       <div className="space-y-3 p-4">
@@ -46,7 +102,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
             {product.subcategoryName || product.categoryName}
           </p>
           {product.marketplaceSignal ? (
-            <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-charcoal/55">
+            <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-charcoal/70">
               Marketplace sales signal{observedDate(product.marketplaceSignal.observedAt) ? ` · observed ${observedDate(product.marketplaceSignal.observedAt)}` : ""}
             </p>
           ) : null}
@@ -86,7 +142,7 @@ export function ProductCard({ product, priority = false }: { product: Product; p
             </>
           ) : null}
         </div>
-        <AddToCartButton product={product} className="w-full" />
+        <AddToCartButton product={cartItem} className="w-full" />
       </div>
     </article>
   );

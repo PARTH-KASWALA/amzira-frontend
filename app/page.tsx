@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { CategoryShowcase } from "@/components/category-showcase";
 import { HeroCarousel } from "@/components/hero-carousel";
+import { MarketplaceFeedbackSection } from "@/components/marketplace-feedback";
 import {
   DeferredCinematicSection,
   DeferredLuxuryCardGrid,
@@ -72,6 +73,7 @@ const shoppingPaths = [
 
 const heroThemes: HeroProduct["theme"][] = ["peacock", "maroon", "gold", "emerald", "rose", "blue"];
 const detailTones = ["maroon", "emerald", "blue"] as const;
+const heroSlideCount = 7;
 const heroGradients = [
   {
     gradient: "linear-gradient(110deg, #24080f 0%, #7f1735 34%, #0c6c70 70%, #18080a 100%)",
@@ -152,7 +154,14 @@ const heroTitlePriorityWords = [
 ];
 
 function conciseHeroTitle(name: string) {
-  const normalizedName = name.replace(/\s+\d+(?:-\d+)?$/, "").trim();
+  // Keep the merchandising title intact elsewhere, but keep the hero focused
+  // on the style name instead of rendering the catalog SEO suffix as the hero.
+  const normalizedName = name
+    .replace(/\s+\([^)]*\)\s*/g, " ")
+    .replace(/\s+-\s+(?:wedding|festive|party|occasion|ceremony).*$/i, "")
+    .split(/\s+(?:in|for)\s+/i)[0]
+    .replace(/\s+\d+(?:-\d+)?$/, "")
+    .trim();
   const words = normalizedName.split(/\s+/).filter(Boolean);
   if (words.length <= 4) return normalizedName;
 
@@ -189,38 +198,33 @@ type HeroDetailImage = {
 function imageKind(image: ProductImage, fallbackIndex: number): HeroDetailKind {
   const alt = (image.altText || "").toLowerCase();
   const url = image.url.toLowerCase();
-  const descriptor = alt.includes(" - ") ? alt.split(" - ").pop() || alt : alt;
-  const source = descriptor || url;
+  const altParts = alt.split(/\s+-\s+/).map((part) => part.trim()).filter(Boolean);
+  const descriptor = altParts.length > 1 ? altParts.slice(1).join(" ") : alt;
+  const fileName = url.split("/").pop() || url;
 
-  if (source.includes("front_view") || source.includes("front view")) return "front";
-  if (source.includes("closure_view") || source.includes("closure view")) return "closure";
-  if (source.includes("side_view") || source.includes("side view")) return "side";
-  if (source.includes("back_view") || source.includes("back view")) return "back";
-  if (source.includes("outfit")) return "outfit";
-  if (source.includes("choli")) return "choli";
-  if (source.includes("lengha") || source.includes("lehenga")) return "lengha";
+  // The inventory alt text is generated as "Product name - Choli/Lengha".
+  // Inspect only that view suffix (and the actual filename) so a product
+  // named "Lehenga Choli" does not make every gallery image a Choli.
+  const garmentSource = `${descriptor} ${fileName}`;
+  if (/(^|[^a-z])choli([^a-z]|$)/.test(garmentSource)) return "choli";
+  if (/(^|[^a-z])(?:lengha|lehenga)([^a-z]|$)/.test(garmentSource)) return "lengha";
+  if (/(front_view|front view)/.test(descriptor)) return "front";
+  if (/(closure_view|closure view)/.test(descriptor)) return "closure";
+  if (/(side_view|side view)/.test(descriptor)) return "side";
+  if (/(back_view|back view)/.test(descriptor)) return "back";
+  if (/(^|[^a-z])outfit([^a-z]|$)/.test(garmentSource)) return "outfit";
 
   return fallbackIndex === 0 ? "front" : "detail";
 }
 
 function heroDetailLabel(kind: HeroDetailKind) {
   switch (kind) {
-    case "closure":
-      return "Closure";
-    case "side":
-      return "Side View";
-    case "back":
-      return "Back View";
-    case "outfit":
-      return "Outfit";
     case "choli":
       return "Choli";
     case "lengha":
-      return "Lehenga";
-    case "front":
-      return "Front View";
+      return "Lengha";
     default:
-      return "Detail";
+      return "Choli";
   }
 }
 
@@ -246,38 +250,37 @@ function heroDetailImages(product: Product): HeroDetailImage[] | null {
 
   const choli = gallery.find((image) => image.kind === "choli");
   const lengha = gallery.find((image) => image.kind === "lengha");
-  if (choli && lengha) return [choli, lengha];
+  if (!choli || !lengha) return null;
 
-  const detailCandidates = gallery.filter((image) => !["front", "closure"].includes(image.kind));
-  const fallbackCandidates = gallery.filter((image) => image.kind !== "front");
-  const selected = detailCandidates.length >= 2 ? detailCandidates.slice(-2) : fallbackCandidates.slice(-2);
-  return selected.length ? selected : null;
+  return [
+    { ...choli, label: "Choli" },
+    { ...lengha, label: "Lengha" }
+  ];
+}
+
+function heroDescription(product: Product) {
+  if (product.description?.trim()) return product.description;
+
+  const category = product.categoryName || "South Indian ceremony wear";
+  return `A ready-to-wear South Indian ${category} for girls, finished with traditional detailing and a celebration-ready flare for weddings, festivals, birthdays, temple ceremonies, and family gatherings.`;
 }
 
 function buildHeroSlides(products: Product[]): HeroProduct[] | undefined {
-  if (!products.length) return undefined;
-  return products.slice(0, 4).map((product, index) => {
+  const eligibleProducts = products
+    .map((product) => ({ product, heroDetails: heroDetailImages(product) }))
+    .filter((entry): entry is { product: Product; heroDetails: HeroDetailImage[] } => Boolean(entry.heroDetails));
+  if (!eligibleProducts.length) return undefined;
+
+  return eligibleProducts.slice(0, heroSlideCount).map(({ product, heroDetails }, index) => {
     const visual = heroGradients[index % heroGradients.length];
     const title = conciseHeroTitle(product.name);
-    const heroDetails = heroDetailImages(product);
-    const fallbackImages = [product.primaryImage, ...product.images]
-      .filter((image, imageIndex, images) => image && images.indexOf(image) === imageIndex)
-      .slice(0, 2);
-    const details = heroDetails
-      ? heroDetails.map((detail) => ({
-          label: detail.label,
-          image: detail.image,
-          alt: `${product.name} ${detail.label.toLowerCase()} view`,
-          fit: heroDetailFit(detail.kind),
-          tone: detailTones[index % detailTones.length]
-        }))
-      : fallbackImages.map((image, detailIndex) => ({
-          label: ["Front view", "Detail view"][detailIndex] || "Product view",
-          image,
-          alt: `${product.name} ${detailIndex + 1}`,
-          fit: detailIndex === 0 ? "cover" as const : "contain" as const,
-          tone: detailTones[index % detailTones.length]
-        }));
+    const details = heroDetails.map((detail) => ({
+      label: detail.label,
+      image: detail.image,
+      alt: `${product.name} ${detail.label.toLowerCase()} view`,
+      fit: heroDetailFit(detail.kind),
+      tone: detailTones[index % detailTones.length]
+    }));
     return {
       id: String(product.id || product.slug),
       title,
@@ -285,7 +288,7 @@ function buildHeroSlides(products: Product[]): HeroProduct[] | undefined {
       theme: heroThemes[index % heroThemes.length],
       badge: product.badge || (product.discountPercentage ? `${product.discountPercentage}% off` : "Available now"),
       eyebrow: product.subcategoryName || product.categoryName || "Girls' ceremony wear",
-      description: product.description,
+      description: heroDescription(product),
       href: `/product/${product.slug}`,
       cta: "Shop this style",
       modelImage: product.primaryImage,
@@ -331,7 +334,7 @@ export default async function HomePage() {
   ]);
   const inventoryProducts = diversifyInventory(uniqueInventory([...featuredProducts, ...allProducts]));
   const heroProducts = await Promise.all(
-    inventoryProducts.slice(0, 4).map(async (product) => (await getProduct(product.slug)) || product)
+    inventoryProducts.slice(0, heroSlideCount * 4).map(async (product) => (await getProduct(product.slug)) || product)
   );
   const luxuryProducts = inventoryProducts.slice(4, 7);
   const collectionProduct = inventoryProducts[7] || inventoryProducts[0];
@@ -532,6 +535,8 @@ export default async function HomePage() {
           <ProductGrid products={merchandisingProducts} />
         </div>
       </section> : null}
+
+      <MarketplaceFeedbackSection />
 
       <ParentsLoveSection />
 

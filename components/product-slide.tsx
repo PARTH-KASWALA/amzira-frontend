@@ -96,8 +96,8 @@ export function ProductSlide({ product, activeIndex, count, dragX, parallaxX, pa
             src={product.modelImage}
             alt={product.modelAlt}
             fill
-            priority={activeIndex === 0}
             unoptimized={product.modelImage.startsWith("/images/") || product.modelImage.startsWith("https://cdn.amzira.com/")}
+            priority={activeIndex === 0}
             sizes="(min-width: 1280px) 39vw, (min-width: 1024px) 48vw, 92vw"
             className="object-cover object-top"
           />
@@ -105,7 +105,7 @@ export function ProductSlide({ product, activeIndex, count, dragX, parallaxX, pa
 
         <AnimatePresence mode="wait">
           <motion.div key={`details-${product.id}`} className="contents">
-            {product.details.slice(0, 3).map((detail, index) => (
+            {product.details.slice(0, 2).map((detail, index) => (
               <FloatingCard key={`${product.id}-${detail.image}`} detail={detail} index={index} />
             ))}
           </motion.div>

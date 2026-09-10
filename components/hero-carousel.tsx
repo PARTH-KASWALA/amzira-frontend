@@ -5,87 +5,141 @@ import { ArrowLeft, ArrowRight } from "lucide-react";
 import { AnimatePresence, motion, useMotionValue, useReducedMotion, useSpring } from "framer-motion";
 import { ProductSlide, type HeroProduct } from "@/components/product-slide";
 
-const defaultProducts: HeroProduct[] = [
-  {
-    id: "royal-blue-kids",
-    title: "Royal Kanchipuram Lehenga Choli",
-    price: "₹6,499",
-    theme: "blue",
-    badge: "New arrival",
-    eyebrow: "Kids pattu pavadai",
-    description:
-      "Royal blue pattu lehenga choli with Kanchipuram-inspired checks, antique gold borders, and ceremony-ready movement.",
-    href: "/product/sri-valli-girls-traditional-pattu-pavadai",
-    cta: "Shop kids wear",
-    modelImage: "/images/hero-upgrade/blue-kids-lehenga-front.webp",
-    modelAlt: "Child wearing a royal blue South Indian lehenga choli in a decorated temple corridor",
-    gradient:
-      "linear-gradient(110deg, #2b1209 0%, #6e3b1f 38%, #0e2a71 72%, #130a08 100%)",
-    accent: "#154ed6",
+const minimumHeroSlides = 7;
+const heroAutoplayIntervalMs = 5_000;
+
+type CatalogFallbackProduct = Omit<HeroProduct, "modelImage" | "modelAlt" | "details"> & {
+  catalogSlug: string;
+  tone: "maroon" | "emerald" | "blue";
+};
+
+function catalogFallbackProduct({ catalogSlug, tone, ...product }: CatalogFallbackProduct): HeroProduct {
+  const imageBase = `/images/catalog/${catalogSlug}`;
+
+  return {
+    ...product,
+    modelImage: `${imageBase}/01.webp`,
+    modelAlt: product.title,
     details: [
-      {
-        label: "Choli front",
-        image: "/images/hero-upgrade/blue-choli-front.webp",
-        alt: "Royal blue choli front detail with gold zari work",
-        tone: "blue"
-      },
-      {
-        label: "Back detail",
-        image: "/images/hero-upgrade/blue-choli-back.webp",
-        alt: "Royal blue choli back detail with open back and gold bands",
-        tone: "blue"
-      },
-      {
-        label: "Lehenga flare",
-        image: "/images/hero-upgrade/blue-lehenga-skirt.webp",
-        alt: "Royal blue lehenga skirt with pleats and gold border",
-        tone: "blue"
-      }
+      { label: "Choli", image: `${imageBase}/05.webp`, alt: `${product.title} choli photoshoot`, fit: "contain", tone },
+      { label: "Lengha", image: `${imageBase}/06.webp`, alt: `${product.title} lengha photoshoot`, fit: "contain", tone }
     ]
-  },
-  {
-    id: "emerald-temple-kids",
-    title: "Emerald Temple Silk Lehenga",
-    price: "₹5,999",
+  };
+}
+
+const defaultProducts: HeroProduct[] = [
+  catalogFallbackProduct({
+    id: "anika-emerald-purple-temple",
+    title: "Anika Emerald Purple Temple Lehenga",
+    price: "₹1,399",
+    theme: "rose",
+    badge: "New arrival",
+    eyebrow: "Temple work lehenga choli",
+    description: "Emerald and purple silk with temple-inspired zari work, made for weddings, pujas, and joyful family celebrations.",
+    href: "/product/anika-emerald-purple-temple-work-lehenga-choli",
+    cta: "Shop this style",
+    gradient: "linear-gradient(110deg, #2d0b15 0%, #8f2848 38%, #9c641b 74%, #19090d 100%)",
+    accent: "#9c641b",
+    catalogSlug: "anika-emerald-purple-temple-work-lehenga-choli",
+    tone: "maroon"
+  }),
+  catalogFallbackProduct({
+    id: "meera-royal-blue-peach-peacock",
+    title: "Meera Royal Blue Peach Lehenga",
+    price: "₹1,499",
+    theme: "peacock",
+    badge: "Festive favorite",
+    eyebrow: "Ceremony lehenga choli",
+    description: "Royal blue and peach silk with peacock-inspired detail for birthdays, temple visits, and wedding celebrations.",
+    href: "/product/meera-royal-blue-peach-peacock-lehenga-choli",
+    cta: "Shop this style",
+    gradient: "linear-gradient(110deg, #1a1028 0%, #4d2c75 36%, #3a7897 72%, #110b19 100%)",
+    accent: "#3a7897",
+    catalogSlug: "meera-royal-blue-peach-peacock-lehenga-choli",
+    tone: "blue"
+  }),
+  catalogFallbackProduct({
+    id: "navika-heritage-multi-pattu-pavadai",
+    title: "Navika Heritage Pattu Pavadai",
+    price: "₹1,139",
+    theme: "gold",
+    badge: "Wedding edit",
+    eyebrow: "Classic pattu pavadai",
+    description: "A ready-to-wear South Indian pattu pavadai with traditional detailing and a celebration-ready flare for weddings, festivals, and family gatherings.",
+    href: "/product/navika-heritage-multi-pattu-pavadai",
+    cta: "Shop this style",
+    gradient: "linear-gradient(110deg, #250b1e 0%, #63305d 40%, #a1721f 74%, #1a0a12 100%)",
+    accent: "#a1721f",
+    catalogSlug: "navika-heritage-multi-pattu-pavadai",
+    tone: "maroon"
+  }),
+  catalogFallbackProduct({
+    id: "ira-emerald-maroon-peacock-work",
+    title: "Ira Emerald Maroon Peacock Lehenga",
+    price: "₹1,499",
+    theme: "blue",
+    badge: "Temple edit",
+    eyebrow: "Peacock work lehenga choli",
+    description: "Emerald and maroon silk with peacock work and temple-inspired borders for meaningful celebration days.",
+    href: "/product/ira-emerald-maroon-peacock-work-lehenga-choli",
+    cta: "Shop this style",
+    gradient: "linear-gradient(110deg, #102142 0%, #1f4b8c 38%, #b47b18 74%, #120b18 100%)",
+    accent: "#1f4b8c",
+    catalogSlug: "ira-emerald-maroon-peacock-work-lehenga-choli",
+    tone: "blue"
+  }),
+  catalogFallbackProduct({
+    id: "sharvi-purple-sky-blue",
+    title: "Sharvi Purple Sky Blue Lehenga",
+    price: "₹1,299",
+    theme: "rose",
+    badge: "Festive edit",
+    eyebrow: "Purple sky-blue lehenga choli",
+    description: "A purple and sky-blue lehenga choli with bright festive color for festivals, pujas, and family gatherings.",
+    href: "/product/sharvi-purple-sky-blue-lehenga-choli",
+    cta: "Shop this style",
+    gradient: "linear-gradient(110deg, #310914 0%, #9b2752 40%, #b88c32 72%, #19090d 100%)",
+    accent: "#9b2752",
+    catalogSlug: "sharvi-purple-sky-blue-lehenga-choli",
+    tone: "maroon"
+  }),
+  catalogFallbackProduct({
+    id: "saanvi-yellow-green-tree-deer",
+    title: "Saanvi Yellow Green Tree Deer Pattu Pavadai",
+    price: "₹1,319",
     theme: "emerald",
     badge: "Festive edit",
-    eyebrow: "Temple border story",
-    description:
-      "Emerald silk, maroon temple borders, and gold elephant motifs shaped for puja mornings, weddings, and family portraits.",
-    href: "/category/kids-pattu-pavadai",
-    cta: "View festive edit",
-    modelImage: "/images/hero-upgrade/green-dress-full.webp",
-    modelAlt: "Child wearing an emerald and maroon temple silk lehenga choli",
-    gradient:
-      "linear-gradient(110deg, #1c1008 0%, #5f230f 32%, #0f5a3e 72%, #261006 100%)",
-    accent: "#0f6b49",
-    details: [
-      {
-        label: "Full set",
-        image: "/images/hero-upgrade/green-dress-product.webp",
-        alt: "Emerald temple silk lehenga product cutout",
-        tone: "emerald"
-      },
-      {
-        label: "Side fall",
-        image: "/images/hero-upgrade/green-dress-side.webp",
-        alt: "Emerald temple silk lehenga side view",
-        fit: "cover",
-        tone: "emerald"
-      },
-      {
-        label: "Back view",
-        image: "/images/hero-upgrade/green-dress-back.webp",
-        alt: "Emerald temple silk lehenga back view",
-        fit: "cover",
-        tone: "emerald"
-      }
-    ]
-  }
+    eyebrow: "Tree deer pattu pavadai",
+    description: "Yellow and green silk with traditional tree-deer detailing for weddings, temple ceremonies, and family celebrations.",
+    href: "/product/saanvi-yellow-green-tree-deer-pattu-pavadai",
+    cta: "Shop this style",
+    gradient: "linear-gradient(110deg, #241006 0%, #6d2d13 34%, #176047 72%, #120b08 100%)",
+    accent: "#176047",
+    catalogSlug: "saanvi-yellow-green-tree-deer-pattu-pavadai",
+    tone: "emerald"
+  }),
+  catalogFallbackProduct({
+    id: "amaira-light-green-red-jacquard",
+    title: "Amaira Light Green Red Jacquard Lehenga",
+    price: "₹1,399",
+    theme: "emerald",
+    badge: "New arrival",
+    eyebrow: "Jacquard lehenga choli",
+    description: "Light green and red jacquard silk with a graceful festive border, made for birthdays, pujas, and wedding days.",
+    href: "/product/amaira-light-green-red-jacquard-work-lehenga-choli",
+    cta: "Shop this style",
+    gradient: "linear-gradient(110deg, #210d0d 0%, #76222d 36%, #28715a 74%, #0d1d18 100%)",
+    accent: "#28715a",
+    catalogSlug: "amaira-light-green-red-jacquard-work-lehenga-choli",
+    tone: "emerald"
+  })
 ];
 
 export function HeroCarousel({ products = defaultProducts }: { products?: HeroProduct[] }) {
-  const slides = products.length ? products : defaultProducts;
+  const slides = products.length >= minimumHeroSlides
+    ? products
+    : [...products, ...defaultProducts.filter((product) => !products.some((candidate) => candidate.id === product.id))]
+        .slice(0, minimumHeroSlides);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const shouldReduceMotion = useReducedMotion();
@@ -113,7 +167,7 @@ export function HeroCarousel({ products = defaultProducts }: { products?: HeroPr
       return;
     }
 
-    const timer = window.setInterval(goNext, 6500);
+    const timer = window.setInterval(goNext, heroAutoplayIntervalMs);
     return () => window.clearInterval(timer);
   }, [goNext, isPaused, shouldReduceMotion]);
 

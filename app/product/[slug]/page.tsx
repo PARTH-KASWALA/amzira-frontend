@@ -11,12 +11,22 @@ import { ProductReviews } from "@/components/product-reviews";
 import { DeliveryEstimate } from "@/components/delivery-estimate";
 import { WishlistButton } from "@/components/wishlist-button";
 import { ProductRecommendations } from "@/components/product-recommendations";
-import { getProduct } from "@/lib/api";
+import { getProduct, getProducts } from "@/lib/api";
 import { getProductReviewsForSeo } from "@/lib/api/product-extras";
 import { formatMoney } from "@/lib/format";
 import { breadcrumbJsonLd, buildMetadata, productJsonLd } from "@/lib/seo";
 
 type Props = { params: Promise<{ slug: string }> };
+
+// Product content is public and changes on the same catalog cadence as the
+// homepage. Pre-render known products for fast first visits; newly published
+// slugs still use Next's normal on-demand fallback.
+export const revalidate = 300;
+
+export async function generateStaticParams() {
+  const products = await getProducts();
+  return products.map((product) => ({ slug: product.slug }));
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;

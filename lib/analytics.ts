@@ -1,5 +1,10 @@
 import type { Product } from "@/lib/catalog";
 
+type CommerceProduct = Pick<
+  Product,
+  "id" | "slug" | "categorySlug" | "subcategorySlug" | "salePrice" | "inStock" | "stockQuantity"
+>;
+
 export type CommerceEventName =
   | "view_item"
   | "select_size"
@@ -39,7 +44,7 @@ function hasAnalyticsConsent() {
   return document.documentElement.dataset.analyticsConsent === "granted";
 }
 
-export function productAnalyticsPayload(product: Product): CommerceEventPayload {
+export function productAnalyticsPayload(product: CommerceProduct): CommerceEventPayload {
   const stockStatus = !product.inStock
     ? "out_of_stock"
     : product.stockQuantity !== undefined && product.stockQuantity <= 5

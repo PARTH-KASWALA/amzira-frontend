@@ -2,6 +2,16 @@ import { z } from "zod";
 
 export const CART_KEY = "amzira_cart_v2";
 export const LEGACY_CART_KEY = "amzira_next_cart";
+const FALLBACK_CART_IMAGE = "/images/hero-upgrade/green-kids-lehenga-front.webp";
+
+export function normalizeCartImage(path: string | null | undefined) {
+  if (!path) return FALLBACK_CART_IMAGE;
+  const catalogUpload = path.match(/\/static\/uploads\/products\/catalog\/(.+)$/);
+  if (catalogUpload) return `/images/catalog/${catalogUpload[1]}`;
+  const publicCatalog = path.match(/^https?:\/\/(?:www\.)?amzira\.com\/images\/catalog\/(.+)$/);
+  if (publicCatalog) return `/images/catalog/${publicCatalog[1]}`;
+  return path;
+}
 
 export type GuestCartItem = {
   productId: string | number;
@@ -33,7 +43,12 @@ export function readGuestCart(): GuestCartItem[] {
   if (typeof window === "undefined") return [];
   try {
     const current = localStorage.getItem(CART_KEY);
-    if (current) return guestCartSchema.parse(JSON.parse(current));
+    if (current) {
+      return guestCartSchema.parse(JSON.parse(current)).map((item) => ({
+        ...item,
+        image: normalizeCartImage(item.image)
+      }));
+    }
 
     const legacy = JSON.parse(localStorage.getItem(LEGACY_CART_KEY) || "[]") as Array<Record<string, unknown>>;
     const migrated = legacy.map((item) => ({
@@ -53,7 +68,10 @@ export function readGuestCart(): GuestCartItem[] {
 }
 
 export function writeGuestCart(items: GuestCartItem[]) {
-  localStorage.setItem(CART_KEY, JSON.stringify(items));
+  localStorage.setItem(
+    CART_KEY,
+    JSON.stringify(items.map((item) => ({ ...item, image: normalizeCartImage(item.image) })))
+  );
   window.dispatchEvent(new CustomEvent("amzira-cart-updated"));
 }
 

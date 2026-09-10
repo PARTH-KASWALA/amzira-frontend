@@ -81,8 +81,8 @@ export function ProductGallery({ images, name }: { images: string[]; name: strin
               src={source}
               alt={index === 0 ? name : `${name}, view ${index + 1}`}
               fill
-              priority={index === 0}
               unoptimized={source.startsWith("/images/") || source.startsWith("https://cdn.amzira.com/")}
+              priority={index === 0}
               sizes="(max-width: 1024px) 100vw, 55vw"
               className="object-cover"
             />

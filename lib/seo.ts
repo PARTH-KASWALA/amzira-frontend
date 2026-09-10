@@ -69,9 +69,8 @@ type ProductReviewForSchema = {
 };
 
 export function productJsonLd(product: Product, reviews: ProductReviewForSchema[] = []) {
-  // AMZIRA publishes a 36-hour return window. Google's merchantReturnDays
-  // field only accepts whole days, so preserve the exact policy in a
-  // PropertyValue rather than rounding it to a misleading 1 or 2 days.
+  const productUrl = absoluteUrl(`/product/${product.slug}`);
+  const productGroupId = `${productUrl}#product-group`;
   const returnWindowHours = product.returnWindowHours ?? 36;
   const returnPolicy = {
     "@type": "MerchantReturnPolicy",
@@ -83,6 +82,10 @@ export function productJsonLd(product: Product, reviews: ProductReviewForSchema[
     ...(product.isReturnEligible === false
       ? {}
       : {
+          // Google requires a whole number of days for a finite window. The
+          // storefront policy remains the source of truth at 36 hours; 2 is
+          // the conservative structured-data representation of that window.
+          merchantReturnDays: Math.ceil(returnWindowHours / 24),
           description: "Eligible ready-to-ship garments may be returned within 36 hours of recorded delivery; product-specific exceptions apply.",
           additionalProperty: {
             "@type": "PropertyValue",
@@ -92,46 +95,56 @@ export function productJsonLd(product: Product, reviews: ProductReviewForSchema[
           }
         })
   };
-  const shippingDetails = product.shippingRate === null || product.shippingRate === undefined
-    ? undefined
-    : {
-        "@type": "OfferShippingDetails",
-        shippingDestination: { "@type": "DefinedRegion", addressCountry: "IN" },
-        shippingRate: { "@type": "MonetaryAmount", value: product.shippingRate, currency: "INR" },
-        deliveryTime: {
-          "@type": "ShippingDeliveryTime",
-          // These ranges match the published shipping policy and pincode
-          // estimator; they are not a guaranteed arrival promise.
-          handlingTime: { "@type": "QuantitativeValue", minValue: 1, maxValue: 3, unitCode: "DAY" },
-          transitTime: { "@type": "QuantitativeValue", minValue: 2, maxValue: 8, unitCode: "DAY" }
-        }
-      };
-  const offerFor = (sku: string, available: boolean) => ({
+  const shippingDetailsFor = (price: number) => {
+    if (product.shippingRate === null || product.shippingRate === undefined) return undefined;
+    const shippingRate = price >= 2000 ? 0 : product.shippingRate;
+    return {
+      "@type": "OfferShippingDetails",
+      shippingDestination: { "@type": "DefinedRegion", addressCountry: "IN" },
+      shippingRate: { "@type": "MonetaryAmount", value: shippingRate, currency: "INR" },
+      deliveryTime: {
+        "@type": "ShippingDeliveryTime",
+        // These ranges match the published shipping policy and pincode
+        // estimator; they are not a guaranteed arrival promise.
+        handlingTime: { "@type": "QuantitativeValue", minValue: 1, maxValue: 3, unitCode: "DAY" },
+        transitTime: { "@type": "QuantitativeValue", minValue: 2, maxValue: 8, unitCode: "DAY" }
+      }
+    };
+  };
+  const offerFor = (sku: string, available: boolean, price: number) => ({
     "@type": "Offer",
-    url: absoluteUrl(`/product/${product.slug}`),
+    url: productUrl,
     priceCurrency: "INR",
-    price: product.salePrice,
+    price,
     availability: available ? "https://schema.org/InStock" : "https://schema.org/OutOfStock",
     itemCondition: "https://schema.org/NewCondition",
     seller: { "@type": "Organization", name: siteName },
     sku,
-    shippingDetails,
+    shippingDetails: shippingDetailsFor(price),
     hasMerchantReturnPolicy: returnPolicy,
-    description: `${formatMoney(product.salePrice)} with product-specific size, delivery, and policy details before ordering.`
+    description: `${formatMoney(price)} with product-specific size, delivery, and policy details before ordering.`
   });
   const variants = product.variants.map((variant) => ({
     "@type": "Product",
+    "@id": `${productUrl}#variant-${variant.id}`,
     name: `${product.name} – ${variant.size}`,
     sku: variant.sku || `${product.id}-${variant.id}`,
     size: variant.size,
     color: variant.color || undefined,
     image: product.images.map(absoluteUrl),
-    offers: offerFor(variant.sku || `${product.id}-${variant.id}`, variant.stockQuantity > 0),
+    isVariantOf: { "@id": productGroupId },
+    offers: offerFor(
+      variant.sku || `${product.id}-${variant.id}`,
+      variant.stockQuantity > 0,
+      product.salePrice + (variant.additionalPrice || 0)
+    ),
   }));
 
   return {
     "@context": "https://schema.org",
     "@type": product.variants.length ? "ProductGroup" : "Product",
+    "@id": product.variants.length ? productGroupId : `${productUrl}#product`,
+    url: productUrl,
     name: product.name,
     image: product.images.map(absoluteUrl),
     description: product.description,
@@ -161,7 +174,7 @@ export function productJsonLd(product: Product, reviews: ProductReviewForSchema[
           }))
         }
       : {}),
-    offers: offerFor(String(product.id), product.inStock),
+    offers: offerFor(String(product.id), product.inStock, product.salePrice),
     ...(variants.length
       ? {
           productGroupID: String(product.id),

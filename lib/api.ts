@@ -82,6 +82,11 @@ function assetUrl(url: string | null | undefined) {
   if (!url) return "";
   const catalogUpload = url.match(/\/static\/uploads\/products\/catalog\/(.+)$/);
   if (catalogUpload) return `/images/catalog/${catalogUpload[1]}`;
+  // The production API rewrites legacy catalog uploads to the public
+  // storefront origin. Keep those same-origin assets local so Next Image
+  // does not route them through the paid optimizer.
+  const publicCatalog = url.match(/^https?:\/\/(?:www\.)?amzira\.com\/images\/catalog\/(.+)$/);
+  if (publicCatalog) return `/images/catalog/${publicCatalog[1]}`;
   if (/^https?:\/\//.test(url)) return url;
   const apiOrigin = API_BASE.replace(/\/api\/v1\/?$/, "");
   if (url.startsWith("/")) return `${apiOrigin}${url}`;
@@ -105,7 +110,20 @@ function preferredImage(images: ProductImage[]) {
 function toProduct(input: unknown): Product | null {
   if (!isRecord(input)) return null;
   const category = record(input.category);
-  const subcategory = record(input.subcategory);
+  const rawSubcategory = input.subcategory;
+  const subcategory = record(rawSubcategory);
+  // The public API normally returns a nested subcategory object, but older
+  // catalog responses may expose the slug/name as flat fields (or the slug
+  // itself as `subcategory`). Keep filtering stable across both shapes.
+  const subcategorySlug = text(
+    subcategory.slug ||
+      input.subcategory_slug ||
+      input.subcategorySlug ||
+      (typeof rawSubcategory === "string" ? rawSubcategory : "")
+  );
+  const subcategoryName = text(
+    subcategory.name || input.subcategory_name || input.subcategoryName
+  );
   const imageDetails: ProductImage[] = Array.isArray(input.images)
     ? input.images.map<ProductImage | null>((image, index) => {
         const imageRecord = record(image);
@@ -158,10 +176,15 @@ function toProduct(input: unknown): Product | null {
   const signal = marketplaceSignal(input.marketplace_signal ?? input.marketplaceSignal);
   const salePrice = number(input.sale_price ?? input.salePrice ?? input.price ?? input.base_price);
   const basePrice = number(input.base_price ?? input.basePrice, salePrice);
+  // `imageDetails` already contains normalized URLs. Passing the preferred
+  // gallery URL through `assetUrl` again turns `/images/catalog/...` into an
+  // API URL that does not exist, which breaks the main hero image while the
+  // detail cards still render correctly.
+  const preferredImageUrl = preferredImage(imageDetails)?.url;
   const primaryImage =
-    assetUrl(
-      text(preferredImage(imageDetails)?.url || input.primary_image || input.image_url || images[0])
-    ) || fallbackProducts[0].primaryImage;
+    preferredImageUrl ||
+    assetUrl(text(input.primary_image || input.image_url || images[0])) ||
+    fallbackProducts[0].primaryImage;
   const occasions = Array.isArray(input.occasions)
     ? input.occasions
         .map((occasion) => {
@@ -178,8 +201,8 @@ function toProduct(input: unknown): Product | null {
     description: text(input.description || input.meta_description),
     categorySlug,
     categoryName,
-    subcategorySlug: text(subcategory.slug) || null,
-    subcategoryName: text(subcategory.name) || null,
+    subcategorySlug: subcategorySlug || null,
+    subcategoryName: subcategoryName || null,
     basePrice,
     salePrice,
     discountPercentage:
@@ -301,7 +324,7 @@ function productMatchesFilters(product: Product, params: Record<string, string |
   const minPrice = numericFilterValue(params.min_price);
   const maxPrice = numericFilterValue(params.max_price);
 
-  if (subcategory && product.subcategorySlug !== subcategory) return false;
+  if (subcategory && normalizeFilterValue(product.subcategorySlug) !== subcategory) return false;
   if (occasion && !product.occasions.some((item) => normalizeFilterValue(item) === occasion)) return false;
   if (size && !product.variants.some((variant) => variant.stockQuantity > 0 && normalizeFilterValue(variant.size) === size)) return false;
   if (minPrice !== null && product.salePrice < minPrice) return false;
@@ -350,8 +373,9 @@ function sortProducts(products: Product[], sortBy: unknown) {
 
 function applyProductFilters(products: Product[], params: Record<string, string | number | boolean | undefined>) {
   const categorySubcategories = categorySubcategorySlugs(String(params.category || ""));
+  const allowedSubcategories = new Set(categorySubcategories.map(normalizeFilterValue));
   const categoryFilteredProducts = categorySubcategories.length
-    ? products.filter((product) => product.subcategorySlug && categorySubcategories.includes(product.subcategorySlug))
+    ? products.filter((product) => product.subcategorySlug && allowedSubcategories.has(normalizeFilterValue(product.subcategorySlug)))
     : products;
 
   return sortProducts(categoryFilteredProducts.filter((product) => productMatchesFilters(product, params)), params.sort_by);
@@ -387,37 +411,55 @@ export async function getProducts(params: Record<string, string | number | boole
   const categorySubcategories = categorySubcategorySlugs(String(params.category || ""));
   const shouldFilterClientSide = Boolean(
     params.category &&
-    (categorySubcategories.length ||
-      params.subcategory ||
-      params.search ||
-      params.occasion ||
-      params.size ||
-      params.min_price ||
-      params.max_price ||
-      params.sort_by)
+    categorySubcategories.length
   );
+  const hasActiveCatalogFilter = [
+    "subcategory",
+    "search",
+    "occasion",
+    "size",
+    "min_price",
+    "max_price",
+    "sort_by"
+  ].some((key) => params[key] !== undefined && params[key] !== "");
   if (params.limit === undefined) search.set("limit", "100");
   Object.entries(params).forEach(([key, value]) => {
     if (value !== undefined && value !== "") {
-      if (shouldFilterClientSide && ["subcategory", "search", "occasion", "size", "min_price", "max_price", "sort_by"].includes(key)) {
-        return;
-      }
       search.set(key, key === "category" ? apiCategorySlug(String(value)) : String(value));
     }
   });
   const suffix = search.toString() ? `?${search.toString()}` : "";
-  // Filtered catalog pages must see inventory/category imports immediately.
-  // Keeping the unfiltered homepage/search payload on a short ISR window is
-  // fine, but caching a filtered empty result can hide newly imported stock.
-  const firstPage = await apiGet<unknown>(`/products${suffix}`, { fresh: shouldFilterClientSide });
+  // A base category page is public, cacheable catalog content. Only a page
+  // with an active shopper filter needs a fresh backend read; otherwise a
+  // visit opts the entire route out of ISR for no customer-facing benefit.
+  // Cart and checkout remain responsible for the final stock validation.
+  let requestSearch = new URLSearchParams(search);
+  let requestFresh = shouldFilterClientSide && hasActiveCatalogFilter;
+  let firstPage = await apiGet<unknown>(`/products${suffix}`, { fresh: requestFresh });
+
+  // A filtered page used to return an empty catalog when the fresh request
+  // briefly failed, even though the same parent catalog was available from
+  // Next's cache on the unfiltered page. Retry from that cached parent list;
+  // the local filter below still enforces the requested subcategory.
+  if (
+    shouldFilterClientSide &&
+    (!firstPage || (params.subcategory && productList(firstPage).length === 0))
+  ) {
+    for (const key of ["subcategory", "search", "occasion", "size", "min_price", "max_price", "sort_by"]) {
+      requestSearch.delete(key);
+    }
+    requestFresh = false;
+    const cachedSuffix = requestSearch.toString() ? `?${requestSearch.toString()}` : "";
+    firstPage = await apiGet<unknown>(`/products${cachedSuffix}`, { fresh: requestFresh });
+  }
   const firstPageRecord = record(firstPage);
   const pages = [firstPage];
   const totalPages = number(firstPageRecord.total_pages, 1);
   if (params.limit === undefined && params.page === undefined && totalPages > 1) {
     for (let page = 2; page <= totalPages; page += 1) {
-      const nextSearch = new URLSearchParams(search);
+      const nextSearch = new URLSearchParams(requestSearch);
       nextSearch.set("page", String(page));
-      pages.push(await apiGet<unknown>(`/products?${nextSearch.toString()}`, { fresh: shouldFilterClientSide }));
+      pages.push(await apiGet<unknown>(`/products?${nextSearch.toString()}`, { fresh: requestFresh }));
     }
   }
   const products = pages.flatMap(productList).filter((product) =>
@@ -477,7 +519,11 @@ export async function getCategory(slug: string): Promise<Category | null> {
 }
 
 export async function getProduct(slug: string): Promise<Product | null> {
-  const data = await apiGet<unknown>(`/products/${encodeURIComponent(slug)}`, { fresh: true });
+  // Product pages are public catalog content. Let the existing five-minute
+  // Data Cache policy apply here so a visitor does not trigger a new backend
+  // request for the same product on every page view. Cart and checkout still
+  // revalidate stock against the backend immediately before a purchase.
+  const data = await apiGet<unknown>(`/products/${encodeURIComponent(slug)}`);
   const directProduct = productDetail(data);
   if (
     hasProductDetailPayload(data) &&
@@ -500,7 +546,7 @@ export async function getProduct(slug: string): Promise<Product | null> {
     .find((product) => product.slug === slug);
 
   if (listedProduct && String(listedProduct.id) !== "product") {
-    const idData = await apiGet<unknown>(`/products/${encodeURIComponent(String(listedProduct.id))}`, { fresh: true });
+    const idData = await apiGet<unknown>(`/products/${encodeURIComponent(String(listedProduct.id))}`);
     const idProduct = productDetail(idData);
     if (
       hasProductDetailPayload(idData) &&

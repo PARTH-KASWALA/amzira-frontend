@@ -2,8 +2,7 @@ import { z } from "zod";
 import { API_ORIGIN } from "@/lib/api/config";
 import { browserApi } from "@/lib/api/browser-client";
 import type { CartSummary } from "@/lib/api/types";
-import type { GuestCartItem } from "@/lib/cart";
-import { writeGuestCart } from "@/lib/cart";
+import { normalizeCartImage, writeGuestCart, type GuestCartItem } from "@/lib/cart";
 
 const cartSchema = z.object({
   items: z.array(
@@ -30,9 +29,10 @@ const cartSchema = z.object({
 });
 
 function imageUrl(path: string | null | undefined) {
-  if (!path) return "/images/hero-upgrade/green-kids-lehenga-front.webp";
-  if (/^https?:\/\//.test(path)) return path;
-  return path.startsWith("/") ? `${API_ORIGIN}${path}` : path;
+  const normalized = normalizeCartImage(path);
+  if (normalized.startsWith("/images/")) return normalized;
+  if (/^https?:\/\//.test(normalized)) return normalized;
+  return normalized.startsWith("/") ? `${API_ORIGIN}${normalized}` : normalized;
 }
 
 export async function getAuthenticatedCart(): Promise<CartSummary> {

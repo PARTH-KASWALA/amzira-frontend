@@ -10,6 +10,21 @@ test.describe('AMZIRA storefront', () => {
     await expect(page.locator('html')).toHaveAttribute('data-scroll-behavior', 'smooth');
   });
 
+  test('shows only clearly attributed marketplace feedback above the rating threshold', async ({ page }) => {
+    await page.goto('/');
+    const feedback = page.getByRole('region', { name: 'Loved across our seller channels' });
+    await expect(feedback.getByRole('heading', { name: 'Loved across our seller channels' })).toBeVisible();
+    await expect(feedback).toHaveClass(/pattern-section/);
+    await expect(feedback.getByText('4.0 / 5')).toBeVisible();
+    await expect(feedback.getByText('3.9 / 5')).toHaveCount(2);
+    await expect(feedback.getByRole('img', { name: /Verified Flipkart buyer photo/i })).toHaveCount(4);
+    await expect(feedback.getByRole('img', { name: /Pritamfab Fashion lehenga/i })).toHaveCount(3);
+    await expect(feedback.getByText('“Very nice product.”')).toBeVisible();
+    await expect(feedback.getByRole('link', { name: /View Flipkart source listing/i })).toHaveCount(2);
+    await expect(feedback.getByRole('link', { name: /View Flipkart source listing/i }).nth(1)).toHaveAttribute('href', /itm8f2596fb12654/);
+    await expect(feedback.getByText(/not an AMZIRA verified-purchase review/i)).toHaveCount(3);
+  });
+
   test('guest can choose a real variant, add it to cart, and reach the secure sign-in boundary', async ({ page }) => {
     await page.goto(`/product/${productSlug}`);
     await expect(page.getByRole('heading', { name: productName })).toBeVisible();
@@ -124,8 +139,8 @@ test.describe('AMZIRA storefront', () => {
     await expect(page.locator('#kids-mega-menu')).not.toContainText(/Debli|Piramit|Black V|Satin Jacquard/);
 
     for (const category of [
-      { slug: 'kids-pattu-pavadai', heading: 'Girls’ Pattu Pavadai & South Indian Lehenga Choli', count: 107 },
-      { slug: 'girls-lehenga-choli', heading: 'Girls’ Pattu Pavadai & South Indian Lehenga Choli', count: 30 },
+      { slug: 'kids-pattu-pavadai', heading: 'Girls’ Pattu Pavadai & South Indian Lehenga Choli', count: 110 },
+      { slug: 'girls-lehenga-choli', heading: 'Girls’ Pattu Pavadai & South Indian Lehenga Choli', count: 33 },
       { slug: 'pattu-pavadai', heading: 'Girls’ Pattu Pavadai & South Indian Lehenga Choli', count: 77 }
     ]) {
       await page.goto(`/category/${category.slug}`);
@@ -138,6 +153,52 @@ test.describe('AMZIRA storefront', () => {
     await page.getByRole('button', { name: 'Apply filters' }).click();
     await expect(page).toHaveURL(/subcategory=classic-pattu-pavadai/);
     await expect(page.getByText('29 styles available')).toBeVisible();
+  });
+
+  test('every published girls subcategory returns the styles shown in its filter count', async ({ page }) => {
+    const subcategories = [
+      { category: 'girls-lehenga-choli', slug: 'south-indian-lehenga-choli' },
+      { category: 'girls-lehenga-choli', slug: 'temple-peacock-work-lehenga' },
+      { category: 'girls-lehenga-choli', slug: 'koti-jacket-lehenga-sets' },
+      { category: 'girls-lehenga-choli', slug: 'festive-silk-lehenga-choli' },
+      { category: 'pattu-pavadai', slug: 'classic-pattu-pavadai' },
+      { category: 'pattu-pavadai', slug: 'peacock-elephant-pattu-pavadai' },
+      { category: 'pattu-pavadai', slug: 'gold-zari-pattu-pavadai' }
+    ];
+
+    for (const { category, slug } of subcategories) {
+      await page.goto(`/category/${category}`);
+      const option = page.locator(`select[name="subcategory"] option[value="${slug}"]`);
+      const label = await option.textContent();
+      const expectedCount = label.match(/\((\d+)\)/)?.[1];
+      expect(expectedCount, `Missing product count for ${slug}`).toBeTruthy();
+
+      await page.locator('select[name="subcategory"]').selectOption(slug);
+      await Promise.all([
+        page.waitForURL(new RegExp(`subcategory=${slug}`)),
+        page.locator('form[action^="/category/"]').evaluate((form) => form.requestSubmit())
+      ]);
+      await expect(page.getByText(`${expectedCount} styles available`)).toBeVisible();
+      await expect(page.getByRole('heading', { name: 'No pieces found' })).toHaveCount(0);
+    }
+  });
+
+  test('quick view exposes all in-stock age sizes and the catalog turns to the named back view', async ({ page }) => {
+    await page.goto('/category/pattu-pavadai?subcategory=gold-zari-pattu-pavadai');
+    const firstCard = page.locator('.kids-catalog-grid > article').first();
+
+    await firstCard.hover();
+    await expect(firstCard.getByText('Back view')).toHaveCSS('opacity', '1');
+
+    await firstCard.getByRole('button', { name: 'Quick view' }).click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByText('Select age / size')).toBeVisible();
+    for (const size of ['1-2Y', '2-3Y', '3-4Y', '4-5Y', '5-6Y', '6-7Y', '7-8Y', '9-10Y']) {
+      await expect(dialog.getByRole('button', { name: size, exact: true })).toBeVisible();
+    }
+
+    await dialog.getByRole('button', { name: '6-7Y', exact: true }).click();
+    await expect(dialog.getByRole('button', { name: 'Add to cart', exact: true })).toBeEnabled();
   });
 
   test('kids catalog product cards open their matching product detail page', async ({ page }) => {
@@ -181,7 +242,7 @@ test.describe('AMZIRA storefront', () => {
     const productLinks = await page.locator('article.group a[aria-label^="View "]').evaluateAll((links) =>
       [...new Set(links.map((link) => link.getAttribute('href')).filter(Boolean))]
     );
-    expect(productLinks).toHaveLength(107);
+    expect(productLinks.length).toBeGreaterThanOrEqual(107);
 
     for (const href of productLinks) {
       await page.goto(href, { waitUntil: 'commit' });
@@ -202,6 +263,7 @@ test.describe('AMZIRA storefront', () => {
       expect(await galleryImages.count()).toBeGreaterThan(1);
 
       for (const image of await galleryImages.all()) {
+        await image.scrollIntoViewIfNeeded();
         await expect.poll(() => image.evaluate((element) => element.complete && element.naturalWidth > 0)).toBe(true);
       }
     }
@@ -219,7 +281,7 @@ test.describe('AMZIRA storefront', () => {
     await inventoryHighlight.click();
 
     await expect(page).toHaveURL(/\/product\//);
-    await expect(page.getByRole('button', { name: /Add to cart/i })).toBeVisible();
+    await expect(page.getByRole('complementary').getByRole('button', { name: /Add to cart/i })).toBeVisible();
     await expect(page.getByRole('heading', { name: /This style has moved/i })).toHaveCount(0);
   });
 

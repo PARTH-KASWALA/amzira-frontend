@@ -246,7 +246,7 @@ export default async function HeritagePage() {
                 src={heritageInventoryLooks.green.image}
                 alt={heritageInventoryLooks.green.alt}
                 fill
-                unoptimized={heritageInventoryLooks.green.image.startsWith("/images/") || heritageInventoryLooks.green.image.startsWith("https://cdn.amzira.com/")}
+                unoptimized
                 sizes="(min-width: 1024px) 28vw, 46vw"
                 className="object-cover"
               />
@@ -256,7 +256,7 @@ export default async function HeritagePage() {
                 src={heritageInventoryLooks.blue.image}
                 alt={heritageInventoryLooks.blue.alt}
                 fill
-                unoptimized={heritageInventoryLooks.blue.image.startsWith("/images/") || heritageInventoryLooks.blue.image.startsWith("https://cdn.amzira.com/")}
+                unoptimized
                 sizes="(min-width: 1024px) 30vw, 54vw"
                 className="object-cover"
               />
@@ -276,7 +276,6 @@ export default async function HeritagePage() {
           src="/images/heritage/heritage-proof-courtyard.webp"
           alt=""
           fill
-          unoptimized
           sizes="100vw"
           className="heritage-proof-backdrop pointer-events-none -z-10 object-cover"
         />
