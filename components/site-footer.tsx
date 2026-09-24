@@ -20,6 +20,7 @@ const footerColumns = [
   {
     title: "Discover",
     links: [
+      ["About AMZIRA", "/about-us"],
       ["Our Heritage", "/heritage"],
       ["Craftsmanship", "/heritage#craft"],
       ["Stores", "/stores"],
@@ -59,7 +60,7 @@ export function SiteFooter() {
         unoptimized
         sizes="100vw"
         quality={75}
-        className="pointer-events-none absolute inset-0 object-cover object-center saturate-[1.08] contrast-[1.02]"
+        className="site-footer__art pointer-events-none absolute inset-0 object-cover object-center saturate-[1.08] contrast-[1.02]"
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#fff9f0]/88 via-[#fff0e4]/58 to-[#fff0e4]/18" />
       <div className="pointer-events-none absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-white/92 via-white/45 to-transparent" />
@@ -97,6 +98,46 @@ export function SiteFooter() {
             <Mail className="h-4 w-4" aria-hidden="true" /> Email for updates
           </a>
         </div>
+      </div>
+
+      <div className="site-footer__mobile relative mx-auto w-full max-w-[640px] px-4 pb-8 pt-10">
+        <Link href="/" className="focus-ring inline-flex items-center gap-3 rounded-sm" aria-label="AMZIRA home">
+          <span className="relative h-11 w-11 shrink-0 overflow-hidden rounded-full border border-gold/70 bg-white/80 shadow-soft">
+            <Image src="/images/logo/amzira_logo.webp" alt="" fill unoptimized sizes="44px" className="object-contain p-1.5" />
+          </span>
+          <span>
+            <span className="block text-2xl font-bold leading-none tracking-tight text-charcoal">amzira</span>
+            <span className="mt-1 block text-[9px] font-semibold uppercase tracking-[0.25em] text-[#8f5d4b]">South Indian Luxury</span>
+          </span>
+        </Link>
+        <p className="mt-5 max-w-sm text-sm leading-6 text-[#5f5b5a]">Ceremony-ready South Indian styles, with fit guidance when you need it.</p>
+
+        <div className="mt-7 divide-y divide-[#d9b9ad]/65 border-y border-[#d9b9ad]/65">
+          {footerColumns.map((column) => (
+            <details key={column.title} className="site-footer__mobile-group">
+              <summary className="focus-ring flex min-h-14 cursor-pointer list-none items-center justify-between text-xs font-semibold uppercase tracking-[0.22em] text-[#8f3444]">
+                {column.title}
+                <span aria-hidden="true">+</span>
+              </summary>
+              <ul className="grid gap-3 pb-5">
+                {column.links.map(([label, href]) => (
+                  <li key={label}>
+                    <Link href={href} className="focus-ring rounded-sm text-sm leading-6 text-[#5f5b5a] hover:text-maroon">{label}</Link>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          ))}
+        </div>
+
+        <section className="mt-7 rounded-md border border-[#d9b9ad]/70 bg-white/65 p-5">
+          <h2 className="text-xs font-semibold uppercase tracking-[0.22em] text-[#8f3444]">Need a hand?</h2>
+          <p className="mt-3 text-sm leading-6 text-[#5f5b5a]">Support: <a className="underline-offset-4 hover:underline" href={`tel:${COMPANY.supportPhone}`}>{COMPANY.supportPhoneDisplay}</a></p>
+          <a href={`mailto:${COMPANY.supportEmail}?subject=AMZIRA%20support%20request`} className="btn-secondary mt-4 w-full gap-2 bg-white/90">
+            <Mail className="h-4 w-4" aria-hidden="true" /> Email support
+          </a>
+        </section>
+        <p className="mt-7 text-xs text-[#65605e]">© 2026 AMZIRA Atelier. All rights reserved.</p>
       </div>
 
       <div className="site-footer__meta relative mx-auto flex w-full max-w-[1480px] flex-col gap-5 px-4 pb-10 text-sm font-medium text-[#65605e] sm:px-6 md:flex-row md:items-end md:justify-between lg:px-8">

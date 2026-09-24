@@ -2,6 +2,7 @@ node_modules
 .next
 .next-stale-*
 .next-broken-*
+.next-corrupt-*
 out
 .env*
 !.env.example

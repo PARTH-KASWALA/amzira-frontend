@@ -10,8 +10,10 @@ import {
   Flower2,
   Gem,
   Grid2X2,
+  Menu,
   Shirt,
-  Sparkles
+  Sparkles,
+  X
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { CartCountBadge } from "@/components/cart-count-badge";
@@ -38,10 +40,13 @@ function isCurrentDepartment(pathname: string, label: string, href: string) {
 export function SiteHeader() {
   const pathname = usePathname();
   const [activeLabel, setActiveLabel] = useState<string | null>(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const activeGroup = navGroups.find((group) => group.label === activeLabel && group.status === "live");
 
   useEffect(() => {
     setActiveLabel(null);
+    setIsMobileMenuOpen(false);
+    document.querySelector<HTMLDetailsElement>(".site-header__mobile-kids")?.removeAttribute("open");
   }, [pathname]);
 
   useEffect(() => {
@@ -78,7 +83,7 @@ export function SiteHeader() {
       </div>
 
       <div className="container-page flex min-h-[78px] items-center justify-between gap-4">
-        <Link href="/" className="focus-ring group flex min-w-0 items-center gap-3 rounded-sm" aria-label="AMZIRA home">
+        <Link href="/" className="site-header__brand focus-ring group flex min-w-0 items-center gap-3 rounded-sm" aria-label="AMZIRA home">
           <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-full border border-gold/55 bg-white shadow-soft">
             <Image
               src="/images/logo/amzira_logo.webp"
@@ -152,6 +157,14 @@ export function SiteHeader() {
           >
             Heritage
           </Link>
+          <Link
+            href="/about-us"
+            className={`nav-department focus-ring ${pathname === "/about-us" ? "nav-department--active" : ""}`}
+            onFocus={() => setActiveLabel(null)}
+            onMouseEnter={() => setActiveLabel(null)}
+          >
+            About
+          </Link>
         </nav>
 
         <div className="flex items-center gap-0.5" onMouseEnter={() => setActiveLabel(null)}>
@@ -168,6 +181,16 @@ export function SiteHeader() {
               {item.label === "Cart" ? <CartCountBadge /> : null}
             </Link>
           ))}
+          <button
+            className="site-header__menu-button focus-ring grid min-h-11 min-w-11 place-items-center rounded-full text-charcoal transition hover:bg-maroon-soft hover:text-maroon"
+            type="button"
+            aria-label={isMobileMenuOpen ? "Close navigation" : "Open navigation"}
+            aria-expanded={isMobileMenuOpen}
+            aria-controls="mobile-primary-navigation"
+            onClick={() => setIsMobileMenuOpen((open) => !open)}
+          >
+            {isMobileMenuOpen ? <X className="h-5 w-5" aria-hidden="true" /> : <Menu className="h-5 w-5" aria-hidden="true" />}
+          </button>
         </div>
       </div>
 
@@ -295,7 +318,69 @@ export function SiteHeader() {
         >
           Heritage
         </Link>
+        <Link
+          href="/about-us"
+          className={`focus-ring min-h-11 shrink-0 rounded-sm border px-4 py-3 text-xs font-semibold uppercase tracking-[0.14em] ${
+            pathname === "/about-us" ? "border-maroon bg-maroon text-white" : "border-charcoal/10 bg-white text-charcoal"
+          }`}
+        >
+          About
+        </Link>
       </nav>
+
+      <div className={`site-header__mobile-menu ${isMobileMenuOpen ? "is-open" : ""}`} id="mobile-primary-navigation">
+        <nav className="container-page grid grid-cols-2 gap-2 py-3" aria-label="Mobile primary navigation">
+          {[...navGroups, { label: "Heritage", href: "/heritage", status: "live" as const }, { label: "About", href: "/about-us", status: "live" as const }].map((group) => {
+            const current = isCurrentDepartment(pathname, group.label, group.href);
+
+            if (group.label === "Kids" && "columns" in group) {
+              return (
+                <details className={`site-header__mobile-kids ${current ? "is-current" : ""}`} key={group.label}>
+                  <summary className="site-header__mobile-kids-summary">
+                    <span>Kids collections</span>
+                    <ChevronDown aria-hidden="true" />
+                  </summary>
+                  <div className="site-header__mobile-kids-panel">
+                    <Link className="site-header__mobile-kids-all" href={group.href}>
+                      {group.introCta[0]} <ArrowRight aria-hidden="true" />
+                    </Link>
+                    <div className="site-header__mobile-kids-columns">
+                      {group.columns.map((column) => (
+                        <section key={column.title}>
+                          <h2>{column.title}</h2>
+                          <ul>
+                            {column.links.map((item) => (
+                              <li key={item.href}>
+                                <Link href={item.href}>{item.label}</Link>
+                              </li>
+                            ))}
+                          </ul>
+                          <Link className="site-header__mobile-kids-cta" href={column.cta[1]}>
+                            {column.cta[0]} <ArrowRight aria-hidden="true" />
+                          </Link>
+                        </section>
+                      ))}
+                    </div>
+                  </div>
+                </details>
+              );
+            }
+
+            return (
+              <Link
+                key={group.label}
+                href={group.href}
+                className={`focus-ring flex min-h-12 items-center justify-between rounded-md border px-4 text-xs font-semibold uppercase tracking-[0.12em] ${
+                  current ? "border-maroon bg-maroon text-white" : "border-charcoal/10 bg-white text-charcoal"
+                }`}
+              >
+                {group.label}
+                <ArrowRight className="h-4 w-4" aria-hidden="true" />
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
     </header>
   );
 }

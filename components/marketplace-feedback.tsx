@@ -112,6 +112,35 @@ const marketplaceFeedback: MarketplaceFeedback[] = [
   }
 ];
 
+type MobileFeedbackTile =
+  | {
+      kind: "review";
+      key: string;
+      feedback: MarketplaceFeedback;
+      review: MarketplaceFeedback["reviews"][number];
+    }
+  | {
+      kind: "photo";
+      key: string;
+      feedback: MarketplaceFeedback;
+      photo: NonNullable<MarketplaceFeedback["customerPhotos"]>[number];
+    };
+
+const mobileFeedbackTiles: MobileFeedbackTile[] = marketplaceFeedback.flatMap((feedback) => [
+  ...feedback.reviews.map((review, index) => ({
+    kind: "review" as const,
+    key: `review-${feedback.marketplace}-${feedback.seller}-${index}`,
+    feedback,
+    review
+  })),
+  ...(feedback.customerPhotos ?? []).map((photo, index) => ({
+    kind: "photo" as const,
+    key: `photo-${feedback.marketplace}-${feedback.seller}-${index}`,
+    feedback,
+    photo
+  }))
+]);
+
 function RatingStars({ rating }: { rating: number }) {
   return (
     <span className="flex items-center gap-0.5 text-gold" role="img" aria-label={`${rating} out of 5 stars`}>
@@ -128,7 +157,7 @@ export function MarketplaceFeedbackSection() {
       <div className="container-page pattern-section__content">
         <div className="max-w-3xl">
           <p className="section-kicker">Marketplace customer feedback</p>
-          <h2 className="mt-2 font-display text-4xl font-semibold text-maroon-deep sm:text-5xl" id="marketplace-feedback-heading">
+          <h2 className="marketplace-feedback-title mt-2 font-display text-4xl font-semibold text-maroon-deep sm:text-5xl" id="marketplace-feedback-heading">
             Loved across our seller channels
           </h2>
           <p className="mt-4 text-sm leading-7 text-charcoal/70 sm:text-base">
@@ -136,21 +165,63 @@ export function MarketplaceFeedbackSection() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-6 lg:grid-cols-2">
+        <div className="marketplace-feedback-mobile-grid sm:hidden" aria-label="Marketplace reviews and customer photos">
+          {mobileFeedbackTiles.map((tile) => tile.kind === "review" ? (
+            <article className="marketplace-feedback-mobile-card" key={tile.key}>
+              <header className="marketplace-feedback-mobile-card__header">
+                <p>{tile.feedback.marketplace} · {tile.feedback.seller}</p>
+                <time>{tile.review.date === "Shown on source listing" ? "Date not listed" : tile.review.date}</time>
+              </header>
+              <div className="marketplace-feedback-mobile-card__rating">
+                <RatingStars rating={tile.review.rating} />
+                <span>{tile.review.rating.toFixed(1)} / 5</span>
+              </div>
+              <blockquote>“{tile.review.quote}”</blockquote>
+              <footer>
+                <p className="marketplace-feedback-mobile-card__product">{tile.feedback.product}</p>
+                <p className="marketplace-feedback-mobile-card__summary">
+                  Listing average {tile.feedback.rating.toFixed(1)} / 5 · {tile.feedback.ratingCount} {tile.feedback.marketplace === "Myntra" ? "verified buyers" : "ratings"}
+                </p>
+                <a href={tile.feedback.listingUrl} rel="noreferrer" target="_blank">
+                  View source listing <ExternalLink aria-hidden="true" />
+                </a>
+              </footer>
+            </article>
+          ) : (
+            <figure className="marketplace-feedback-mobile-photo" key={tile.key}>
+              <div className="marketplace-feedback-mobile-photo__image">
+                <Image
+                  alt={tile.photo.alt}
+                  className="object-cover"
+                  fill
+                  sizes="(max-width: 639px) 46vw, 220px"
+                  src={tile.photo.url}
+                  unoptimized
+                />
+              </div>
+              <figcaption>
+                <span><Camera aria-hidden="true" /> Customer photo · {tile.feedback.marketplace}</span>
+                <a href={tile.feedback.listingUrl} rel="noreferrer" target="_blank">{tile.feedback.product}</a>
+              </figcaption>
+            </figure>
+          ))}
+        </div>
+
+        <div className="marketplace-feedback-grid mt-10 hidden gap-6 sm:grid lg:grid-cols-2">
           {marketplaceFeedback.map((feedback) => (
             <article className="overflow-hidden rounded-xl border border-maroon/10 bg-white shadow-soft" key={`${feedback.marketplace}-${feedback.product}`}>
-              <div className="flex flex-wrap items-start justify-between gap-4 border-b border-charcoal/10 bg-maroon-soft/45 p-6">
+              <div className="marketplace-feedback-card-header flex flex-wrap items-start justify-between gap-4 border-b border-charcoal/10 bg-maroon-soft/45 p-6">
                 <div>
                   <p className="text-xs font-bold uppercase tracking-[0.16em] text-maroon">{feedback.marketplace} · {feedback.seller}</p>
-                  <h3 className="mt-2 font-display text-2xl font-semibold text-maroon-deep">{feedback.product}</h3>
+                  <h3 className="marketplace-feedback-product mt-2 font-display text-2xl font-semibold text-maroon-deep">{feedback.product}</h3>
                 </div>
-                <div className="rounded-lg bg-white px-4 py-3 text-right shadow-sm">
-                  <span className="flex items-center justify-end gap-2 text-lg font-bold text-maroon-deep"><RatingStars rating={feedback.rating} /> {feedback.rating.toFixed(1)} / 5</span>
+                <div className="marketplace-feedback-rating rounded-lg bg-white px-4 py-3 text-right shadow-sm">
+                  <span className="marketplace-feedback-score flex items-center justify-end gap-2 text-lg font-bold text-maroon-deep"><RatingStars rating={feedback.rating} /> {feedback.rating.toFixed(1)} / 5</span>
                   <p className="mt-1 text-xs font-semibold text-charcoal/65">from {feedback.ratingCount} {feedback.marketplace === "Myntra" ? "verified buyers" : "ratings"}</p>
                 </div>
               </div>
 
-              <div className="grid gap-6 p-6 sm:grid-cols-[minmax(0,1fr)_150px]">
+              <div className="marketplace-feedback-card-body grid gap-6 p-6 sm:grid-cols-[minmax(0,1fr)_150px]">
                 <div>
                   <ul className="space-y-4" aria-label={`Featured ${feedback.marketplace} reviews rated four stars or above`}>
                     {feedback.reviews.map((review, index) => (

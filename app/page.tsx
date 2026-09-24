@@ -333,9 +333,12 @@ export default async function HomePage() {
     getProducts({ limit: 100 })
   ]);
   const inventoryProducts = diversifyInventory(uniqueInventory([...featuredProducts, ...allProducts]));
-  const heroProducts = await Promise.all(
-    inventoryProducts.slice(0, heroSlideCount * 4).map(async (product) => (await getProduct(product.slug)) || product)
-  );
+  // A catalog list item is not enough to guarantee that its PDP exists. Only
+  // promote products whose detail endpoint resolves; unresolved list entries
+  // are left to the catalog grid, while the hero uses its safe fallback slides.
+  const heroProducts = (await Promise.all(
+    inventoryProducts.slice(0, heroSlideCount * 4).map((product) => getProduct(product.slug))
+  )).filter((product): product is Product => Boolean(product));
   const luxuryProducts = inventoryProducts.slice(4, 7);
   const collectionProduct = inventoryProducts[7] || inventoryProducts[0];
   const craftProduct = inventoryProducts[8] || inventoryProducts[0];
@@ -388,35 +391,50 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <section className="craft-home-section overflow-hidden py-14 lg:py-20">
-        <div className="container-page grid gap-10 lg:grid-cols-[1fr_0.86fr] lg:items-center">
-          <div className="relative min-h-[420px] overflow-hidden rounded-xl bg-charcoal shadow-sari sm:min-h-[520px] lg:min-h-[560px]">
-            <Image
-              src={craftProduct?.primaryImage || "/images/hero-upgrade/green-kids-lehenga-front.webp"}
-              alt={craftProduct?.name || "Girl wearing an emerald South Indian lehenga choli with a temple border"}
-              fill
-              unoptimized={Boolean(craftProduct?.primaryImage?.startsWith("/images/") || craftProduct?.primaryImage?.startsWith("https://cdn.amzira.com/") || !craftProduct?.primaryImage)}
-              sizes="(min-width: 1024px) 48vw, 100vw"
-              className="object-cover brightness-[1.04] saturate-[1.08]"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-maroon-deep/36 via-transparent to-transparent" />
-            <div className="absolute bottom-6 left-6 right-6 max-w-sm rounded-lg border border-white/60 bg-white/88 p-5 shadow-soft backdrop-blur-md sm:bottom-8 sm:left-8">
-              <div className="flex items-center gap-4">
-                <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-white text-maroon shadow-sm">
-                  <HandHeart className="h-8 w-8" aria-hidden="true" />
-                </span>
-                <div>
-                  <p className="font-display text-2xl font-semibold leading-tight text-maroon-deep">
-                    Crafted for her brightest memories.
-                  </p>
-                  <p className="mt-2 text-xs font-medium leading-5 text-charcoal/68">
-                    Rooted in tradition. Comfortable all day.
-                  </p>
+      <section className="craft-home-section homepage-craft-section overflow-hidden py-14 lg:py-20">
+        <div className="container-page homepage-craft-layout grid gap-10 lg:grid-cols-[1fr_0.86fr] lg:items-center">
+          <div className="homepage-craft-visual">
+            <div className="homepage-craft-media relative min-h-[420px] overflow-hidden rounded-xl bg-charcoal shadow-sari sm:min-h-[520px] lg:min-h-[560px]">
+              <Image
+                src={craftProduct?.primaryImage || "/images/hero-upgrade/green-kids-lehenga-front.webp"}
+                alt={craftProduct?.name || "Girl wearing an emerald South Indian lehenga choli with a temple border"}
+                fill
+                unoptimized={Boolean(craftProduct?.primaryImage?.startsWith("/images/") || craftProduct?.primaryImage?.startsWith("https://cdn.amzira.com/") || !craftProduct?.primaryImage)}
+                sizes="(min-width: 1024px) 48vw, 100vw"
+                className="homepage-craft-image object-cover brightness-[1.04] saturate-[1.08]"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-maroon-deep/36 via-transparent to-transparent" />
+              <div className="homepage-craft-callout homepage-craft-callout--overlay absolute bottom-6 left-6 right-6 max-w-sm rounded-lg border border-white/60 bg-white/88 p-5 shadow-soft backdrop-blur-md sm:bottom-8 sm:left-8">
+                <div className="flex items-center gap-4">
+                  <span className="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-white text-maroon shadow-sm">
+                    <HandHeart className="h-8 w-8" aria-hidden="true" />
+                  </span>
+                  <div>
+                    <p className="font-display text-2xl font-semibold leading-tight text-maroon-deep">
+                      Crafted for her brightest memories.
+                    </p>
+                    <p className="mt-2 text-xs font-medium leading-5 text-charcoal/68">
+                      Rooted in tradition. Comfortable all day.
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
+            <div className="homepage-craft-callout homepage-craft-callout--mobile hidden">
+              <span className="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-white text-maroon shadow-sm">
+                <HandHeart className="h-6 w-6" aria-hidden="true" />
+              </span>
+              <div>
+                <p className="font-display text-xl font-semibold leading-tight text-maroon-deep">
+                  Crafted for her brightest memories.
+                </p>
+                <p className="mt-1 text-xs font-medium leading-5 text-charcoal/68">
+                  Rooted in tradition. Comfortable all day.
+                </p>
+              </div>
+            </div>
           </div>
-          <div className="min-w-0">
+          <div className="homepage-craft-copy min-w-0">
             <div className="craft-title-rule mb-6" aria-hidden="true">
               <span />
             </div>
@@ -424,13 +442,13 @@ export default async function HomePage() {
             <h2 className="mt-4 max-w-3xl font-display text-4xl font-semibold leading-[1.06] text-maroon-deep sm:text-5xl lg:text-6xl">
               South Indian heritage for little celebration days.
             </h2>
-            <div className="my-7 h-px w-56 bg-gradient-to-r from-gold via-maroon to-transparent" />
-            <p className="max-w-2xl text-base leading-8 text-charcoal/70">
+            <div className="homepage-craft-divider my-7 h-px w-56 bg-gradient-to-r from-gold via-maroon to-transparent" />
+            <p className="homepage-craft-description max-w-2xl text-base leading-8 text-charcoal/70">
               Girls&apos; lehenga choli and pattu pavadai with vivid silk color, traditional borders, and kid-friendly comfort.
             </p>
             <Link
               href="/search"
-              className="focus-ring mt-8 flex min-h-[64px] min-w-0 items-center gap-4 rounded-full border border-charcoal/10 bg-white px-5 text-charcoal shadow-soft transition hover:border-maroon/35 hover:shadow-sari"
+              className="homepage-craft-search focus-ring mt-8 flex min-h-[64px] min-w-0 items-center gap-4 rounded-full border border-charcoal/10 bg-white px-5 text-charcoal shadow-soft transition hover:border-maroon/35 hover:shadow-sari"
             >
               <Search className="h-6 w-6 shrink-0 text-maroon" aria-hidden="true" />
               <span className="min-w-0 flex-1 truncate text-sm text-charcoal/58 sm:text-base">
@@ -440,10 +458,10 @@ export default async function HomePage() {
                 <ArrowRight className="h-5 w-5" aria-hidden="true" />
               </span>
             </Link>
-            <p className="mt-8 text-xs font-semibold uppercase tracking-[0.24em] text-maroon-deep">
+            <p className="homepage-popular-label mt-8 text-xs font-semibold uppercase tracking-[0.24em] text-maroon-deep">
               Popular searches
             </p>
-            <div className="mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+            <div className="homepage-popular-searches mt-4 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
               {shoppingPaths.map((path) => (
                 <Link
                   key={path.label}
@@ -463,13 +481,13 @@ export default async function HomePage() {
 
       <DeferredProcessionGifSection />
 
-      <section className="occasion-section pattern-section py-16 lg:py-24">
+      <section className="occasion-section homepage-occasion-section pattern-section py-16 lg:py-24">
         <div className="container-page pattern-section__content">
           <div className="mb-8 flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
             <div>
               <div className="temple-rule">
                 <p className="section-kicker">Shop by occasion</p>
-                <h2 className="mt-2 font-display text-5xl font-semibold text-maroon-deep">
+                <h2 className="homepage-occasion-title mt-2 font-display text-5xl font-semibold text-maroon-deep">
                   Every event gets its own edit
                 </h2>
               </div>
@@ -481,14 +499,14 @@ export default async function HomePage() {
               Explore edits <ArrowRight className="h-4 w-4" aria-hidden="true" />
             </Link>
           </div>
-          <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+          <div className="homepage-occasion-grid grid gap-5 md:grid-cols-2 xl:grid-cols-4">
             {occasionEdits.map((edit) => (
               <Link
                 key={edit.name}
                 href={edit.href}
                 className="group overflow-hidden rounded-lg border border-charcoal/10 bg-white shadow-soft transition hover:-translate-y-1 hover:shadow-sari focus-ring"
               >
-                <div className="relative aspect-[1.02/1] overflow-hidden bg-sandal">
+                <div className="homepage-occasion-image relative aspect-[1.02/1] overflow-hidden bg-sandal">
                   <Image
                     src={edit.image}
                     alt={`${edit.name} ethnic wear edit`}
@@ -497,15 +515,15 @@ export default async function HomePage() {
                     sizes="(min-width: 1280px) 24vw, (min-width: 768px) 48vw, 100vw"
                     className="object-cover transition duration-700 group-hover:scale-[1.04]"
                   />
-                  <span className="absolute left-5 top-5 grid h-12 w-12 place-items-center rounded-full border border-white bg-white text-maroon shadow-soft">
+                  <span className="homepage-occasion-icon absolute left-5 top-5 grid h-12 w-12 place-items-center rounded-full border border-white bg-white text-maroon shadow-soft">
                     <edit.icon className="h-6 w-6" aria-hidden="true" />
                   </span>
                 </div>
-                <div className="p-6">
-                  <h3 className="font-display text-3xl font-semibold text-maroon-deep">{edit.name}</h3>
-                  <span className="mt-3 block h-px w-16 bg-gradient-to-r from-gold via-gold to-transparent" />
-                  <p className="mt-2 text-sm leading-6 text-charcoal/64">{edit.copy}</p>
-                  <span className="mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-maroon">
+                <div className="homepage-occasion-card-copy p-6">
+                  <h3 className="homepage-occasion-card-title font-display text-3xl font-semibold text-maroon-deep">{edit.name}</h3>
+                  <span className="homepage-occasion-card-rule mt-3 block h-px w-16 bg-gradient-to-r from-gold via-gold to-transparent" />
+                  <p className="homepage-occasion-card-description mt-2 text-sm leading-6 text-charcoal/64">{edit.copy}</p>
+                  <span className="homepage-occasion-card-link mt-5 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-[0.14em] text-maroon">
                     Explore edit
                     <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" aria-hidden="true" />
                   </span>
@@ -516,12 +534,12 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {merchandisingProducts.length ? <section className="pattern-section py-16 lg:py-24">
+      {merchandisingProducts.length ? <section className="homepage-merchandising-section pattern-section py-16 lg:py-24">
         <div className="container-page pattern-section__content">
           <div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
             <div>
               <p className="section-kicker">{merchandisingLabel}</p>
-              <h2 className="mt-2 font-display text-5xl font-semibold text-maroon-deep">{merchandisingTitle}</h2>
+              <h2 className="homepage-merchandising-title mt-2 font-display text-5xl font-semibold text-maroon-deep">{merchandisingTitle}</h2>
               {marketplaceProducts.length && !bestsellerProducts.length ? (
                 <p className="mt-3 max-w-2xl text-sm leading-6 text-charcoal/65">
                   Observed seller-channel performance signals are shown transparently here; they are not AMZIRA customer ratings or reviews.
@@ -532,7 +550,7 @@ export default async function HomePage() {
               Girls&apos; collection
             </Link>
           </div>
-          <ProductGrid products={merchandisingProducts} />
+          <ProductGrid products={merchandisingProducts} className="homepage-merchandising-grid" />
         </div>
       </section> : null}
 

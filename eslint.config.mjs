@@ -12,6 +12,7 @@ const eslintConfig = [
       ".next/**",
       ".next-stale-*/**",
       ".next-broken-*/**",
+      ".next-corrupt-*/**",
       "node_modules/**",
       "out/**",
       "coverage/**",

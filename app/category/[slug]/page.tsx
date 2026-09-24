@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { Flower2, Search, SlidersHorizontal } from "lucide-react";
 import { JsonLd } from "@/components/json-ld";
+import { MobileCategoryFilters } from "@/components/mobile-category-filters";
+import { MobileCategorySort } from "@/components/mobile-category-sort";
 import { ProductGrid } from "@/components/product-grid";
 import { getCategories, getCategory, getProducts, getSubcategories } from "@/lib/api";
 import { buildMetadata, breadcrumbJsonLd } from "@/lib/seo";
@@ -58,6 +60,9 @@ export default async function CategoryPage({ params, searchParams }: Props) {
     sort_by: query.sort_by
   };
   const productsPromise = getProducts(catalogParams);
+  const activeFilterCount = Object.entries(catalogParams).filter(
+    ([key, value]) => key !== "category" && key !== "sort_by" && value !== undefined && value !== ""
+  ).length;
   const hasActiveFilter = Object.entries(catalogParams).some(
     ([key, value]) => key !== "category" && value !== undefined && value !== ""
   );
@@ -83,6 +88,43 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       )
     )
   ).sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+  const filterForm = (
+    <form className="mt-5 grid gap-4" action={`/category/${category.slug}`}>
+      <label className="form-field">Search<span className={isKidsCatalog ? "kids-catalog-search" : undefined}><input name="search" defaultValue={query.search} placeholder="Lehenga, pattu pavadai..." />{isKidsCatalog ? <Search aria-hidden="true" /> : null}</span></label>
+      {subcategories.length ? (
+        <label className="form-field">
+          Shop by style
+          <select name="subcategory" defaultValue={query.subcategory || ""}>
+            <option value="">All styles</option>
+            {subcategories.map((subcategory) => (
+              <option key={subcategory.slug} value={subcategory.slug}>
+                {subcategory.name} ({subcategory.productCount})
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+      <label className="form-field">Occasion<select name="occasion" defaultValue={query.occasion || ""}><option value="">All occasions</option><option value="wedding">Wedding</option><option value="festival">Festival</option><option value="puja">Puja</option><option value="sangeet">Sangeet</option></select></label>
+      {sizeOptions.length ? (
+        <label className="form-field">
+          Size / age band
+          <select name="size" defaultValue={query.size || ""}>
+            <option value="">All available sizes</option>
+            {sizeOptions.map((size) => <option key={size} value={size}>{size}</option>)}
+          </select>
+        </label>
+      ) : null}
+      <div className="grid grid-cols-2 gap-3">
+        <label className="form-field">Min price<input name="min_price" type="number" min="0" step="500" defaultValue={query.min_price} /></label>
+        <label className="form-field">Max price<input name="max_price" type="number" min="0" step="500" defaultValue={query.max_price} /></label>
+      </div>
+      <label className={isKidsCatalog ? "form-field kids-catalog-sort-desktop" : "form-field"}>Sort<select name="sort_by" defaultValue={query.sort_by || "newest"}><option value="newest">Newest</option><option value="popular">Popular</option><option value="marketplace">Marketplace signals</option><option value="bestseller">Bestsellers</option><option value="top_rated">Top rated</option><option value="price_asc">Price: low to high</option><option value="price_desc">Price: high to low</option></select></label>
+      <div className="kids-catalog-filter-actions">
+        <button className="btn-primary" type="submit">Apply filters</button>
+        <Link className="btn-secondary" href={`/category/${category.slug}`}>Clear filters</Link>
+      </div>
+    </form>
+  );
 
   return (
     <>
@@ -112,44 +154,37 @@ export default async function CategoryPage({ params, searchParams }: Props) {
       </section>
 
       <section className={isKidsCatalog ? "container-page kids-catalog-layout" : "container-page grid gap-8 py-12 lg:grid-cols-[280px_1fr]"}>
-        <aside className={isKidsCatalog ? "kids-catalog-filters" : "h-fit border-t border-charcoal/10 bg-white pt-5 lg:sticky lg:top-32"}>
-          <div className="flex items-center gap-3 border-b border-charcoal/10 pb-4">
-            <SlidersHorizontal className="h-5 w-5 text-gold" aria-hidden="true" />
-            <h2 className="font-semibold uppercase tracking-[0.16em]">Filters</h2>
+        <aside className={isKidsCatalog ? "kids-catalog-filter-shell" : "h-fit border-t border-charcoal/10 bg-white pt-5 lg:sticky lg:top-32"}>
+          <div className={isKidsCatalog ? "kids-catalog-mobile-toolbar" : undefined}>
+            {isKidsCatalog ? (
+              <MobileCategoryFilters activeFilterCount={activeFilterCount}>{filterForm}</MobileCategoryFilters>
+            ) : (
+              <details className="catalog-filter-panel" open>
+                <summary className="flex list-none items-center justify-between gap-3 border-b border-charcoal/10 pb-4">
+                  <span className="flex items-center gap-3">
+                    <SlidersHorizontal className="h-5 w-5 text-gold" aria-hidden="true" />
+                    <span className="font-semibold uppercase tracking-[0.16em]">Filters</span>
+                  </span>
+                  <span className="catalog-filter-panel__toggle text-xs font-semibold uppercase tracking-[0.12em] text-maroon">Filter &amp; sort</span>
+                </summary>
+                {filterForm}
+              </details>
+            )}
+            {isKidsCatalog ? (
+              <MobileCategorySort
+                action={`/category/${category.slug}`}
+                value={query.sort_by || "newest"}
+                preservedParams={[
+                  ["search", query.search],
+                  ["subcategory", query.subcategory],
+                  ["occasion", query.occasion],
+                  ["size", query.size],
+                  ["min_price", query.min_price],
+                  ["max_price", query.max_price]
+                ]}
+              />
+            ) : null}
           </div>
-          <form className="mt-5 grid gap-4" action={`/category/${category.slug}`}>
-            <label className="form-field">Search<span className={isKidsCatalog ? "kids-catalog-search" : undefined}><input name="search" defaultValue={query.search} placeholder="Lehenga, pattu pavadai..." />{isKidsCatalog ? <Search aria-hidden="true" /> : null}</span></label>
-            {subcategories.length ? (
-              <label className="form-field">
-                Shop by style
-                <select name="subcategory" defaultValue={query.subcategory || ""}>
-                  <option value="">All styles</option>
-                  {subcategories.map((subcategory) => (
-                    <option key={subcategory.slug} value={subcategory.slug}>
-                      {subcategory.name} ({subcategory.productCount})
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ) : null}
-            <label className="form-field">Occasion<select name="occasion" defaultValue={query.occasion || ""}><option value="">All occasions</option><option value="wedding">Wedding</option><option value="festival">Festival</option><option value="puja">Puja</option><option value="sangeet">Sangeet</option></select></label>
-            {sizeOptions.length ? (
-              <label className="form-field">
-                Size / age band
-                <select name="size" defaultValue={query.size || ""}>
-                  <option value="">All available sizes</option>
-                  {sizeOptions.map((size) => <option key={size} value={size}>{size}</option>)}
-                </select>
-              </label>
-            ) : null}
-            <div className="grid grid-cols-2 gap-3">
-              <label className="form-field">Min price<input name="min_price" type="number" min="0" step="500" defaultValue={query.min_price} /></label>
-              <label className="form-field">Max price<input name="max_price" type="number" min="0" step="500" defaultValue={query.max_price} /></label>
-            </div>
-            <label className="form-field">Sort<select name="sort_by" defaultValue={query.sort_by || "newest"}><option value="newest">Newest</option><option value="popular">Popular</option><option value="marketplace">Marketplace signals</option><option value="bestseller">Bestsellers</option><option value="top_rated">Top rated</option><option value="price_asc">Price: low to high</option><option value="price_desc">Price: high to low</option></select></label>
-            <button className="btn-primary" type="submit">Apply filters</button>
-            <Link className="btn-secondary" href={`/category/${category.slug}`}>Clear filters</Link>
-          </form>
         </aside>
         <div className={isKidsCatalog ? "kids-catalog-results" : undefined}>
           <div className={isKidsCatalog ? "kids-catalog-results__bar" : "mb-6 flex flex-col gap-3 border-y border-charcoal/10 bg-white py-4 sm:flex-row sm:items-center sm:justify-between"}>

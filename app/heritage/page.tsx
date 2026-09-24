@@ -6,16 +6,12 @@ import {
   ArrowRight,
   BadgeCheck,
   Boxes,
-  CalendarHeart,
-  Clock3,
   Gem,
   HandHeart,
   Landmark,
   LineChart,
   RefreshCcw,
-  Ruler,
   ScrollText,
-  ShieldCheck,
   Sparkles,
   Sprout,
   Truck
@@ -181,13 +177,6 @@ const craftsmanshipStandards = [
   }
 ];
 
-const craftsmanshipProofs = [
-  { icon: Clock3, value: "36-hour", label: "Returns window" },
-  { icon: Ruler, value: "Fit-led", label: "Size guidance" },
-  { icon: ShieldCheck, value: "Secure", label: "Purchase protection" },
-  { icon: CalendarHeart, value: "Personal", label: "Ceremony styling" }
-];
-
 export default async function HeritagePage() {
   const [featuredProducts, inventoryProducts] = await Promise.all([
     getFeaturedProducts(),
@@ -205,7 +194,7 @@ export default async function HeritagePage() {
 
   return (
     <>
-      <section className="relative isolate overflow-hidden bg-charcoal text-white">
+      <section className="heritage-hero relative isolate overflow-hidden bg-charcoal text-white">
         <Image
           src="/images/heritage/heritage-hero-backdrop.webp"
           alt="South Indian temple courtyard with silk borders, brass lamps, and heritage architecture"
@@ -218,8 +207,8 @@ export default async function HeritagePage() {
         <div className="absolute inset-0 bg-gradient-to-r from-charcoal via-charcoal/76 to-maroon-deep/30" />
         <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-ivory to-transparent" />
 
-        <div className="container-page relative grid min-h-[calc(100svh-7rem)] gap-10 py-10 lg:grid-cols-[0.94fr_1.06fr] lg:items-center lg:py-[3.125rem]">
-          <div className="temple-rule max-w-3xl">
+        <div className="heritage-hero__layout container-page relative grid min-h-[calc(100svh-7rem)] gap-10 py-10 lg:grid-cols-[0.94fr_1.06fr] lg:items-center lg:py-[3.125rem]">
+          <div className="heritage-hero__copy temple-rule max-w-3xl">
             <p className="section-kicker text-gold-pale">Our heritage</p>
             <h1 className="mt-5 font-display text-6xl font-semibold leading-none text-white sm:text-7xl lg:text-8xl">
               South Indian craft, kept in motion.
@@ -232,13 +221,13 @@ export default async function HeritagePage() {
               <Link className="btn-primary gap-2 bg-gold text-charcoal hover:bg-gold-pale" href="/appointments">
                 Book a heritage session <ArrowRight className="h-4 w-4" aria-hidden="true" />
               </Link>
-              <Link className="btn-secondary border-white/30 bg-white/10 text-white hover:border-gold hover:text-gold-pale" href="#craft">
+              <Link className="heritage-hero__craft-link btn-secondary border-white/30 bg-white/10 text-white hover:border-gold hover:text-gold-pale" href="#craft">
                 See the craft
               </Link>
             </div>
           </div>
 
-          <div className="relative min-h-[420px] lg:min-h-[620px]" aria-label="AMZIRA heritage textile story">
+          <div className="heritage-hero__collage relative min-h-[420px] lg:min-h-[620px]" aria-label="AMZIRA heritage textile story">
             <div className="absolute left-0 top-8 h-24 w-3/5 border border-gold/35 bg-gradient-to-r from-maroon/28 to-transparent" />
             <div className="absolute right-0 top-0 h-36 w-2/5 border border-white/20 bg-peacock/20" />
             <div className="absolute left-4 top-10 aspect-[4/5] w-[48%] overflow-hidden rounded-md border border-gold/50 bg-sandal shadow-sari sm:w-[42%] lg:left-10">
@@ -313,7 +302,7 @@ export default async function HeritagePage() {
             </div>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
+          <div className="heritage-pillars-grid grid gap-5 md:grid-cols-2 lg:grid-cols-4">
             {pillars.map(({ icon: Icon, title, copy }, index) => (
               <article
                 key={title}
@@ -382,22 +371,10 @@ export default async function HeritagePage() {
                 <Link href="#craft" className="btn-primary group min-w-64 gap-3 shadow-sari">
                   Explore our craft <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" aria-hidden="true" />
                 </Link>
-                <div className="flex items-center gap-3 text-charcoal">
-                  <ShieldCheck className="h-9 w-9 shrink-0 text-gold-dark" aria-hidden="true" />
-                  <p className="text-xs leading-5"><strong className="block text-sm">Purchase support</strong>Fit guidance · Easy returns · Order tracking</p>
-                </div>
               </div>
             </div>
           </div>
 
-          <div className="heritage-craftsmanship-proof mt-10 grid grid-cols-2 lg:grid-cols-4">
-            {craftsmanshipProofs.map(({ icon: Icon, value, label }) => (
-              <div key={label} className="heritage-craftsmanship-proof-item flex items-center justify-center gap-4 px-5 py-4">
-                <Icon className="h-8 w-8 text-maroon" aria-hidden="true" />
-                <p><strong className="block font-display text-xl text-maroon-deep">{value}</strong><span className="text-xs text-charcoal/68">{label}</span></p>
-              </div>
-            ))}
-          </div>
         </div>
       </section>
 
@@ -427,7 +404,7 @@ export default async function HeritagePage() {
             {inventoryHighlight ? (
               <Link
                 href={`/product/${inventoryHighlight.slug}`}
-                className="group mt-8 grid overflow-hidden rounded-md border border-gold/45 bg-white/88 shadow-sari transition hover:-translate-y-1 hover:shadow-soft focus-ring sm:grid-cols-[150px_minmax(0,1fr)]"
+                className="heritage-inventory-highlight group mt-8 grid overflow-hidden rounded-md border border-gold/45 bg-white/88 shadow-sari transition hover:-translate-y-1 hover:shadow-soft focus-ring sm:grid-cols-[150px_minmax(0,1fr)]"
               >
                 <div className="relative aspect-[4/5] bg-sandal sm:aspect-auto">
                   <Image
@@ -475,7 +452,7 @@ export default async function HeritagePage() {
         </div>
       </section>
 
-      <section className="relative overflow-hidden bg-maroon-deep py-10 text-white lg:py-[3.6rem]">
+      <section className="heritage-procession-section relative overflow-hidden bg-maroon-deep py-10 text-white lg:py-[3.6rem]">
         <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(212,175,55,0.16)_0_1px,transparent_1px_28px),linear-gradient(120deg,rgba(11,79,108,0.34),transparent_58%)]" />
         <div className="container-page relative grid gap-9 lg:grid-cols-[0.94fr_1.06fr] lg:items-center">
           <div>
@@ -527,7 +504,7 @@ export default async function HeritagePage() {
                 Built for customers who compare silhouette, occasion, color, delivery, and styling before they commit.
               </p>
             </div>
-            <div className="heritage-growth-rail grid gap-0 sm:grid-cols-3">
+            <div className="heritage-growth-rail grid gap-0 sm:grid-cols-3" role="region" aria-label="How the AMZIRA archive grows" tabIndex={0}>
               {growthCards.map(({ icon: Icon, title, copy }) => (
                 <article key={title} className="heritage-growth-item p-4">
                   <span className="heritage-growth-icon grid h-10 w-10 place-items-center rounded-full">

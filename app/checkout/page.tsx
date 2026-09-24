@@ -29,7 +29,7 @@ export default async function CheckoutPage() {
   const initialCheckoutEnabled = await getInitialCheckoutEnabled();
 
   return (
-    <div className="bg-[#FDFAF5] py-8 sm:py-12 min-h-[calc(100vh-200px)]">
+    <div className="checkout-page-shell min-h-[calc(100vh-200px)] py-8 sm:py-12">
       <section className="container-page space-y-8">
         {/* Checkout Stepper */}
         <div className="mx-auto max-w-2xl">

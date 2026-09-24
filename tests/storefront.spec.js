@@ -10,6 +10,22 @@ test.describe('AMZIRA storefront', () => {
     await expect(page.locator('html')).toHaveAttribute('data-scroll-behavior', 'smooth');
   });
 
+  test('homepage featured links never point to a missing product page', async ({ page }) => {
+    await page.goto('/');
+
+    const hero = page.getByRole('region', { name: 'Featured AMZIRA styles' });
+    const productHrefs = await hero.locator('a[href^="/product/"]').evaluateAll((links) =>
+      [...new Set(links.map((link) => link.getAttribute('href')).filter(Boolean))]
+    );
+
+    for (const href of productHrefs) {
+      const response = await page.request.get(href);
+      expect(response.status(), `${href} should resolve to a product page`).toBe(200);
+    }
+
+    await expect(hero.locator('a[href="/product/anika-emerald-purple-temple-work-lehenga-choli"]')).toHaveCount(0);
+  });
+
   test('shows only clearly attributed marketplace feedback above the rating threshold', async ({ page }) => {
     await page.goto('/');
     const feedback = page.getByRole('region', { name: 'Loved across our seller channels' });
@@ -108,10 +124,37 @@ test.describe('AMZIRA storefront', () => {
   test('catalog filters are functional GET controls and remain in the URL', async ({ page }) => {
     await page.goto('/category/kids-pattu-pavadai');
     await page.getByLabel('Occasion').selectOption('festival');
-    await page.getByLabel('Sort').selectOption('price_asc');
+    await page.locator('select[name="sort_by"]:visible').selectOption('price_asc');
     await page.getByRole('button', { name: 'Apply filters' }).click();
     await expect(page).toHaveURL(/occasion=festival/);
     await expect(page).toHaveURL(/sort_by=price_asc/);
+  });
+
+  test('mobile catalog filters open inside the viewport as a bottom sheet', async ({ page }) => {
+    await page.setViewportSize({ width: 440, height: 956 });
+    await page.goto('/category/kids-pattu-pavadai');
+
+    const filters = page.locator('.kids-catalog-filters');
+    await expect(filters.locator('summary')).toBeVisible();
+    await expect(filters).not.toHaveAttribute('open');
+
+    await filters.locator('summary').click();
+    await expect(filters).toHaveAttribute('open', '');
+
+    const geometry = await filters.evaluate((element) => {
+      const rect = element.getBoundingClientRect();
+      return {
+        position: getComputedStyle(element).position,
+        top: rect.top,
+        bottom: rect.bottom,
+        viewportHeight: window.innerHeight
+      };
+    });
+
+    expect(geometry.position).toBe('fixed');
+    expect(geometry.top).toBeGreaterThanOrEqual(0);
+    expect(geometry.bottom).toBeLessThanOrEqual(geometry.viewportHeight);
+    await expect(filters.getByRole('button', { name: 'Apply filters' })).toBeVisible();
   });
 
   test('kids mega menu routes to the matching backend category slices', async ({ page }) => {

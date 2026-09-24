@@ -8,7 +8,8 @@ const contentTypes: Record<string, string> = {
   ".jpeg": "image/jpeg",
   ".png": "image/png",
   ".webp": "image/webp",
-  ".gif": "image/gif"
+  ".gif": "image/gif",
+  ".mp4": "video/mp4"
 };
 
 export async function GET(_request: NextRequest, { params }: { params: Promise<{ path: string[] }> }) {

@@ -138,7 +138,7 @@ export function ProductQuickView({ product }: { product: QuickViewTriggerProduct
       <button
         ref={triggerRef}
         type="button"
-        className="focus-ring absolute bottom-3 left-3 z-10 inline-flex min-h-10 items-center gap-2 rounded-full border border-white/70 bg-white/95 px-4 text-[10px] font-bold uppercase tracking-[0.14em] text-maroon shadow-sm transition hover:bg-white"
+        className="product-quick-view-trigger focus-ring absolute bottom-3 left-3 z-10 inline-flex min-h-10 items-center gap-2 rounded-full border border-white/70 bg-white/95 px-4 text-[10px] font-bold uppercase tracking-[0.14em] text-maroon shadow-sm transition hover:bg-white"
         aria-haspopup="dialog"
         aria-controls={dialogId}
         onClick={openQuickView}
@@ -191,7 +191,7 @@ export function ProductQuickView({ product }: { product: QuickViewTriggerProduct
               </div>
             </div>
 
-            <div className="flex min-h-0 flex-col overflow-hidden bg-white p-6 sm:p-8">
+            <div className="quick-view-details-panel flex min-h-0 flex-col overflow-hidden p-6 sm:p-8">
               <div className="flex items-start justify-between gap-4 border-b border-charcoal/10 pb-5">
                 <div>
                   <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold-deep">AMZIRA quick view</p>
