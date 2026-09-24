@@ -18,6 +18,9 @@ const girlsCategoryDescription =
   "Shop South Indian girls’ pattu pavadai and lehenga choli for weddings, Pongal, Navratri, puja, and festive family celebrations. Explore temple borders, silk textures, zari work, and comfortable age-led fits.";
 
 export const revalidate = 300;
+// Catalog filters are driven by URL search params, so this route must render
+// dynamically instead of being treated as a static Server Component.
+export const dynamic = "force-dynamic";
 
 export async function generateStaticParams() {
   const categories = await getCategories();
